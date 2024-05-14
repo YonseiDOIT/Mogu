@@ -1,21 +1,18 @@
 import React from 'react'
-import {
-  TouchableOpacity,
-  ImageBackground,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native'
+import { TouchableOpacity, StyleSheet, Text, View } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { TextInput } from 'react-native-gesture-handler'
+import Header from '../../components/Header'
 
-const Welcome = ({ navigation }) => {
+const Login = ({ navigation }) => {
   return (
     <View style={styles.container}>
+      <Header />
+
       <View style={styles.textContainer}>
         <Text style={styles.login}>로그인</Text>
         <Text style={styles.description}>
-          공구하고 경제적인 매지리 생활하세요!{' '}
+          공구하고 경제적인 매지리 생활하세요!
         </Text>
       </View>
 
@@ -63,13 +60,12 @@ const Welcome = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: 'center',
     backgroundColor: 'white',
   },
 
   textContainer: {
     marginBottom: 110,
-    marginTop: 20,
+    marginTop: '30%',
     marginLeft: '8%',
   },
 
@@ -102,6 +98,7 @@ const styles = StyleSheet.create({
     marginLeft: '10%',
     marginTop: -14,
   },
+
   lostPwtext: {
     textDecorationLine: 'underline',
     fontSize: 12,
@@ -159,4 +156,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default Welcome
+export default Login
