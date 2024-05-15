@@ -4,6 +4,8 @@ import TabNavigation from './Tab'
 import Welcome from '../screens/login/Welcome'
 import Login from '../screens/login/Login'
 import FindPassword from '../screens/login/FindPassword'
+import VerifyNumber from '../screens/login/VerifyNumber'
+import ResetPassword from '../screens/login/ResetPassword'
 
 import 'react-native-gesture-handler'
 
@@ -25,6 +27,16 @@ const StackNavigation = () => {
       <Stack.Screen
         name="FindPassword"
         component={FindPassword}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VerifyNumber"
+        component={VerifyNumber}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ResetPassword"
+        component={ResetPassword}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

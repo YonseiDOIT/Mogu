@@ -1,33 +1,42 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { TouchableOpacity, StyleSheet, Text, View } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { TextInput } from 'react-native-gesture-handler'
 import Header from '../../components/Header'
 
 const FindPassword = ({ navigation }) => {
+  const [userMail, setUserMail] = useState('')
+
   return (
     <View style={styles.container}>
       <Header />
 
       <View style={styles.textContainer}>
-        <Text style={styles.login}>비밀번호 찾기</Text>
+        <Text style={styles.findPw}>비밀번호 찾기</Text>
         <Text style={styles.description}>
           인증번호를 받을 연세메일 주소를 알려주세요.
         </Text>
       </View>
 
       <View style={styles.mail}>
-        <Text style={styles.mailPassword}>연세메일</Text>
+        <Text style={styles.yMail}>연세메일</Text>
         <View style={styles.inputContainer}>
-          <TextInput placeholder="hello1234" style={styles.input}></TextInput>
-          <Text style={styles.emailFix}>@ yonsei.ac.kr</Text>
+          <TextInput
+            placeholder="hello1234"
+            style={styles.input}
+            value={userMail}
+            onChangeText={(text) => setUserMail(text)}
+          ></TextInput>
+          <Text style={styles.inputMail}>@ yonsei.ac.kr</Text>
         </View>
       </View>
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity
-          style={styles.loginButton}
-          onPress={() => navigation.navigate('Main')}
+          style={styles.contButton}
+          onPress={() =>
+            navigation.navigate('VerifyNumber', { userMail: userMail })
+          }
         >
           <Text style={styles.buttonText}>계속하기</Text>
         </TouchableOpacity>
@@ -48,7 +57,7 @@ const styles = StyleSheet.create({
     marginLeft: '8%',
   },
 
-  login: {
+  findPw: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 10,
@@ -64,7 +73,7 @@ const styles = StyleSheet.create({
     marginLeft: '10%',
   },
 
-  mailPassword: {
+  yMail: {
     color: '#777777',
   },
 
@@ -83,7 +92,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
 
-  emailFix: {
+  inputMail: {
     marginLeft: -100,
     marginBottom: 10,
     fontWeight: 'semibold',
@@ -94,7 +103,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  loginButton: {
+  contButton: {
     marginTop: 10,
     marginBottom: 15,
     height: 47,
