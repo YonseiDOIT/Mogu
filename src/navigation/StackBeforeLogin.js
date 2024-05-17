@@ -6,6 +6,7 @@ import Login from '../screens/login/Login'
 import FindPassword from '../screens/login/FindPassword'
 import VerifyNumber from '../screens/login/VerifyNumber'
 import ResetPassword from '../screens/login/ResetPassword'
+import Main from '../screens/main/Main'
 
 import 'react-native-gesture-handler'
 
@@ -13,7 +14,7 @@ const Stack = createStackNavigator()
 
 const StackNavigation = () => {
   return (
-    <Stack.Navigator initialRouteName="Main">
+    <Stack.Navigator initialRouteName="Welcome">
       <Stack.Screen
         name="Welcome"
         component={Welcome}
@@ -37,6 +38,11 @@ const StackNavigation = () => {
       <Stack.Screen
         name="ResetPassword"
         component={ResetPassword}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Main"
+        component={Main}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
