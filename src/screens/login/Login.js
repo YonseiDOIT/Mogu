@@ -98,7 +98,7 @@ const Login = ({ navigation }) => {
 
       <View style={styles.noAccount}>
         <Text>아직 계정이 없나요?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Join')}>
+        <TouchableOpacity onPress={() => navigation.navigate('JoinMail')}>
           <Text style={styles.join}>가입하기</Text>
         </TouchableOpacity>
       </View>

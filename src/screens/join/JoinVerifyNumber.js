@@ -11,10 +11,9 @@ import {
 import { NavigationContainer } from '@react-navigation/native'
 import { TextInput } from 'react-native-gesture-handler'
 import Header from '../../components/Header'
-import ResetPassword from '../login/ResetPassword'
 import { func } from 'prop-types'
 
-const VerifyNumber = ({ navigation, route }) => {
+const JoinVerifyNumber = ({ navigation, route }) => {
   const { userMail } = route.params
   const [isFocused, setIsFocused] = useState(false)
   const [verifiCode, setVerifiCode] = useState('')
@@ -39,7 +38,7 @@ const VerifyNumber = ({ navigation, route }) => {
 
     // if (verifiCode === randomCode) {
     if (verifiCode === randomCode) {
-      navigation.navigate('ResetPassword')
+      navigation.navigate('Join')
     } else {
       setModalVisible(true)
     }
@@ -57,9 +56,9 @@ const VerifyNumber = ({ navigation, route }) => {
       <View style={styles.container}>
         <Header />
         <View style={styles.textContainer}>
-          <Text style={styles.login}>비밀번호 찾기</Text>
+          <Text style={styles.login}>가입하기</Text>
           <Text style={styles.description}>
-            {userMail ? `${userMail}@yonsei.ac.kr` : ''} 메일을 확인해주세요.
+            {userMail ? `${userMail} @yonsei.ac.kr` : ''} 메일을 확인해주세요!
           </Text>
         </View>
 
@@ -277,4 +276,4 @@ const styles = StyleSheet.create({
     fontSize: '14',
   },
 })
-export default VerifyNumber
+export default JoinVerifyNumber
