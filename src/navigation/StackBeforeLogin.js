@@ -10,6 +10,8 @@ import Main from '../screens/main/Main'
 import JoinMail from '../screens/join/JoinMail'
 import JoinVerifyNumber from '../screens/join/JoinVerifyNumber'
 import Join from '../screens/join/Join'
+import TermsAgree from '../screens/join/TermsAgree'
+import JoinWelcome from '../screens/join/JoinWelcome'
 
 import 'react-native-gesture-handler'
 
@@ -61,6 +63,16 @@ const StackNavigation = () => {
       <Stack.Screen
         name="Join"
         component={Join}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="TermsAgree"
+        component={TermsAgree}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="JoinWelcome"
+        component={JoinWelcome}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
