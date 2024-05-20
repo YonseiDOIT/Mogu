@@ -40,7 +40,6 @@ const StackNavigation = () => {
         component={ResetPassword}
         options={{ headerShown: false }}
       />
-
     </Stack.Navigator>
   )
 }
