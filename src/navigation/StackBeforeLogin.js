@@ -6,12 +6,7 @@ import Login from '../screens/login/Login'
 import FindPassword from '../screens/login/FindPassword'
 import VerifyNumber from '../screens/login/VerifyNumber'
 import ResetPassword from '../screens/login/ResetPassword'
-import Main from '../screens/main/Main'
-import JoinMail from '../screens/join/JoinMail'
-import JoinVerifyNumber from '../screens/join/JoinVerifyNumber'
-import Join from '../screens/join/Join'
-import TermsAgree from '../screens/join/TermsAgree'
-import JoinWelcome from '../screens/join/JoinWelcome'
+
 
 import 'react-native-gesture-handler'
 
@@ -19,7 +14,7 @@ const Stack = createStackNavigator()
 
 const StackNavigation = () => {
   return (
-    <Stack.Navigator initialRouteName="Welcome">
+    <Stack.Navigator initialRouteName="Main">
       <Stack.Screen
         name="Welcome"
         component={Welcome}
@@ -43,36 +38,6 @@ const StackNavigation = () => {
       <Stack.Screen
         name="ResetPassword"
         component={ResetPassword}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Main"
-        component={Main}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="JoinMail"
-        component={JoinMail}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="JoinVerifyNumber"
-        component={JoinVerifyNumber}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Join"
-        component={Join}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="TermsAgree"
-        component={TermsAgree}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="JoinWelcome"
-        component={JoinWelcome}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
