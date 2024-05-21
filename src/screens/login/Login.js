@@ -3,20 +3,16 @@ import { TouchableOpacity, StyleSheet, Text, View, Alert } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { TextInput } from 'react-native-gesture-handler'
 import Header from '../../components/Header'
-
 const Login = ({ navigation }) => {
   // const [email, setEmail] = useState('')
   // const [password, setPassword] = useState('')
-
   // const handleLogin = () => {
   //   if (email === '' || password === '') {
   //     Alert.alert('알림', '이메일/비밀번호를 입력해주세요.')
   //     return
   //   }
-
   //   login(email, password)
   // }
-
   // const login = async (email, password) => {
   //   try {
   //     const response = await fetch('http://localhost:3000/login', {
@@ -26,13 +22,10 @@ const Login = ({ navigation }) => {
   //       },
   //       body: JSON.stringify({ email, password }),
   //     })
-
   //     if (!response.ok) {
   //       throw new Error('네트워크 에러')
   //     }
-
   //     const result = await response.json()
-
   //     if (result.success) {
   //       navigation.navigate('Main')
   //     } else {
@@ -42,18 +35,15 @@ const Login = ({ navigation }) => {
   //     Alert.alert('알림', '로그인 실패')
   //   }
   // }
-
   return (
     <View style={styles.container}>
       <Header />
-
       <View style={styles.textContainer}>
         <Text style={styles.login}>로그인</Text>
         <Text style={styles.description}>
           공구하고 경제적인 매지리 생활하세요!
         </Text>
       </View>
-
       <View style={styles.mailPw}>
         <Text style={styles.mailPassword}>연세메일</Text>
         <View style={styles.inputContainer}>
@@ -66,7 +56,6 @@ const Login = ({ navigation }) => {
           <Text style={styles.emailFix}>@ yonsei.ac.kr</Text>
         </View>
       </View>
-
       <View style={styles.mailPw}>
         <Text style={styles.mailPassword}>비밀번호</Text>
         <TextInput
@@ -77,20 +66,18 @@ const Login = ({ navigation }) => {
           // onChangeText={setPassword}
         />
       </View>
-
       <View style={styles.lostPw}>
         <TouchableOpacity onPress={() => navigation.navigate('FindPassword')}>
           <Text style={styles.lostPwtext}>비밀번호를 잊었나요?</Text>
         </TouchableOpacity>
       </View>
-
       <View style={styles.buttonContainer}>
         {/* <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
           <Text style={styles.buttonText}>로그인</Text>
         </TouchableOpacity> */}
         <TouchableOpacity
           style={styles.loginButton}
-          onPress={() => navigation.navigate('MyInfoCheck')}
+          onPress={() => navigation.navigate('Main')}
         >
           <Text style={styles.buttonText}>로그인</Text>
         </TouchableOpacity>
@@ -98,14 +85,15 @@ const Login = ({ navigation }) => {
 
       <View style={styles.noAccount}>
         <Text>아직 계정이 없나요?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('JoinMail')}>
-          <Text style={styles.join}>가입하기</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Join')}>
+          <TouchableOpacity onPress={() => navigation.navigate('JoinMail')}>
+            <Text style={styles.join}>가입하기</Text>
+          </TouchableOpacity>
         </TouchableOpacity>
       </View>
     </View>
   )
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -189,5 +177,4 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
 })
-
 export default Login
