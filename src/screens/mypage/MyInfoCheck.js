@@ -5,7 +5,9 @@ import { TextInput } from 'react-native-gesture-handler'
 import MyInfoHeader from '../../components/MyInfoHeader'
 import Login from '../login/Login'
 import SignOut from '../mypage/SignOut' 
+import Useredit from './Useredit'
 import { RotateInDownLeft } from 'react-native-reanimated'
+import { bool } from 'prop-types'
 
 const MyInfoCheck = ({navigation}) => {
 
@@ -34,31 +36,65 @@ const MyInfoCheck = ({navigation}) => {
         />
       </View>
       <View style={styles.maininfo}>
-        <View style={styles.username}>
-            <Text style={styles.usernametext}>나의첫09</Text>
-            <Text style={styles.nim}>님</Text>
+        <View style={styles.id}>
+            <Image
+                source={require('../../assets/user.png')}
+                style={[styles.idmail,{height:21,top:10}]}
+            />
+            <View style={[styles.idinfo,{left:15}]}
+            onPress={() => navigation.navigate('Useredit')}>
+                <Text style={styles.usernametext}>나의첫09</Text>
+            </View>
+          <Pressable
+              onPress={() => navigation.navigate('Useredit')}>
+              <Image
+                source={require('../../assets/infoarrow.png')}
+                style={styles.infoimage}/>
+          </Pressable>
         </View>
         <View style={styles.id}>
-            <Text style={styles.idtext}>아이디</Text>
+            <Image
+                source={require('../../assets/mail.png')}
+                style={[styles.idmail,{height:16,top:15}]}
+            />
             <View style={[styles.idinfo,{left:15}]}>
-                <Text style={styles.usernametext}>kimmaegi09@ yonsei.ac.kr</Text>
+                <Text style={[styles.usernametext,{color:'#777777'}]}>kimmaegi09@ yonsei.ac.kr</Text>
             </View>
         </View>
         
         <View style={styles.id}>
-            <Text style={styles.idtext}>전화번호</Text>
-            <View style={styles.idinfo}>
-                <Text style={styles.usernametext}>010-1234-1234</Text>
+            <Image
+                source={require('../../assets/phone.png')}
+                style={[styles.idmail,{height:21,top:12}]}
+            />
+            <View style={[styles.idinfo,{left:15}]}>
+                <Text style={styles.usernametext}>010-1234-5678</Text>
             </View>
+          <Pressable
+              onPress={() => navigation.navigate('Phoneedit')}>
+              <Image
+                source={require('../../assets/infoarrow.png')}
+                style={styles.infoimage}/>
+          </Pressable>
         </View>
         <View style={styles.id}>
-            <Text style={styles.idtext}>비밀번호</Text>
-                <TextInput
-                value="나는야비밀번호다"
-                editable={false}
+            <Image
+                source={require('../../assets/lock.png')}
+                style={[styles.idmail,{height:21,top:10}]}
+            />
+            <View style={[styles.idinfo,{left:15}]}>
+                <TextInput 
+                style = {[{left:10}]}
                 secureTextEntry={true}
-                style={styles.idinfo}
-                />
+                editable={false}
+                >나는야비밀번호다</TextInput>
+            </View>
+          <Pressable
+              onPress={() => navigation.navigate('Passwordedit')}>
+              <Image
+                source={require('../../assets/infoarrow.png')}
+                style={styles.infoimage}/>
+          </Pressable>
         </View>
       </View>
       <Pressable style={styles.Pressable1}onPress={onPressModalOpen}>
@@ -109,6 +145,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
+  idmail:{
+      width:30,
+      resizeMode: 'contain',
+      marginLeft:10,
+      top:1
+  },
+  infoimage:{
+      width: 20,
+      height: 12,
+      resizeMode: 'contain',
+      marginLeft:-30,
+      bottom:-15
+  },
   image:{
     marginTop:-30,
     width:'80%',
@@ -131,12 +180,11 @@ const styles = StyleSheet.create({
     borderBottomWidth:2,
     marginBottom:40,
     marginLeft:'10%'
-
   },
   usernametext:{
-    marginBottom:5,
+    bottom:-15,
     marginLeft:10,
-    fontWeight:'600'
+    fontWeight:'600',
   },
   nim:{
     position:'absolute',
@@ -144,16 +192,18 @@ const styles = StyleSheet.create({
   },
   id:{
     flexDirection: 'row',
-    marginBottom:50,
+    borderRadius:14,
+    height:47,
+    width:'80%',
+    borderColor:'#C4C4C4',
+    borderWidth:1,
+    marginBottom:21,
     marginLeft:'10%'
-
   },
 idinfo:{
     flexDirection: 'row',
-    width:'70%',
-    borderBottomColor:'black',
-    borderBottomWidth:2,
-    marginLeft:20
+    width:'88%',
+    marginLeft:0
   },
   Pressable1:{
     marginTop:25,

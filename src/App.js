@@ -1,6 +1,9 @@
 import React from 'react'
 import { NavigationContainer } from '@react-navigation/native'
-import StackNavigation from '../src/navigation/StackBeforeLogin'
+import StackbeforeloginNavigation from '../src/navigation/StackBeforeLogin'
+import StackafterloginNavigation from '../src/navigation/StackAfterLogin'
+
+
 import { createStackNavigator } from '@react-navigation/stack'
 // import styled from 'styled-components'
 
@@ -19,7 +22,7 @@ const App = () => {
 
   return (
     <NavigationContainer>
-      <StackNavigation />
+      <StackbeforeloginNavigation />
     </NavigationContainer>
   )
 }
