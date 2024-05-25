@@ -88,6 +88,9 @@ const StackbeforeloginNavigation = () => {
       <Stack.Screen
         name="Passwordedit"
         component={Passwordedit}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="TermsAgree"
         component={TermsAgree}
         options={{ headerShown: false }}
