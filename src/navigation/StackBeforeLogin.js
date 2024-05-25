@@ -8,13 +8,15 @@ import Welcome from '../screens/login/Welcome'
 import Login from '../screens/login/Login'
 import FindPassword from '../screens/login/FindPassword'
 import VerifyNumber from '../screens/login/VerifyNumber'
+import Main from '../screens/main/Main'
 import ResetPassword from '../screens/login/ResetPassword'
 import JoinMail from '../screens/join/JoinMail'
 import JoinVerifyNumber from '../screens/join/JoinVerifyNumber'
 import Useredit from '../screens/mypage/Useredit'
 import Phoneedit from '../screens/mypage/Phoneedit'
 import Passwordedit from '../screens/mypage/Passwordedit'
-
+import TermsAgree from '../screens/join/TermsAgree'
+import JoinWelcome from '../screens/join/JoinWelcome'
 
 import 'react-native-gesture-handler'
 
@@ -86,6 +88,18 @@ const StackbeforeloginNavigation = () => {
       <Stack.Screen
         name="Passwordedit"
         component={Passwordedit}
+        name="TermsAgree"
+        component={TermsAgree}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="JoinWelcome"
+        component={JoinWelcome}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Main"
+        component={Main}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
