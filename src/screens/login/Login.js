@@ -77,7 +77,8 @@ const Login = ({ navigation }) => {
         </TouchableOpacity> */}
         <TouchableOpacity
           style={styles.loginButton}
-          onPress={() => navigation.navigate('Main')}
+          // onPress={() => navigation.navigate('Main')} 
+          onPress={() => navigation.navigate('MyInfoCheck')}//임시로 내 정보 페이지에 연결
         >
           <Text style={styles.buttonText}>로그인</Text>
         </TouchableOpacity>
