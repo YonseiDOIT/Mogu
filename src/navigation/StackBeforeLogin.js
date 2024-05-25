@@ -17,6 +17,7 @@ import Phoneedit from '../screens/mypage/Phoneedit'
 import Passwordedit from '../screens/mypage/Passwordedit'
 import TermsAgree from '../screens/join/TermsAgree'
 import JoinWelcome from '../screens/join/JoinWelcome'
+import Editend from '../screens/mypage/Editend'
 
 import 'react-native-gesture-handler'
 
@@ -88,6 +89,9 @@ const StackbeforeloginNavigation = () => {
       <Stack.Screen
         name="Passwordedit"
         component={Passwordedit}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="TermsAgree"
         component={TermsAgree}
         options={{ headerShown: false }}
@@ -98,10 +102,15 @@ const StackbeforeloginNavigation = () => {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="Editend"
+        component={Editend}
+        options={{ headerShown: false }}
+      />
+      {/* <Stack.Screen
         name="Main"
         component={Main}
         options={{ headerShown: false }}
-      />
+      /> */}
     </Stack.Navigator>
   )
 }

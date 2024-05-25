@@ -25,7 +25,7 @@ const Useredit = ({ navigation }) => {
     if (nickname === 'Yonsei') {
       setMessage('이미 존재하는 닉네임이에요.  T-T');
     } else {
-      navigation.navigate('MyInfoCheck');
+      navigation.navigate('Editend');
     }
   };
 
