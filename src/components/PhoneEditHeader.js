@@ -2,7 +2,7 @@ import React from 'react'
 import { TouchableOpacity, Image, Text, StyleSheet, Pressable,View } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 
-const MyInfoHeader = () => {
+const UserEditHeader = () => {
   const navigation = useNavigation()
 
   return (
@@ -12,11 +12,11 @@ const MyInfoHeader = () => {
             source={require('../assets/backlinearrow.png')}
             style={styles.image}
         />
-        <Text style ={styles.headment1}>내 정보</Text>
+        <Text style ={styles.headment1}>전화번호 수정하기</Text>
         </Pressable>
     </View>
   )
-}
+};
 const styles = StyleSheet.create({
     view:{
         height:100,
@@ -37,24 +37,19 @@ const styles = StyleSheet.create({
   headment1:{
     position: 'absolute',
     fontWeight:'700',
-    marginTop: '-5%',
-    width:100,
+    top:-1,
+    width:200,
     left:35,
     fontSize:20
   },
-  modify:{
+    edit:{
     position: 'absolute',
-    marginTop: '16%',
+    top:63,
     fontWeight:'500',
     width:100,
-    height:20,
-    right:-10,
-    fontSize:17,
-  },
-    edit:{
     right:-10,
     fontSize:17
   },
 })
 
-export default MyInfoHeader
+export default UserEditHeader
