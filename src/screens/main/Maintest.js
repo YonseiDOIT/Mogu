@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react'
 import {
   View,
   TextInput,
@@ -9,8 +9,8 @@ import {
   Text,
 } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import Icon from 'react-native-vector-icons/MaterialIcons'
 import {
   FontAwesome6,
   MaterialIcons,
@@ -18,25 +18,25 @@ import {
   Octicons,
 } from '@expo/vector-icons'
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator()
 
 function Maintest() {
   return (
     <Tab.Navigator
       initialRouteName="Home"
-        screenOptions={{
-          tabBarInactiveTintColor: '#BDBDBD',
-          tabBarActiveTintColor: '#000000',
-        }}
-      >
+      screenOptions={{
+        tabBarInactiveTintColor: '#BDBDBD',
+        tabBarActiveTintColor: '#000000',
+      }}
+    >
       <Tab.Screen
         name="홈"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({color, size}) => (
-              <MaterialIcons name="home" size={size} color={color} />
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="home" size={size} color={color} />
           ),
-        headerShown: false,
+          headerShown: false,
         }}
       />
       <Tab.Screen
@@ -44,11 +44,10 @@ function Maintest() {
         component={LikeScreen}
         options={{
           title: '관심',
-          tabBarIcon: ({color, size}) => (
-              <Icon name="notifications" color={color} size={size} />
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="notifications" color={color} size={size} />
           ),
-        headerShown: false,
-
+          headerShown: false,
         }}
       />
       <Tab.Screen
@@ -56,10 +55,10 @@ function Maintest() {
         component={OngoingScreen}
         options={{
           title: '참여',
-          tabBarIcon: ({color, size}) => (
-              <Icon name="notifications" color={color} size={size} />
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="notifications" color={color} size={size} />
           ),
-            headerShown: false,
+          headerShown: false,
         }}
       />
       <Tab.Screen
@@ -67,17 +66,17 @@ function Maintest() {
         component={Myinfo}
         options={{
           title: '마이',
-          tabBarIcon: ({color, size}) => (
-              <Octicons name="person" size={size} color={color} />
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="person" size={size} color={color} />
           ),
-            headerShown: false,
+          headerShown: false,
         }}
       />
     </Tab.Navigator>
-  );
+  )
 }
-function HomeScreen({navigation}) {
-const [selectedSort, setSelectedSort] = useState('기한임박순')
+function HomeScreen({ navigation }) {
+  const [selectedSort, setSelectedSort] = useState('기한임박순')
   const [dropdownVisible, setDropdownVisible] = useState(false)
 
   const toggleDropdown = () => {
@@ -265,7 +264,6 @@ const [selectedSort, setSelectedSort] = useState('기한임박순')
   )
 }
 const styles = StyleSheet.create({
-
   screenContainer: {
     flex: 1,
     backgroundColor: 'white',
@@ -518,16 +516,15 @@ const styles = StyleSheet.create({
 })
 
 function LikeScreen() {
-  return <Text>관심 공구 화면</Text>;
+  return <Text>관심 공구 화면</Text>
 }
 
 function OngoingScreen() {
-  return <Text>진행중인 공구화면</Text>;
+  return <Text>진행중인 공구화면</Text>
 }
 
 function Myinfo() {
-  return <Text>내 정보 화면</Text>;
+  return <Text>내 정보 화면</Text>
 }
 
-
-export default Maintest;
+export default Maintest

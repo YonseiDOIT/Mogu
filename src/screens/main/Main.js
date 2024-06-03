@@ -200,7 +200,6 @@ const Main = () => {
 }
 
 const styles = StyleSheet.create({
-
   screenContainer: {
     flex: 1,
     backgroundColor: 'white',
@@ -305,7 +304,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
     alignItems: 'flex-end',
-    zIndex: 2, // 추가
+    zIndex: 2,
   },
 
   sortButton: {
