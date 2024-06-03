@@ -200,6 +200,7 @@ const Main = () => {
 }
 
 const styles = StyleSheet.create({
+
   screenContainer: {
     flex: 1,
     backgroundColor: 'white',
