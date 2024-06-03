@@ -36,7 +36,7 @@ const Phoneedit = ({ navigation }) => {
           <View style={[styles.idinfo, { left: 15 }]}>
             <TextInput
               style={styles.usernametext}
-              placeholder='전화번로를 입력하세요'
+              placeholder='전화번호를 입력하세요'
               value={nickname}
               onChangeText={lengthcheck} // Add this line to update the nickname state
               editable={true}

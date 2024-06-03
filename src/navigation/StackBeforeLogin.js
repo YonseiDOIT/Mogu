@@ -18,6 +18,7 @@ import Passwordedit from '../screens/mypage/Passwordedit'
 import TermsAgree from '../screens/join/TermsAgree'
 import JoinWelcome from '../screens/join/JoinWelcome'
 import Editend from '../screens/mypage/Editend'
+import NotificationCheck from '../screens/mypage/NotificationCheck'
 
 import 'react-native-gesture-handler'
 
@@ -105,6 +106,11 @@ const StackbeforeloginNavigation = () => {
       <Stack.Screen
         name="Editend"
         component={Editend}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="NotificationCheck"
+        component={NotificationCheck}
         options={{ headerShown: false }}
       />
       {/* <Stack.Screen
