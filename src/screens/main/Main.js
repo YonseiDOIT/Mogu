@@ -8,6 +8,7 @@ import {
   ScrollView,
   Text,
 } from 'react-native'
+import Icon from 'react-native-vector-icons/MaterialIcons'
 
 const Main = () => {
   const [selectedSort, setSelectedSort] = useState('기한임박순')
@@ -21,6 +22,54 @@ const Main = () => {
     setSelectedSort(option)
     setDropdownVisible(false)
   }
+
+  const formatTime = (time) => {
+    const totalMinutes = parseInt(time, 10)
+    if (totalMinutes >= 1440) {
+      const days = Math.floor(totalMinutes / 1440)
+      const hours = Math.floor((totalMinutes % 1440) / 60)
+      const minutes = totalMinutes % 60
+      return `${days}일 ${hours}시간 ${minutes}분`
+    } else if (totalMinutes >= 60) {
+      const hours = Math.floor(totalMinutes / 60)
+      const minutes = totalMinutes % 60
+      return `${hours}시간 ${minutes}분`
+    } else {
+      const seconds = (totalMinutes * 60) % 60
+      return `${totalMinutes}분 ${seconds}초`
+    }
+  }
+
+  const items = [
+    {
+      id: 1,
+      quantity: '5개',
+      time: '23', // 시간
+      title: '상품 1',
+      price: '3,000',
+    },
+    {
+      id: 2,
+      quantity: '3개',
+      time: '60',
+      title: '상품 2',
+      price: '500',
+    },
+    {
+      id: 3,
+      quantity: '7개',
+      time: '180',
+      title: '상품 3',
+      price: '15,000',
+    },
+    {
+      id: 4,
+      quantity: '1개',
+      time: '30',
+      title: '상품 4',
+      price: '4,200',
+    },
+  ]
 
   return (
     <View style={styles.screenContainer}>
@@ -88,31 +137,64 @@ const Main = () => {
             ]}
           />
         </TouchableOpacity>
-        {dropdownVisible && (
-          <View style={styles.dropdown}>
-            <TouchableOpacity onPress={() => selectSortOption('기한임박순')}>
-              <Text
-                style={[
-                  styles.dropdownItem,
-                  selectedSort === '기한임박순' && styles.dropdownSelected,
-                ]}
-              >
-                기한임박순
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => selectSortOption('추천순')}>
-              <Text
-                style={[
-                  styles.dropdownItem,
-                  selectedSort === '추천순' && styles.dropdownSelected,
-                ]}
-              >
-                추천순
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
       </View>
+      {dropdownVisible && (
+        <View style={styles.dropdown}>
+          <TouchableOpacity onPress={() => selectSortOption('기한임박순')}>
+            <Text
+              style={[
+                styles.dropdownItem,
+                selectedSort === '기한임박순' && styles.dropdownSelected,
+              ]}
+            >
+              기한임박순
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => selectSortOption('추천순')}>
+            <Text
+              style={[
+                styles.dropdownItem,
+                selectedSort === '추천순' && styles.dropdownSelected,
+              ]}
+            >
+              추천순
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      <ScrollView style={styles.itemsContainer}>
+        <View style={styles.itemsGrid}>
+          {items.map((item) => (
+            <View key={item.id} style={styles.itemWrapper}>
+              <TouchableOpacity style={styles.itemBox} />
+              <View style={styles.row}>
+                <Text style={styles.itemText}>수량 {item.quantity}</Text>
+                <View style={styles.timeContainer}>
+                  <Icon
+                    name="access-time"
+                    size={16}
+                    color="#333"
+                    style={styles.timeIcon}
+                  />
+                  <Text style={styles.itemText}>{formatTime(item.time)}</Text>
+                </View>
+              </View>
+              <Text style={styles.itemTitle}>{item.title}</Text>
+              <View style={styles.rowPrice}>
+                <Text style={styles.itemPrice}>{item.price}</Text>
+                <Text style={styles.priceWon}> 원</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+      <TouchableOpacity style={styles.addButton}>
+        <Image
+          source={require('../../assets/addButton.png')}
+          style={styles.addButtonImage}
+        />
+      </TouchableOpacity>
     </View>
   )
 }
@@ -222,6 +304,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
     alignItems: 'flex-end',
+    zIndex: 2, // 추가
   },
 
   sortButton: {
@@ -229,7 +312,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '22%',
-    marginRight: 20,
+    marginRight: '8%',
   },
 
   sortButtonText: {
@@ -248,14 +331,14 @@ const styles = StyleSheet.create({
   },
 
   dropdown: {
-    marginTop: '7%',
+    position: 'absolute',
+    top: 225,
+    right: 0,
     marginRight: '8%',
     borderRadius: 10,
     backgroundColor: 'white',
-    position: 'absolute',
-    right: 0,
     width: '28%',
-    zIndex: 1,
+    zIndex: 3,
     // Android
     elevation: 5,
     // iOS
@@ -264,6 +347,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
+
   dropdownItem: {
     margin: 7,
     marginLeft: 15,
@@ -274,6 +358,96 @@ const styles = StyleSheet.create({
   dropdownSelected: {
     color: '#75C743',
     fontWeight: 'bold',
+  },
+
+  itemsContainer: {
+    flex: 1,
+  },
+
+  itemsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    padding: 10,
+  },
+
+  itemWrapper: {
+    width: '48%',
+    marginBottom: 10,
+  },
+
+  itemBox: {
+    width: '100%',
+    height: '65%',
+    backgroundColor: '#F3F3F3',
+    borderRadius: 8,
+  },
+
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 5,
+  },
+
+  rowPrice: {
+    flexDirection: 'row',
+    alignContent: 'center',
+  },
+
+  timeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  timeIcon: {
+    width: 16,
+    height: 16,
+    marginRight: 5,
+    marginTop: 5,
+  },
+
+  itemText: {
+    marginTop: 5,
+    fontSize: 12,
+    color: '#333333',
+  },
+
+  itemTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 5,
+  },
+
+  itemPrice: {
+    fontSize: 16,
+    color: '#75C743',
+    fontWeight: 'bold',
+    marginTop: 5,
+  },
+
+  priceWon: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 5,
+  },
+
+  addButton: {
+    position: 'absolute',
+    resizeMode: 'contain',
+    bottom: '4.5%',
+    right: '5%',
+    width: 80,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+
+  addButtonImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
   },
 })
 

@@ -25,7 +25,8 @@ const Stack = createStackNavigator()
 
 const StackbeforeloginNavigation = () => {
   return (
-    <Stack.Navigator initialRouteName="Main">
+    // <Stack.Navigator initialRouteName="Main">
+    <Stack.Navigator>
       <Stack.Screen
         name="Welcome"
         component={Welcome}
