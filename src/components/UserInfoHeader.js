@@ -2,17 +2,19 @@ import React from 'react'
 import { TouchableOpacity, Image, Text, StyleSheet, Pressable,View } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 
-const MyInfoHeader = () => {
+const UserInfoHeader = () => {
   const navigation = useNavigation()
   return (
     <View style={styles.view}>
-        <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Image
-            source={require('../assets/backlinearrow.png')}
-            style={styles.image}
-        />
-        <Text style ={styles.headment1}>내 정보</Text>
-        </Pressable>
+        <View style={styles.backButton}>
+            <Text style ={styles.headment1}>나의첫09</Text>
+            <Pressable onPress={() => navigation.navigate('MyInfoCheck')}>
+            <Image 
+                source={require('../assets/setting.png')}
+                style={styles.image}
+            />
+            </Pressable>
+        </View>
     </View>
   )
 }
@@ -25,21 +27,20 @@ const styles = StyleSheet.create({
     },
   backButton: {
     position: 'absolute',
-    width:100,
-    height:30,
     marginLeft: '7%',
     marginTop: '16%',
   },
   image: {
     width: 30,
     height: 20,
+    marginLeft:'90%',
     resizeMode: 'contain',
   },
   headment1:{
     position: 'absolute',
     fontWeight:'700',
-    marginTop: '-1%',
-    left:35,
+    marginTop: '0%',
+    width:500,
     fontSize:20
   },
   modify:{
@@ -57,4 +58,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default MyInfoHeader
+export default UserInfoHeader
