@@ -8,7 +8,7 @@ import Welcome from '../screens/login/Welcome'
 import Login from '../screens/login/Login'
 import FindPassword from '../screens/login/FindPassword'
 import VerifyNumber from '../screens/login/VerifyNumber'
-import Main from '../screens/main/Main'
+import Maintest from '../screens/main/Maintest'
 import ResetPassword from '../screens/login/ResetPassword'
 import JoinMail from '../screens/join/JoinMail'
 import JoinVerifyNumber from '../screens/join/JoinVerifyNumber'
@@ -112,11 +112,11 @@ const StackbeforeloginNavigation = () => {
         component={NotificationCheck}
         options={{ headerShown: false }}
       />
-      {/* <Stack.Screen
-        name="Main"
-        component={Main}
+      <Stack.Screen
+        name="Maintest"
+        component={Maintest}
         options={{ headerShown: false }}
-      /> */}
+      />
     </Stack.Navigator>
   )
 }

@@ -1,19 +1,19 @@
-import React from 'react'
-import { Text, StyleSheet } from 'react-native'
+import React, { useRef, useState } from 'react';
+import { Animated, View, Text,Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native'
 
-const Main = () => {
+const Main = ({ navigation }) => {
   return (
-    // <Container>
-    //   <StyledText>Main</StyledText>
-    // </Container>
-    <Text style={styles.text}>main</Text>
+    <View style={styles.container}>
+    </View>
   )
 }
+
 const styles = StyleSheet.create({
-  text: {
+  container: {
     flex: 1,
     backgroundColor: 'white',
-    textAlign: 'center',
   },
 })
+
 export default Main

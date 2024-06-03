@@ -7,7 +7,7 @@ import {
   Octicons,
 } from '@expo/vector-icons'
 import Main from '../screens/main/Main'
-import Like from '../screens/like/Like'
+import Like from '../screens/like/Like.js'
 import MgmtOnGoing from '../screens/mogu_management/MgmtOnGoing'
 import MyInfo from '../screens/mypage/MyInfo'
 import { NavigationContainer } from '@react-navigation/native'
@@ -16,7 +16,6 @@ const Tab = createBottomTabNavigator()
 
 const TabNavigation = () => {
   return (
-    <NavigationContainer>
       <Tab.Navigator
         initialRouteName="Main" // 초기: Main
         screenOptions={{
@@ -65,7 +64,6 @@ const TabNavigation = () => {
           }}
         />
       </Tab.Navigator>
-    </NavigationContainer>
   )
 }
 
