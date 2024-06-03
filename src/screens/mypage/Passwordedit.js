@@ -69,9 +69,8 @@ const Passwordedit = ({ navigation }) => {
         <Text
           style={[
             styles.overlapped,
-            password === 'newpass1234!' ? styles.error : styles.success,
-          ]}
-        >
+            password === 'newpass1234!' ? styles.error : styles.success,//password === 'newpass1234!' 부분에 true false 함수 넣기
+          ]}>
           {message}
         </Text>
       </View>
