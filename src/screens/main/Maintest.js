@@ -10,13 +10,8 @@ import {
 } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import Icon from 'react-native-vector-icons/MaterialIcons'
-import {
-  FontAwesome6,
-  MaterialIcons,
-  Feather,
-  Octicons,
-} from '@expo/vector-icons'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import Octicons from 'react-native-vector-icons/Octicons'
 
 const Tab = createBottomTabNavigator()
 
@@ -43,9 +38,9 @@ function Maintest() {
         name="Search"
         component={LikeScreen}
         options={{
-          title: '관심',
+          title: '관심 공구',
           tabBarIcon: ({ color, size }) => (
-            <Icon name="notifications" color={color} size={size} />
+            <MaterialIcons name="favorite-border" size={size} color={color} />
           ),
           headerShown: false,
         }}
@@ -54,9 +49,9 @@ function Maintest() {
         name="Notification"
         component={OngoingScreen}
         options={{
-          title: '참여',
+          title: '공구 관리',
           tabBarIcon: ({ color, size }) => (
-            <Icon name="notifications" color={color} size={size} />
+            <MaterialIcons name="shopping-bag" size={size} color={color} />
           ),
           headerShown: false,
         }}
@@ -65,7 +60,7 @@ function Maintest() {
         name="Message"
         component={Myinfo}
         options={{
-          title: '마이',
+          title: '내 정보',
           tabBarIcon: ({ color, size }) => (
             <Octicons name="person" size={size} color={color} />
           ),
@@ -75,6 +70,7 @@ function Maintest() {
     </Tab.Navigator>
   )
 }
+
 function HomeScreen({ navigation }) {
   const [selectedSort, setSelectedSort] = useState('기한임박순')
   const [dropdownVisible, setDropdownVisible] = useState(false)
@@ -236,7 +232,7 @@ function HomeScreen({ navigation }) {
               <View style={styles.row}>
                 <Text style={styles.itemText}>수량 {item.quantity}</Text>
                 <View style={styles.timeContainer}>
-                  <Icon
+                  <MaterialIcons
                     name="access-time"
                     size={16}
                     color="#333"
@@ -263,6 +259,7 @@ function HomeScreen({ navigation }) {
     </View>
   )
 }
+
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
@@ -311,8 +308,8 @@ const styles = StyleSheet.create({
   },
 
   alarmButton: {
-    width: 25,
-    height: 25,
+    width: 21,
+    height: 21,
     resizeMode: 'contain',
     marginLeft: 10,
   },
@@ -368,7 +365,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
     alignItems: 'flex-end',
-    zIndex: 2, // 추가
+    zIndex: 2,
   },
 
   sortButton: {
@@ -432,12 +429,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    padding: 10,
+    padding: 15,
   },
 
   itemWrapper: {
     width: '48%',
-    marginBottom: 10,
+    marginBottom: 1,
   },
 
   itemBox: {
@@ -499,7 +496,7 @@ const styles = StyleSheet.create({
   addButton: {
     position: 'absolute',
     resizeMode: 'contain',
-    bottom: '4.5%',
+    bottom: 0,
     right: '5%',
     width: 80,
     height: 60,
