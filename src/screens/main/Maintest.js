@@ -308,8 +308,8 @@ const styles = StyleSheet.create({
   },
 
   alarmButton: {
-    width: 21,
-    height: 21,
+    width: 25,
+    height: 25,
     resizeMode: 'contain',
     marginLeft: 10,
   },
@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
     alignItems: 'flex-end',
-    zIndex: 2,
+    zIndex: 2, // 추가
   },
 
   sortButton: {
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
 
   itemWrapper: {
     width: '48%',
-    marginBottom: 1,
+    marginBottom: 5,
   },
 
   itemBox: {
