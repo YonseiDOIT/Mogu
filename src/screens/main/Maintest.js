@@ -369,6 +369,9 @@ const styles = StyleSheet.create({
   },
 
   sortButton: {
+    position: 'absolute',
+    right: '1%',
+    marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -377,6 +380,9 @@ const styles = StyleSheet.create({
   },
 
   sortButtonText: {
+    position: 'absolute',
+    right: '10%',
+    alignContent: 'flex-end',
     fontSize: 16,
     color: '#777777',
   },
@@ -384,6 +390,7 @@ const styles = StyleSheet.create({
   sortButtonIcon: {
     width: 20,
     height: 20,
+    marginLeft: '90%',
     resizeMode: 'contain',
   },
 
@@ -423,6 +430,7 @@ const styles = StyleSheet.create({
 
   itemsContainer: {
     flex: 1,
+    marginTop: 15,
   },
 
   itemsGrid: {
