@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react'
 import {
   View,
   TextInput,
@@ -7,81 +7,72 @@ import {
   TouchableOpacity,
   ScrollView,
   Text,
-  Pressable,
-  Switch
 } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
-import { useNavigation } from '@react-navigation/native'
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import UserInfoHeader from '../../components/UserInfoHeader';
-import {
-  FontAwesome6,
-  MaterialIcons,
-  Feather,
-  Octicons,
-} from '@expo/vector-icons'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import Octicons from 'react-native-vector-icons/Octicons'
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator()
 
 function Maintest() {
   return (
     <Tab.Navigator
       initialRouteName="Home"
-        screenOptions={{
-          tabBarInactiveTintColor: '#BDBDBD',
-          tabBarActiveTintColor: '#000000',
-        }}
-      >
+      screenOptions={{
+        tabBarInactiveTintColor: '#BDBDBD',
+        tabBarActiveTintColor: '#000000',
+      }}
+    >
       <Tab.Screen
         name="홈"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({color, size}) => (
-              <MaterialIcons name="home" size={size} color={color} />
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="home" size={size} color={color} />
           ),
-        headerShown: false,
+          headerShown: false,
         }}
       />
       <Tab.Screen
         name="Search"
         component={LikeScreen}
         options={{
-          title: '관심',
-          tabBarIcon: ({color, size}) => (
-              <Icon name="notifications" color={color} size={size} />
+          title: '관심 공구',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="favorite-border" size={size} color={color} />
           ),
-        headerShown: false,
-
+          headerShown: false,
         }}
       />
       <Tab.Screen
         name="Notification"
         component={OngoingScreen}
         options={{
-          title: '참여',
-          tabBarIcon: ({color, size}) => (
-              <Icon name="notifications" color={color} size={size} />
+          title: '공구 관리',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="shopping-bag" size={size} color={color} />
           ),
-            headerShown: false,
+          headerShown: false,
         }}
       />
       <Tab.Screen
         name="Message"
         component={Myinfo}
         options={{
-          title: '마이',
-          tabBarIcon: ({color, size}) => (
-              <Octicons name="person" size={size} color={color} />
+          title: '내 정보',
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="person" size={size} color={color} />
           ),
-            headerShown: false,
+          headerShown: false,
         }}
       />
     </Tab.Navigator>
-  );
+  )
 }
-function HomeScreen({navigation}) {
-const [selectedSort, setSelectedSort] = useState('기한임박순')
+
+function HomeScreen({ navigation }) {
+  const [selectedSort, setSelectedSort] = useState('기한임박순')
   const [dropdownVisible, setDropdownVisible] = useState(false)
 
   const toggleDropdown = () => {
@@ -241,7 +232,7 @@ const [selectedSort, setSelectedSort] = useState('기한임박순')
               <View style={styles.row}>
                 <Text style={styles.itemText}>수량 {item.quantity}</Text>
                 <View style={styles.timeContainer}>
-                  <Icon
+                  <MaterialIcons
                     name="access-time"
                     size={16}
                     color="#333"
@@ -268,8 +259,8 @@ const [selectedSort, setSelectedSort] = useState('기한임박순')
     </View>
   )
 }
-const styles = StyleSheet.create({
 
+const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
     backgroundColor: 'white',
@@ -438,12 +429,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    padding: 10,
+    padding: 15,
   },
 
   itemWrapper: {
     width: '48%',
-    marginBottom: 10,
+    marginBottom: 5,
   },
 
   itemBox: {
@@ -505,7 +496,7 @@ const styles = StyleSheet.create({
   addButton: {
     position: 'absolute',
     resizeMode: 'contain',
-    bottom: '4.5%',
+    bottom: 0,
     right: '5%',
     width: 80,
     height: 60,
@@ -522,87 +513,15 @@ const styles = StyleSheet.create({
 })
 
 function LikeScreen() {
-  return <Text>관심 공구 화면</Text>;
+  return <Text>관심 공구 화면</Text>
 }
 
 function OngoingScreen() {
-  return <Text>진행중인 공구화면</Text>;
+  return <Text>진행중인 공구화면</Text>
 }
 
-function Myinfo({ navigation }) {
-    const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
-  return (
-    <View style={Myinfo_styles.container}>
-        <UserInfoHeader/>
-            <View style={Myinfo_styles.mytrade}>
-                <Text style={[Myinfo_styles.title, { marginTop: 40 }]}>나의 거래</Text>
-                <Pressable style={Myinfo_styles.button}>
-                    <Text style={Myinfo_styles.text}><Image style={Myinfo_styles.image}source={require('../../assets/shoppingbag.png')}/>종료/취소된 공구</Text>
-                </Pressable>
-            </View>
-            <View style={[Myinfo_styles.mytrade, { borderBottomWidth:1,borderBottomColor:'#DEDEDE' }]}>
-                <Text style={[Myinfo_styles.title, { marginTop: 10 }]}>모구 소식</Text>
-                <Pressable style={Myinfo_styles.button} onPress={() => navigation.navigate('NotificationCheck')} >
-                    <Text style={Myinfo_styles.text}><Image style={Myinfo_styles.image}source={require('../../assets/mail.png')}/>공지사항</Text>
-                </Pressable>
-                <Pressable style={Myinfo_styles.button}>
-                    <Text style={Myinfo_styles.text}><Image style={Myinfo_styles.image}source={require('../../assets/message.png')}/>자주 묻는 질문</Text>
-                </Pressable>
-                <Pressable style={Myinfo_styles.button}>
-                    <Text style={Myinfo_styles.text}><Image style={Myinfo_styles.image}source={require('../../assets/cs.png')}/>고객센터</Text>
-                </Pressable>
-            </View>
-                <View style={Myinfo_styles.alarmtoggle}>
-                    <Text style={[Myinfo_styles.text,{marginTop:4,fontWeight:700}]}>알림 수신 설정</Text>
-                    <Switch style={Myinfo_styles.switch}
-                        trackColor={{ false: "#767577", true: "#BFFF97" }}
-                        thumbColor={isEnabled ? "#75C743" : "#f4f3f4"}
-                        ios_backgroundColor="#3e3e3e"
-                        onValueChange={toggleSwitch}
-                        value={isEnabled}/>
-                </View>            
-    </View>
-  )
+function Myinfo() {
+  return <Text>내 정보 화면</Text>
 }
 
-const Myinfo_styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-  },
-  mytrade:{
-    marginLeft:'5%',
-    width:'90%'
-  },
-  title:{
-    fontSize:'17',
-    fontWeight:'900',
-    marginBottom:20
-  },
-  button:{
-    flexDirection:'row',
-    marginBottom:25
-  },
-  switch:{
-    marginLeft:'55%'
-  },
-  alarmtoggle:{
-    marginTop:'5%',
-    flexDirection:'row',
-    marginLeft:'5%',
-    width:'90%'
-  },
-  text:{
-    fontSize:'17',
-  },
-  image:{
-    resizeMode:'contain',
-    width:16,
-    height:16,
-    marginRight:15
-  }
-})
-
-
-export default Maintest;
+export default Maintest
