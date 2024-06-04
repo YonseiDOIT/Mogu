@@ -119,11 +119,6 @@ const StackbeforeloginNavigation = () => {
         component={Maintest}
         options={{ headerShown: false }}
       />
-      {/* <Stack.Screen
-        name="Main"
-        component={Main}
-        options={{ headerShown: false }}
-      /> */}
     </Stack.Navigator>
   )
 }
