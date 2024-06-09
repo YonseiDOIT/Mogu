@@ -21,6 +21,7 @@ import JoinWelcome from '../screens/join/JoinWelcome'
 import Editend from '../screens/mypage/Editend'
 import NotificationCheck from '../screens/mypage/NotificationCheck'
 import MyInfo from '../screens/mypage/MyInfo'
+import Join from '../screens/join/Join'
 
 import 'react-native-gesture-handler'
 
@@ -123,6 +124,11 @@ const StackbeforeloginNavigation = () => {
       <Stack.Screen
         name="MyInfo"
         component={MyInfo}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Join"
+        component={Join}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
