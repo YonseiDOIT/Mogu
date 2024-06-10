@@ -541,7 +541,7 @@ const Myinfo = ({ navigation }) => {
                 <Pressable style={Myinfo_styles.button} onPress={()=>navigation.navigate('NotificationCheck')}>
                     <Text style={Myinfo_styles.text}><Image style={Myinfo_styles.image}source={require('../../assets/mail.png')}/>공지사항</Text>
                 </Pressable>
-                <Pressable style={Myinfo_styles.button}>
+                <Pressable style={Myinfo_styles.button} onPress={()=>navigation.navigate('FAQ')}>
                     <Text style={Myinfo_styles.text}><Image style={Myinfo_styles.image}source={require('../../assets/message.png')}/>자주 묻는 질문</Text>
                 </Pressable>
                 <Pressable style={Myinfo_styles.button}>
@@ -550,7 +550,16 @@ const Myinfo = ({ navigation }) => {
             </View>
                 <View style={Myinfo_styles.alarmtoggle}>
                     <Text style={[Myinfo_styles.text,{marginTop:4,fontWeight:700}]}>알림 수신 설정</Text>
-                </View>            
+                        <Switch
+                          trackColor={{ false: "#767577", true: "#BFFF97" }}
+                          thumbColor={isEnabled ? "#75C743" : "#f4f3f4"}
+                          style={Myinfo_styles.switch}
+                          ios_backgroundColor="#3e3e3e"
+                          onValueChange={toggleSwitch}
+                          value={isEnabled}
+                        />                         
+                </View>
+       
     </View>
   )
 }
