@@ -254,7 +254,7 @@ function HomeScreen({ navigation }) {
           ))}
         </View>
       </ScrollView>
-      <TouchableOpacity style={styles.addButton}>
+      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('CreateGroupPurchase')}>
         <Image
           source={require('../../assets/addButton.png')}
           style={styles.addButtonImage}
