@@ -26,7 +26,7 @@ import 'react-native-gesture-handler'
 
 const Stack = createStackNavigator()
 
-const StackbeforeloginNavigation = () => {
+const StackBeforeLogin = () => {
   return (
     // <Stack.Navigator initialRouteName="Main">
     <Stack.Navigator>
@@ -139,4 +139,4 @@ const StackbeforeloginNavigation = () => {
   )
 }
 
-export default StackbeforeloginNavigation
+export default StackBeforeLogin
