@@ -1,21 +1,28 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   TouchableOpacity,
   StyleSheet,
   Text,
   View,
-  Alert,
   Image,
+  TextInput,
 } from 'react-native'
-import { NavigationContainer } from '@react-navigation/native'
-import { TextInput } from 'react-native-gesture-handler'
 import Header from '../../components/Header'
 
 const Join = ({ navigation }) => {
-  const [isChecked, setIsChecked] = useState('')
+  const [isChecked, setIsChecked] = useState(false)
   const [phoneNumber, setPhoneNumber] = useState('')
+  const [nickname, setNickname] = useState('')
   const [password, setPassword] = useState('')
-  const [message, setMessage] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [isPasswordValid, setIsPasswordValid] = useState(true)
+  const [isNicknameValid, setIsNicknameValid] = useState(true)
+  const [isPhoneNumberValid, setIsPhoneNumberValid] = useState(false)
+  const [isJoinButtonEnabled, setIsJoinButtonEnabled] = useState(false)
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword)
+  }
 
   const formatPhoneNumber = (input) => {
     const value = input.replace(/\D/g, '') // 숫자가 아닌 문자열 모두 제거
@@ -28,18 +35,30 @@ const Join = ({ navigation }) => {
   const handlePhoneNumberChange = (input) => {
     const formattedPhoneNumber = formatPhoneNumber(input)
     setPhoneNumber(formattedPhoneNumber)
+    setIsPhoneNumberValid(/^\d{3}-\d{3,4}-\d{4}$/.test(formattedPhoneNumber))
   }
 
-  const handlePasswordChange = (text) => {
+  const checkPassword = (text) => {
     setPassword(text)
-    if (text.length === 0) {
-      setMessage('')
-    } else if (text.length < 7) {
-      setMessage('비밀번호는 7자리 이상이어야 합니다.')
-    } else {
-      setMessage('알맞은 비밀번호입니다 :)')
-    }
+    setIsPasswordValid(text.length >= 7)
   }
+
+  const checkNickname = (text) => {
+    setNickname(text)
+    const isValid =
+      text.length >= 2 &&
+      text.length <= 10 &&
+      !['duplicate1', 'duplicate2'].includes(text)
+    setIsNicknameValid(isValid)
+  }
+
+  useEffect(() => {
+    if (isNicknameValid && isPasswordValid && isPhoneNumberValid && isChecked) {
+      setIsJoinButtonEnabled(true)
+    } else {
+      setIsJoinButtonEnabled(false)
+    }
+  }, [isNicknameValid, isPasswordValid, isPhoneNumberValid, isChecked])
 
   return (
     <View style={styles.container}>
@@ -51,90 +70,216 @@ const Join = ({ navigation }) => {
       </View>
 
       <View style={styles.form}>
-        <Text style={styles.nickName}>*닉네임</Text>
-        <View style={styles.inputContainer}>
+        <View
+          style={[
+            styles.inputContainer,
+            !isNicknameValid &&
+              nickname.length > 0 &&
+              styles.invalidInputContainer,
+            isNicknameValid &&
+              nickname.length > 0 &&
+              styles.validInputContainer,
+          ]}
+        >
+          <Text
+            style={[
+              styles.label,
+              {
+                color: isNicknameValid
+                  ? nickname.length > 0
+                    ? '#4EAA16'
+                    : '#D9D9D9'
+                  : '#CC0000',
+              },
+            ]}
+          >
+            닉네임
+          </Text>
+          <Image
+            source={require('../../../src/assets/nickname.png')}
+            style={styles.inputImage}
+            resizeMode="contain"
+          />
           <TextInput
-            placeholder="한글 및 숫자 10자 이하"
-            style={styles.input}
+            placeholder="한글 및 숫자 2자 이상 10자 이하"
+            style={[
+              styles.input,
+              {
+                borderColor: isNicknameValid
+                  ? nickname.length > 0
+                    ? '#4EAA16'
+                    : '#D9D9D9'
+                  : '#CC0000',
+              },
+            ]}
+            value={nickname}
+            onChangeText={checkNickname}
+          />
+        </View>
+        {!isNicknameValid && nickname.length > 0 && (
+          <Text style={styles.errorText}>중복된 닉네임입니다.</Text>
+        )}
+      </View>
+
+      <View style={styles.form}>
+        <View
+          style={[
+            styles.inputContainer,
+            !isPhoneNumberValid &&
+              phoneNumber.length > 0 &&
+              styles.invalidInputContainer,
+            isPhoneNumberValid &&
+              phoneNumber.length > 0 &&
+              styles.validInputContainer,
+          ]}
+        >
+          <Text
+            style={[
+              styles.label,
+              {
+                color:
+                  phoneNumber.length > 0
+                    ? isPhoneNumberValid
+                      ? '#4EAA16'
+                      : '#D9D9D9'
+                    : '#D9D9D9',
+              },
+            ]}
+          >
+            휴대폰 번호
+          </Text>
+          <Image
+            source={require('../../../src/assets/phone_g.png')}
+            style={styles.inputImage}
+            resizeMode="contain"
+          />
+          <TextInput
+            placeholder="010-1234-5678"
+            style={[
+              styles.input,
+              {
+                borderColor:
+                  phoneNumber.length > 0
+                    ? isPhoneNumberValid
+                      ? '#4EAA16'
+                      : '#D9D9D9'
+                    : '#D9D9D9',
+              },
+            ]}
+            value={phoneNumber}
+            onChangeText={handlePhoneNumberChange}
+            keyboardType="numeric"
           />
         </View>
       </View>
 
       <View style={styles.form}>
-        <Text style={styles.nickName}>*전화번호</Text>
-        <TextInput
-          placeholder="010-1234-5678"
-          style={styles.input}
-          value={phoneNumber}
-          onChangeText={handlePhoneNumberChange} // 입력할 때마다 호출
-          keyboardType="numeric"
-        />
-      </View>
-
-      <View style={styles.form}>
-        <Text style={styles.nickName}>*비밀번호</Text>
-        <TextInput
-          placeholder="password"
-          secureTextEntry={true}
-          style={styles.input}
-          value={password}
-          onChangeText={handlePasswordChange}
-        />
-        {message ? (
+        <View
+          style={[
+            styles.inputContainer,
+            !isPasswordValid &&
+              password.length > 0 &&
+              styles.invalidInputContainer,
+            isPasswordValid &&
+              password.length > 0 &&
+              styles.validInputContainer,
+          ]}
+        >
           <Text
             style={[
-              styles.message,
-              password.length < 7 ? styles.error : styles.success,
+              styles.label,
+              {
+                color: isPasswordValid
+                  ? password.length > 0
+                    ? '#4EAA16'
+                    : '#D9D9D9'
+                  : '#CC0000',
+              },
             ]}
           >
-            {message}
+            비밀번호
           </Text>
-        ) : null}
-      </View>
-
-      <View style={styles.buttonContainer}>
-        {/* <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.buttonText}>로그인</Text>
-        </TouchableOpacity> */}
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={() => navigation.navigate('Main')}
-        >
-          <Text style={styles.buttonText}>로그인</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View>
-        <View style={styles.essential}>
-          <Text style={styles.textEssential}>필수</Text>
-          <View style={styles.space} />
-          <TouchableOpacity onPress={() => navigation.navigate('TermsAgree')}>
-            <Text style={styles.joinIt}>
-              개인정보 제공 및 서비스 이용약관 동의
-            </Text>
-          </TouchableOpacity>
-          <View style={styles.spaceCheck} />
-
-          <TouchableOpacity onPress={() => setIsChecked(!isChecked)}>
+          <Image
+            source={require('../../../src/assets/pw.png')}
+            style={styles.inputImage}
+            resizeMode="contain"
+          />
+          <TextInput
+            placeholder="7자리 이상 영문/숫자 혼합"
+            secureTextEntry={!showPassword}
+            style={[
+              styles.input,
+              {
+                borderColor: isPasswordValid
+                  ? password.length > 0
+                    ? '#4EAA16'
+                    : '#D9D9D9'
+                  : '#CC0000',
+              },
+            ]}
+            value={password}
+            onChangeText={checkPassword}
+          />
+          <TouchableOpacity
+            onPress={togglePasswordVisibility}
+            style={styles.eyeButton}
+          >
             <Image
               source={
-                isChecked
-                  ? require('../../../src/assets/checkBoxChecked.png')
-                  : require('../../../src/assets/checkBoxUnchecked.png')
+                showPassword
+                  ? require('../../../src/assets/pw_show.png')
+                  : require('../../../src/assets/pw_nshow.png')
               }
-              style={styles.checkbox}
+              style={styles.pwshow}
+              resizeMode="contain"
             />
           </TouchableOpacity>
         </View>
+        {!isPasswordValid && password.length > 0 && (
+          <Text style={styles.errorText}>
+            비밀번호는 최소 7자 이상이어야 합니다.
+          </Text>
+        )}
+      </View>
 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.joinCon}
-            onPress={() => navigation.navigate('JoinWelcome')}
-          >
-            <Text style={styles.buttonText}>가입하기</Text>
-          </TouchableOpacity>
-        </View>
+      <View style={styles.essential}>
+        <Text style={styles.textEssential}>필수</Text>
+        <View style={styles.space} />
+        <TouchableOpacity onPress={() => navigation.navigate('TermsAgree')}>
+          <Text style={styles.joinIt}>
+            개인정보 제공 및 서비스 이용약관 동의
+          </Text>
+        </TouchableOpacity>
+        <View style={styles.spaceCheck} />
+        <TouchableOpacity onPress={() => setIsChecked(!isChecked)}>
+          <Image
+            source={
+              isChecked
+                ? require('../../../src/assets/checkBoxChecked.png')
+                : require('../../../src/assets/checkBoxUnchecked.png')
+            }
+            style={styles.checkbox}
+          />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[
+            styles.joinCon,
+            {
+              backgroundColor: isJoinButtonEnabled ? '#75C743' : '#D3D3D3',
+            },
+          ]}
+          onPress={() => {
+            if (isJoinButtonEnabled) {
+              navigation.navigate('JoinWelcome')
+            }
+          }}
+          disabled={!isJoinButtonEnabled}
+        >
+          <Text style={styles.buttonText}>가입하기</Text>
+        </TouchableOpacity>
       </View>
     </View>
   )
@@ -164,26 +309,56 @@ const styles = StyleSheet.create({
     marginLeft: '10%',
     position: 'relative',
   },
-  nickName: {
-    color: '#777777',
+  label: {
+    position: 'absolute',
+    top: -5,
+    left: 20,
+    zIndex: 1,
+    backgroundColor: 'white',
+    paddingHorizontal: 4,
+    fontSize: 12,
   },
+
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  invalidInputContainer: {
+    borderColor: '#CC0000',
+  },
+  validInputContainer: {
+    borderColor: '#4EAA16',
+  },
 
   input: {
-    height: 40,
-    borderBottomColor: 'black',
-    borderBottomWidth: 2,
-    marginBottom: 10,
+    height: 47,
+    borderWidth: 1,
+    borderRadius: 15,
     width: '90%',
-    paddingHorizontal: 10,
+    paddingLeft: 40,
+  },
+  inputImage: {
+    width: 24,
+    height: 24,
+    marginRight: 10,
+    marginLeft: 10,
+    marginTop: -2, // 이미지 위치를 조금 올림
+    opacity: 0.5,
+    position: 'absolute',
+  },
+  eyeButton: {
+    position: 'absolute',
+    right: 15,
+  },
+  pwshow: {
+    width: 24,
+    height: 24,
+    marginRight: 40,
   },
 
   buttonContainer: {
     justifyContent: 'flex-end',
-    marginTop: '8%',
+    marginTop: '5%',
     alignItems: 'center',
   },
   joinButton: {
@@ -204,19 +379,16 @@ const styles = StyleSheet.create({
   essential: {
     flexDirection: 'row',
     justifyContent: 'center',
-    // marginTop: 10,
-    marginTop: '4.5%',
+    marginTop: '24.5%',
     fontSize: 16,
   },
   textEssential: {
     fontWeight: 'bold',
   },
-
   checkbox: {
     width: 20,
     height: 20,
   },
-
   space: {
     width: 10,
   },
@@ -227,12 +399,6 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     fontSize: 14,
   },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-
   joinCon: {
     marginTop: 10,
     marginBottom: 15,
@@ -240,20 +406,17 @@ const styles = StyleSheet.create({
     width: '83%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#75C743',
     borderRadius: 16,
   },
 
   message: {
     position: 'absolute',
-    // marginTop: 10,
     fontSize: 14,
     bottom: -18,
   },
-  error: {
-    color: 'red',
-    marginTop: -2,
-    marginLeft: 10,
+  errorText: {
+    color: '#CC0000',
+    marginLeft: 20,
   },
   success: {
     color: '#4EAA16',
