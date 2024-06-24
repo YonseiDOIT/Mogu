@@ -1,40 +1,57 @@
 import React, { useState } from 'react'
-import { TouchableOpacity, StyleSheet, Text, View, Alert } from 'react-native'
+import {
+  TouchableOpacity,
+  StyleSheet,
+  Text,
+  View,
+  Alert,
+  Image,
+} from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { TextInput } from 'react-native-gesture-handler'
 import Header from '../../components/Header'
+
 const Login = ({ navigation }) => {
-  // const [email, setEmail] = useState('')
-  // const [password, setPassword] = useState('')
-  // const handleLogin = () => {
-  //   if (email === '' || password === '') {
-  //     Alert.alert('알림', '이메일/비밀번호를 입력해주세요.')
-  //     return
-  //   }
-  //   login(email, password)
-  // }
-  // const login = async (email, password) => {
-  //   try {
-  //     const response = await fetch('http://localhost:3000/login', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ email, password }),
-  //     })
-  //     if (!response.ok) {
-  //       throw new Error('네트워크 에러')
-  //     }
-  //     const result = await response.json()
-  //     if (result.success) {
-  //       navigation.navigate('Main')
-  //     } else {
-  //       Alert.alert('알림', '로그인 실패')
-  //     }
-  //   } catch (error) {
-  //     Alert.alert('알림', '로그인 실패')
-  //   }
-  // }
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [isEmailValid, setIsEmailValid] = useState(true)
+  const [isPasswordValid, setIsPasswordValid] = useState(true)
+  const [emailTouched, setEmailTouched] = useState(false)
+  const [passwordTouched, setPasswordTouched] = useState(false)
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword)
+  }
+
+  const checkEmail = (inputEmail) => {
+    // 여기에 필요한 유효성 검사 로직 추가
+    const isValid = /^[^@\s]+@/.test(inputEmail)
+    setIsEmailValid(isValid)
+  }
+
+  const checkPassword = (inputPassword) => {
+    // 여기에 필요한 유효성 검사 로직 추가
+    const isValid = inputPassword.length >= 6
+    setIsPasswordValid(isValid)
+  }
+
+  const handleLogin = async () => {
+    checkEmail(email)
+    checkPassword(password)
+
+    // 임시로 설정된 이메일과 비밀번호 검증
+    if (email === 'mogu' && password === '121212') {
+      setIsEmailValid(true)
+      setIsPasswordValid(true)
+      navigation.navigate('Maintest')
+    } else {
+      setIsEmailValid(false)
+      setIsPasswordValid(false)
+      navigation.navigate('Maintest')
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Header />
@@ -45,26 +62,104 @@ const Login = ({ navigation }) => {
         </Text>
       </View>
       <View style={styles.mailPw}>
-        <Text style={styles.mailPassword}>연세메일</Text>
-        <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="hello1234"
-            style={styles.input}
-            // value={email}
-            // onChangeText={setEmail}
+        <View
+          style={[
+            styles.inputContainer,
+            !isEmailValid && styles.invalidInputContainer,
+          ]}
+        >
+          <Image
+            source={require('../../assets/mail.png')}
+            style={[styles.image, { display: emailTouched ? 'none' : 'flex' }]}
+            resizeMode="contain"
           />
-          <Text style={styles.emailFix}>@ yonsei.ac.kr</Text>
+          {(emailTouched || email) && (
+            <Text
+              style={[
+                styles.label,
+                { color: isEmailValid ? '#D9D9D9' : '#CC0000' },
+              ]}
+            >
+              연세메일
+            </Text>
+          )}
+          <TextInput
+            placeholder="연세메일"
+            style={[
+              styles.input,
+              { borderColor: isEmailValid ? '#D9D9D9' : '#CC0000' },
+            ]}
+            value={email}
+            onChangeText={(text) => {
+              setEmail(text)
+              setEmailTouched(true)
+            }}
+            onBlur={() => checkEmail(email)}
+            onFocus={() => setEmailTouched(false)}
+          />
+          <Text style={styles.emailFix}>@yonsei.ac.kr</Text>
         </View>
+        {!isEmailValid && (
+          <Text style={styles.errorText}>올바른 이메일 형식이 아닙니다.</Text>
+        )}
       </View>
       <View style={styles.mailPw}>
-        <Text style={styles.mailPassword}>비밀번호</Text>
-        <TextInput
-          placeholder="password"
-          secureTextEntry={true}
-          style={styles.input}
-          // value={password}
-          // onChangeText={setPassword}
-        />
+        <View
+          style={[
+            styles.inputContainer,
+            !isPasswordValid && styles.invalidInputContainer,
+          ]}
+        >
+          <Image
+            source={require('../../assets/pw.png')}
+            style={[
+              styles.image,
+              { display: passwordTouched ? 'none' : 'flex' },
+            ]}
+            resizeMode="contain"
+          />
+          {(passwordTouched || password) && (
+            <Text
+              style={[
+                styles.label,
+                { color: isPasswordValid ? '#D9D9D9' : '#CC0000' },
+              ]}
+            >
+              비밀번호
+            </Text>
+          )}
+          <TextInput
+            placeholder="비밀번호를 입력해주세요."
+            secureTextEntry={!showPassword}
+            style={[
+              styles.input,
+              { borderColor: isPasswordValid ? '#D9D9D9' : '#CC0000' },
+            ]}
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text)
+              setPasswordTouched(true)
+            }}
+            onBlur={() => checkPassword(password)}
+            onFocus={() => setPasswordTouched(false)}
+          />
+          <TouchableOpacity onPress={togglePasswordVisibility}>
+            <Image
+              source={
+                showPassword
+                  ? require('../../assets/pw_show.png')
+                  : require('../../assets/pw_nshow.png')
+              }
+              style={styles.pwshow}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        </View>
+        {!isPasswordValid && (
+          <Text style={styles.errorText}>
+            비밀번호는 최소 6자 이상이어야 합니다.
+          </Text>
+        )}
       </View>
       <View style={styles.lostPw}>
         <TouchableOpacity onPress={() => navigation.navigate('FindPassword')}>
@@ -72,18 +167,10 @@ const Login = ({ navigation }) => {
         </TouchableOpacity>
       </View>
       <View style={styles.buttonContainer}>
-        {/* <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.buttonText}>로그인</Text>
-        </TouchableOpacity> */}
-        <TouchableOpacity
-          style={styles.loginButton}
-          // onPress={() => navigation.navigate('Main')}
-          onPress={() => navigation.navigate('Maintest')} //임시로 내 정보 페이지에 연결
-        >
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
           <Text style={styles.buttonText}>로그인</Text>
         </TouchableOpacity>
       </View>
-
       <View style={styles.noAccount}>
         <Text>아직 계정이 없나요?</Text>
         <TouchableOpacity onPress={() => navigation.navigate('Join')}>
@@ -95,6 +182,7 @@ const Login = ({ navigation }) => {
     </View>
   )
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -117,13 +205,43 @@ const styles = StyleSheet.create({
   mailPw: {
     marginBottom: '8%',
     marginLeft: '10%',
-  },
-  mailPassword: {
-    color: '#777777',
+    marginRight: '10%',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 15,
+    paddingHorizontal: 10,
+    height: 47,
+  },
+  invalidInputContainer: {
+    borderColor: '#CC0000',
+  },
+  image: {
+    width: 24,
+    height: 24,
+    marginRight: 8,
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+  },
+  emailFix: {
+    fontSize: 15,
+    marginLeft: 8,
+  },
+  pwshow: {
+    width: 24,
+    height: 24,
+  },
+  label: {
+    position: 'absolute',
+    top: -5,
+    left: 15,
+    backgroundColor: 'white',
+    paddingHorizontal: 4,
+    fontSize: 12,
   },
   lostPw: {
     marginLeft: '10%',
@@ -132,20 +250,8 @@ const styles = StyleSheet.create({
   lostPwtext: {
     textDecorationLine: 'underline',
     fontSize: 12,
-  },
-  input: {
-    height: 40,
-    borderBottomColor: 'black',
-    borderBottomWidth: 2,
-    marginBottom: 10,
-    width: '90%',
-    paddingHorizontal: 10,
-    fontStyle: 'italic',
-  },
-  emailFix: {
-    marginLeft: -100,
-    marginBottom: 10,
-    fontWeight: 'semibold',
+    alignSelf: 'flex-end',
+    marginRight: '10%',
   },
   buttonContainer: {
     marginTop: '58%',
@@ -177,5 +283,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 15,
   },
+  errorText: {
+    fontSize: 12,
+    color: '#CC0000',
+    marginLeft: 10,
+    marginTop: 6,
+  },
 })
+
 export default Login
