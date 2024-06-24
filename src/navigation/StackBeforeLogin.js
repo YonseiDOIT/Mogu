@@ -21,6 +21,7 @@ import NotificationCheck from '../screens/mypage/NotificationCheck'
 import MyInfo from '../screens/mypage/MyInfo'
 import Join from '../screens/join/Join'
 import FAQ from '../screens/mypage/FAQ'
+import CreateGroupPurchase from '../screens/main/participate/CreateGroupPurchase'
 
 import 'react-native-gesture-handler'
 
@@ -133,6 +134,11 @@ const StackBeforeLogin = () => {
       <Stack.Screen
         name="FAQ"
         component={FAQ}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="CreateGroupPurchase"
+        component={CreateGroupPurchase}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
