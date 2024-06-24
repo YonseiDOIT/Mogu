@@ -1,9 +1,11 @@
 import React from 'react'
 import { NavigationContainer } from '@react-navigation/native'
-import StackbeforeloginNavigation from '../src/navigation/StackBeforeLogin'
-import StackafterloginNavigation from '../src/navigation/StackAfterLogin'
+import StackBeforeLogin from '../src/navigation/StackBeforeLogin'
+import StackAfterLogin from '../src/navigation/StackAfterLogin'
 
 import { createStackNavigator } from '@react-navigation/stack'
+import 'react-native-gesture-handler'
+
 // import styled from 'styled-components'
 
 const Stack = createStackNavigator()
@@ -21,7 +23,7 @@ const App = () => {
 
   return (
     <NavigationContainer>
-      <StackbeforeloginNavigation />
+      <StackAfterLogin />
     </NavigationContainer>
   )
 }
