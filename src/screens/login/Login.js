@@ -25,13 +25,13 @@ const Login = ({ navigation }) => {
   }
 
   const checkEmail = (inputEmail) => {
-    // 여기에 필요한 유효성 검사 로직 추가
+    //필요한 유효성 검사 로직
     const isValid = /^[^@\s]+@/.test(inputEmail)
     setIsEmailValid(isValid)
   }
 
   const checkPassword = (inputPassword) => {
-    // 여기에 필요한 유효성 검사 로직 추가
+    // 유효성 검사 로직
     const isValid = inputPassword.length >= 6
     setIsPasswordValid(isValid)
   }
@@ -212,6 +212,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderRadius: 15,
+    borderColor: '#D9D9D9',
     paddingHorizontal: 10,
     height: 47,
   },
