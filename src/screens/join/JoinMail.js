@@ -5,32 +5,68 @@ import {
   Text,
   View,
   TextInput,
+  Image,
 } from 'react-native'
 import Header from '../../components/Header'
 
 const JoinMail = ({ navigation }) => {
-  const [verifMail, setVerifiMail] = useState('')
+  const [emailId, setEmailId] = useState('')
+  const [emailTouched, setEmailTouched] = useState(false)
   const [error, setError] = useState('')
+  const [isEmailRegistered, setIsEmailRegistered] = useState(false)
 
-  const mail = ['abc', '123']
+  // 가입된 이메일 아이디 목록
+  const registeredEmailIds = ['abc', '123']
 
-  const handleVerifiMail = (text) => {
-    setVerifiMail(text)
+  const handleEmailChange = (text) => {
+    const trimmedEmail = text.trim() // 이메일 입력 시 공백 제거
+    setEmailId(trimmedEmail)
+    setEmailTouched(false)
+    setIsEmailRegistered(false)
     setError('')
+
+    // 입력된 이메일이 있을 때만 가입 여부 검사
+    if (trimmedEmail.length > 0) {
+      checkEmailExistence(trimmedEmail)
+    }
   }
 
-  const checkVerifiMail = () => {
-    if (mail.includes(verifMail)) {
-      setError('이미 가입된 메일주소입니다.')
+  const checkEmailExistence = (trimmedEmail) => {
+    if (registeredEmailIds.includes(trimmedEmail)) {
+      setIsEmailRegistered(true)
+      setError('이미 가입된 메일입니다. 로그인해주세요!')
     } else {
-      navigation.navigate('JoinVerifyNumber', { userMail: verifMail })
+      setError('')
     }
   }
 
   const getButtonStyle = () => {
-    return verifMail.length > 0
+    return emailId.length > 0 && !isEmailRegistered
       ? { ...styles.loginButton, backgroundColor: '#75C743' }
       : { ...styles.loginButton, backgroundColor: '#DEDEDE', color: 'white' }
+  }
+
+  const navigateToVerifyNumber = () => {
+    if (isEmailRegistered) {
+      // 이미 가입된 경우, 에러 메시지만 설정하고 넘어가지 않음
+      setError('이미 가입된 메일입니다. 로그인해주세요!')
+    } else {
+      // 가입되지 않은 경우, 인증 번호 입력 화면으로 이동
+      navigation.navigate('JoinVerifyNumber', { userMail: emailId })
+    }
+  }
+
+  const getLabelStyle = () => {
+    return {
+      color: isEmailRegistered ? '#CC0000' : '#75C743',
+    }
+  }
+
+  const getInputContainerStyle = () => {
+    return {
+      borderColor: isEmailRegistered ? '#CC0000' : '#75C743',
+      backgroundColor: 'white', // 안쪽 색깔은 흰색으로 유지
+    }
   }
 
   return (
@@ -44,21 +80,50 @@ const JoinMail = ({ navigation }) => {
         </Text>
       </View>
 
-      <View style={styles.mail}>
-        <Text style={styles.yMail}>*연세메일</Text>
-        <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="hello1234"
-            style={styles.input}
-            onChangeText={handleVerifiMail}
+      <View style={styles.mailPw}>
+        <View style={[styles.inputContainer, getInputContainerStyle()]}>
+          <Image
+            source={require('../../assets/mail.png')}
+            style={[
+              styles.image,
+              { display: emailTouched || emailId ? 'none' : 'flex' },
+            ]}
+            resizeMode="contain"
           />
-          <Text style={styles.inputMail}> @ yonsei.ac.kr</Text>
+          {(emailTouched || emailId) && (
+            <Text style={[styles.label, getLabelStyle()]}>연세메일</Text>
+          )}
+          <TextInput
+            placeholder="연세메일"
+            style={styles.input}
+            value={emailId}
+            onChangeText={handleEmailChange}
+            onBlur={() => {
+              setEmailTouched(true)
+            }}
+            onFocus={() => setEmailTouched(false)}
+            autoCapitalize="none"
+          />
+          <Text style={styles.emailFix}>@yonsei.ac.kr</Text>
         </View>
-        <Text style={styles.errorText}>{error}</Text>
+        <View style={styles.errorContainer}>
+          {error !== '' && (
+            <Text style={[styles.errorText, { color: '#CC0000' }]}>
+              {error}
+            </Text>
+          )}
+        </View>
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={getButtonStyle()} onPress={checkVerifiMail}>
+        <TouchableOpacity
+          style={{
+            ...getButtonStyle(),
+            opacity: emailId.length === 0 || isEmailRegistered ? 0.5 : 1,
+          }}
+          onPress={navigateToVerifyNumber}
+          disabled={emailId.length === 0 || isEmailRegistered}
+        >
           <Text style={styles.buttonText}>인증하기</Text>
         </TouchableOpacity>
       </View>
@@ -90,40 +155,55 @@ const styles = StyleSheet.create({
     marginBottom: -12,
   },
 
-  mail: {
-    marginBottom: '8%',
+  mailPw: {
+    marginBottom: '60%',
     marginLeft: '10%',
-  },
-
-  yMail: {
-    color: '#777777',
+    marginRight: '10%',
   },
 
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '90%',
-    // marginBottom: 234,
-    marginBottom: 5,
-    borderBottomWidth: 2,
+    borderWidth: 1,
+    borderRadius: 15,
+    paddingHorizontal: 10,
+    height: 47,
+  },
+
+  image: {
+    width: 24,
+    height: 24,
+    marginRight: 8,
+  },
+
+  label: {
+    position: 'absolute',
+    zIndex: 1,
+    top: -5,
+    left: 15,
+    paddingHorizontal: 4,
+    backgroundColor: 'white',
+    fontSize: 12,
   },
 
   input: {
-    height: 40,
-    width: '90%',
-    paddingHorizontal: 10,
-    fontStyle: 'italic',
+    flex: 1,
+    fontSize: 15,
+    padding: 10,
   },
 
-  inputMail: {
-    marginLeft: -90,
-    fontWeight: 'semibold',
+  emailFix: {
+    fontSize: 15,
+    marginLeft: 8,
+  },
+
+  errorContainer: {
+    marginTop: 5,
+    minHeight: 20,
   },
 
   errorText: {
-    color: '#CC0000',
     marginLeft: 10,
-    marginBottom: '65%',
   },
 
   buttonContainer: {
@@ -144,7 +224,6 @@ const styles = StyleSheet.create({
     width: '83%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#75C743',
     borderRadius: 16,
   },
 })
