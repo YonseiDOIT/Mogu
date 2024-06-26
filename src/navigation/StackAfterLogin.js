@@ -1,24 +1,25 @@
 import React from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
-import TabNavigation from './Tab'
-import Main from '../screens/main/Main'
+import TabNavigation from './TabNavigation'
+import Maintest from '../screens/main/Maintest'
 import MyInfoCheck from '../screens/mypage/MyInfoCheck'
 import SignOut from '../screens/mypage/SignOut'
 import SignOutFinish from '../screens/mypage/SignOutFinish'
 
-import 'react-native-gesture-handler'
-
 const Stack = createStackNavigator()
 
-const StackafterloginNavigation = () => {
+const StackAfterLogin = () => {
   return (
-    <Stack.Navigator initialRouteName="Main">
+    <Stack.Navigator initialRouteName="TabNavigation">
       <Stack.Screen
-        name="Main"
-        component={Main}
-        options={{
-          headerShown: false,
-        }}
+        name="TabNavigation"
+        component={TabNavigation}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Maintest"
+        component={Maintest}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="MyInfoCheck"
@@ -35,13 +36,8 @@ const StackafterloginNavigation = () => {
         component={SignOutFinish}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
-        name="TabNavigation"
-        component={TabNavigation}
-        options={{ headerShown: false }}
-      />
     </Stack.Navigator>
   )
 }
 
-export default StackafterloginNavigation
+export default StackAfterLogin

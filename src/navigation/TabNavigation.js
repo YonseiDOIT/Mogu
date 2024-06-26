@@ -4,22 +4,21 @@ import Maintest from '../screens/main/Maintest'
 import LikeScreen from '../screens/like/Like'
 import OngoingScreen from '../screens/mogu_management/MgmtOnGoing'
 import Myinfo from '../screens/mypage/MyInfo'
-
 import { MaterialIcons, Octicons } from '@expo/vector-icons'
 
 const Tab = createBottomTabNavigator()
 
 const TabNavigation = () => {
   return (
-    <Tab.Navigator // Maintest가 무조건 맨 위
-      initialRouteName="Maintest"
+    <Tab.Navigator
+      initialRouteName="Home"
       screenOptions={{
         tabBarInactiveTintColor: '#BDBDBD',
         tabBarActiveTintColor: '#000000',
       }}
     >
       <Tab.Screen
-        name="홈"
+        name="Home"
         component={Maintest}
         options={{
           tabBarIcon: ({ color, size }) => (
@@ -28,9 +27,8 @@ const TabNavigation = () => {
           headerShown: false,
         }}
       />
-
       <Tab.Screen
-        name="Search"
+        name="Like"
         component={LikeScreen}
         options={{
           title: '관심 공구',
@@ -41,7 +39,7 @@ const TabNavigation = () => {
         }}
       />
       <Tab.Screen
-        name="Notification"
+        name="Ongoing"
         component={OngoingScreen}
         options={{
           title: '공구 관리',
@@ -52,7 +50,7 @@ const TabNavigation = () => {
         }}
       />
       <Tab.Screen
-        name="Message"
+        name="MyInfo"
         component={Myinfo}
         options={{
           title: '내 정보',

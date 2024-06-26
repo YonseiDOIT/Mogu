@@ -1,27 +1,28 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { NavigationContainer } from '@react-navigation/native'
-import StackbeforeloginNavigation from '../src/navigation/StackBeforeLogin'
-import StackafterloginNavigation from '../src/navigation/StackAfterLogin'
-
-import { createStackNavigator } from '@react-navigation/stack'
-// import styled from 'styled-components'
-
-const Stack = createStackNavigator()
+import StackBeforeLogin from './navigation/StackBeforeLogin'
+import StackAfterLogin from './navigation/StackAfterLogin'
 
 const App = () => {
-  // useEffect(() => {
-  //   async function loadFonts() {
-  //     await Font.loadAsync({
-  //       'Inter-Regular': require('../src/font/Inter-Regular.ttf'),
-  //     })
-  //   }
+  const [userToken, setUserToken] = useState(null)
 
-  //   loadFonts()
-  // }, [])
+  useEffect(() => {
+    const checkUserToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem('userToken')
+        setUserToken(token)
+      } catch (error) {
+        console.error('Error fetching user token:', error)
+      }
+    }
+
+    checkUserToken()
+  }, [])
 
   return (
     <NavigationContainer>
-      <StackbeforeloginNavigation />
+      {userToken ? <StackAfterLogin /> : <StackBeforeLogin />}
     </NavigationContainer>
   )
 }
