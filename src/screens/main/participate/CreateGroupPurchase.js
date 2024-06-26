@@ -24,13 +24,13 @@ const CreateGroupPurchase = ({ navigation }) => {
   const [otherCategory, setOtherCategory] = useState(''); // New state for other category input
   const webviewRef = useRef(null);
     const [location, setLocation] = useState({
-    latitude: 37.2780,
-    longitude: 127.9101,
-    latitudeDelta: 0.0019,
-    longitudeDelta: 0.0019,
+          latitude: 37.2770,
+          longitude: 127.9025,
+          latitudeDelta: 0.0019,
+          longitudeDelta: 0.0019,
   });
   const [markerLocation, setMarkerLocation] = useState(null);
-  const [selectedPlace, setSelectedPlace] = useState('매지놀이터'); // Default selected place
+  const [selectedPlace, setSelectedPlace] = useState('연세플라자'); // Default selected place
   const mapRef = useRef(null);
 
   const handlePlaceSelect = (place) => {
