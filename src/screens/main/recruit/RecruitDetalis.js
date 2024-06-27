@@ -6,9 +6,26 @@ import {
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
+  Linking,
 } from 'react-native'
 
-const RecruitDetails = ({ navigation, isRecruiting }) => {
+const RecruitDetails = ({
+  navigation,
+  isRecruiting,
+  category,
+  productName,
+  pricePerUnit,
+  remainingQuantity,
+  timeLeft,
+  purchaseLink,
+}) => {
+  const openLink = () => {
+    Linking.openURL(purchaseLink)
+  }
+
+  const formattedPrice = pricePerUnit.toLocaleString()
+  const formattedQuantity = remainingQuantity.toLocaleString()
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -22,7 +39,7 @@ const RecruitDetails = ({ navigation, isRecruiting }) => {
           />
         </TouchableOpacity>
 
-        {/* 이미지 */}
+        {/* 이미지 업로드 */}
         <View style={styles.imageContainer}>
           <View style={styles.imagePlaceholder} />
         </View>
@@ -46,7 +63,47 @@ const RecruitDetails = ({ navigation, isRecruiting }) => {
           </Text>
         </View>
 
-        {/* 하단 상태 */}
+        {/* 카테고리 / 구매 링크 */}
+        <View style={styles.infoContainer}>
+          <Text style={styles.categoryText}>{category}</Text>
+          <TouchableOpacity onPress={openLink}>
+            <Text style={styles.linkText}>구매 링크{'>'}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* 상품 정보 */}
+        <View style={styles.productInfoContainer}>
+          <Text style={styles.productName}>{productName}</Text>
+          <View style={styles.infoRow}>
+            <View style={styles.infoLabelContainer}>
+              <Text style={styles.staticText}>개당</Text>
+            </View>
+            <Text style={[styles.dynamicText, styles.dynamic]}>
+              {' '}
+              ₩{formattedPrice}
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <View style={styles.infoLabelContainer}>
+              <Text style={styles.staticText}>남은 개수</Text>
+            </View>
+            <Text style={[styles.dynamicText, styles.dynamic]}>
+              {' '}
+              {formattedQuantity}개
+            </Text>
+          </View>
+          <View style={styles.infoRow}>
+            <View style={styles.infoLabelContainer}>
+              <Text style={styles.staticText}>마감까지</Text>
+            </View>
+            <Text style={[styles.dynamicText, styles.dynamic]}>
+              {' '}
+              {timeLeft}
+            </Text>
+          </View>
+        </View>
+
+        {/* 하단 상태 텍스트 */}
         <View style={styles.footerContainer}>
           <View style={styles.footerBox}>
             <Text
@@ -121,6 +178,58 @@ const styles = StyleSheet.create({
   closedText: {
     color: '#75C743',
   },
+  infoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginTop: 10,
+  },
+  categoryText: {
+    fontSize: 14,
+    fontWeight: 'semibold',
+    color: '#75C743',
+    textDecorationLine: 'underline',
+    marginTop: '2%',
+  },
+  linkText: {
+    fontSize: 14,
+    fontWeight: 'semibold',
+    color: '#B3B3B3',
+    marginTop: '7%',
+  },
+  productInfoContainer: {
+    marginTop: 10,
+    paddingHorizontal: 20,
+  },
+  productName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'black',
+    marginTop: '4%',
+    marginBottom: '8%',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginBottom: 8,
+  },
+  infoLabelContainer: {
+    width: 80,
+  },
+  staticText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  dynamicText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: 'black',
+    marginBottom: '3%',
+  },
+  dynamic: {
+    color: '#75C743',
+  },
   footerContainer: {
     position: 'absolute',
     bottom: 20,
@@ -134,10 +243,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 15,
     elevation: 5, // Android 그림자
-    shadowColor: 'black', // iOS 그림자
-    shadowOffset: { width: 0, height: 1 }, // iOS 그림자
-    shadowOpacity: 0.2, // iOS 그림자 불투명도
-    shadowRadius: 3.5, // iOS 그림자
+    shadowColor: '#000', // iOS 그림자
+    shadowOffset: { width: 0, height: 2 }, // iOS 그림자 오프셋
+    shadowOpacity: 0.25, // iOS 그림자 불투명도
+    shadowRadius: 3.84, // iOS 그림자 반경
     backgroundColor: 'white',
   },
   footerText: {
