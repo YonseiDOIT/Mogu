@@ -45,7 +45,7 @@ const StackAfterLogin = () => {
             productName="사과"
             pricePerUnit={1100}
             remainingQuantity={100}
-            timeLeft="3일 5시간 20분"
+            timeLeft="0일 0시간 0분"
             purchaseLink="https://example.com/purchase"
           />
         )}
