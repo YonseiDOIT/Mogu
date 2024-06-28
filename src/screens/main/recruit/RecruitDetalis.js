@@ -12,6 +12,7 @@ import {
 const RecruitDetails = ({
   navigation,
   isRecruiting,
+  isClosed,
   category,
   productName,
   pricePerUnit,
@@ -25,6 +26,26 @@ const RecruitDetails = ({
 
   const formattedPrice = pricePerUnit.toLocaleString()
   const formattedQuantity = remainingQuantity.toLocaleString()
+
+  const getStatusText = () => {
+    if (isClosed) {
+      return '종료되었습니다.'
+    } else if (isRecruiting) {
+      return '참여 모집 중'
+    } else {
+      return '마감 후 구매 진행 중'
+    }
+  }
+
+  const getStatusStyle = () => {
+    if (isClosed) {
+      return [styles.statusContainer, styles.closed]
+    } else if (isRecruiting) {
+      return [styles.statusContainer, styles.recruitingBackground]
+    } else {
+      return [styles.statusContainer, styles.closedBackground]
+    }
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -45,21 +66,18 @@ const RecruitDetails = ({
         </View>
 
         {/* 모집 상태 */}
-        <View
-          style={[
-            styles.statusContainer,
-            isRecruiting
-              ? styles.recruitingBackground
-              : styles.closedBackground,
-          ]}
-        >
+        <View style={getStatusStyle()}>
           <Text
             style={[
               styles.statusText,
-              isRecruiting ? styles.recruitingText : styles.closedText,
+              isClosed
+                ? styles.closedText
+                : isRecruiting
+                ? styles.recruitingText
+                : styles.closedText,
             ]}
           >
-            {isRecruiting ? '참여 모집 중' : '마감 후 구매 진행 중'}
+            {getStatusText()}
           </Text>
         </View>
 
@@ -105,7 +123,14 @@ const RecruitDetails = ({
 
         {/* 하단 상태 텍스트 */}
         <View style={styles.footerContainer}>
-          <View style={styles.footerBox}>
+          <View
+            style={[
+              styles.footerBox,
+              isRecruiting
+                ? styles.recruitingFooterBox
+                : styles.closedFooterBox,
+            ]}
+          >
             <Text
               style={[
                 styles.footerText,
@@ -176,7 +201,12 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   closedText: {
-    color: '#75C743',
+    color: '#777777',
+  },
+  closed: {
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#777777',
   },
   infoContainer: {
     flexDirection: 'row',
@@ -259,6 +289,12 @@ const styles = StyleSheet.create({
   },
   closedFooterText: {
     color: '#777777',
+  },
+  recruitingFooterBox: {
+    borderColor: '#75C743',
+  },
+  closedFooterBox: {
+    borderColor: '#777777',
   },
 })
 
