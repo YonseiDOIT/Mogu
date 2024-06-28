@@ -35,7 +35,6 @@ const StackAfterLogin = () => {
         component={SearchResult}
         options={{ headerShown: false }}
       />
-      {/* 테스팅 중, 추후에 돌려놓을 거임 */}
       <Stack.Screen name="RecruitDetails">
         {(props) => (
           <RecruitDetails
@@ -45,7 +44,7 @@ const StackAfterLogin = () => {
             productName="사과"
             pricePerUnit={1100}
             remainingQuantity={100}
-            timeLeft="0일 0시간 0분"
+            timeLeft="3일 12시간 50분"
             purchaseLink="https://example.com/purchase"
           />
         )}

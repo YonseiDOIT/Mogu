@@ -98,7 +98,7 @@ const RecruitDetails = ({
             </View>
             <Text style={[styles.dynamicText, styles.dynamic]}>
               {' '}
-              ₩{formattedPrice}
+              ₩ {formattedPrice}
             </Text>
           </View>
           <View style={styles.infoRow}>
@@ -119,6 +119,9 @@ const RecruitDetails = ({
               {timeLeft}
             </Text>
           </View>
+
+          {/* 구분선 추가 */}
+          <View style={styles.separator} />
         </View>
 
         {/* 하단 상태 텍스트 */}
@@ -252,13 +255,20 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   dynamicText: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: 'bold',
     color: 'black',
     marginBottom: '3%',
   },
   dynamic: {
     color: '#75C743',
+  },
+  separator: {
+    width: '120%',
+    height: 17,
+    marginLeft: -20,
+    backgroundColor: '#F6F6F6',
+    marginVertical: 2,
   },
   footerContainer: {
     position: 'absolute',
