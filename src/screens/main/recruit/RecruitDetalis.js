@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   View,
   Text,
@@ -19,7 +19,19 @@ const RecruitDetails = ({
   remainingQuantity,
   timeLeft,
   purchaseLink,
+  isFavorite: initialIsFavorite,
 }) => {
+  const [isFavorite, setIsFavorite] = useState(initialIsFavorite)
+
+  useEffect(() => {
+    setIsFavorite(initialIsFavorite)
+  }, [initialIsFavorite])
+
+  const toggleFavorite = () => {
+    setIsFavorite(!isFavorite)
+    // Add logic to update favorite status in user data here
+  }
+
   const openLink = () => {
     Linking.openURL(purchaseLink)
   }
@@ -84,6 +96,16 @@ const RecruitDetails = ({
         {/* 카테고리 */}
         <View style={styles.infoContainer}>
           <Text style={styles.categoryText}>{category}</Text>
+          <TouchableOpacity onPress={toggleFavorite}>
+            <Image
+              source={
+                isFavorite
+                  ? require('../../../assets/heart.png')
+                  : require('../../../assets/emptyheart.png')
+              }
+              style={styles.heartImage}
+            />
+          </TouchableOpacity>
         </View>
 
         {/* 상품 정보 */}
@@ -221,10 +243,17 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     marginTop: '3%',
   },
+  heartImage: {
+    resizeMode: 'contain',
+    width: 22,
+    height: 22,
+    marginTop: 5,
+  },
   linkText: {
     fontSize: 14,
     fontWeight: 'semibold',
     color: '#B3B3B3',
+    marginTop: '1%',
     marginBottom: '8%',
   },
   productInfoContainer: {
