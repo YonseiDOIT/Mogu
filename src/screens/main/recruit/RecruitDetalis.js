@@ -81,17 +81,17 @@ const RecruitDetails = ({
           </Text>
         </View>
 
-        {/* 카테고리 / 구매 링크 */}
+        {/* 카테고리 */}
         <View style={styles.infoContainer}>
           <Text style={styles.categoryText}>{category}</Text>
-          <TouchableOpacity onPress={openLink}>
-            <Text style={styles.linkText}>구매 링크{'>'}</Text>
-          </TouchableOpacity>
         </View>
 
         {/* 상품 정보 */}
         <View style={styles.productInfoContainer}>
           <Text style={styles.productName}>{productName}</Text>
+          <TouchableOpacity onPress={openLink}>
+            <Text style={styles.linkText}>구매 링크{'>'}</Text>
+          </TouchableOpacity>
           <View style={styles.infoRow}>
             <View style={styles.infoLabelContainer}>
               <Text style={styles.staticText}>개당</Text>
@@ -219,13 +219,13 @@ const styles = StyleSheet.create({
     fontWeight: 'semibold',
     color: '#75C743',
     textDecorationLine: 'underline',
-    marginTop: '2%',
+    marginTop: '3%',
   },
   linkText: {
     fontSize: 14,
     fontWeight: 'semibold',
     color: '#B3B3B3',
-    marginTop: '7%',
+    marginBottom: '8%',
   },
   productInfoContainer: {
     marginTop: 10,
@@ -236,7 +236,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
     marginTop: '4%',
-    marginBottom: '8%',
   },
   infoRow: {
     flexDirection: 'row',
@@ -252,7 +251,7 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   dynamicText: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: 'bold',
     color: 'black',
     marginBottom: '3%',

@@ -36,7 +36,7 @@ const StackAfterLogin = () => {
         options={{ headerShown: false }}
       />
       {/* 테스팅 중, 추후에 돌려놓을 거임 */}
-      <Stack.Screen name="RecruitDetails">
+      <Stack.Screen name="RecruitDetails" options={{ headerShown: false }}>
         {(props) => (
           <RecruitDetails
             {...props}
