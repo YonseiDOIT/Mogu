@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   View,
   Text,
@@ -19,9 +19,43 @@ const RecruitDetails = ({
   remainingQuantity,
   timeLeft,
   purchaseLink,
+  isFavorite: initialIsFavorite,
+  isApplicant,
+  applicantQuantity,
+  hostDesiredQuantity,
+  applicationTime,
 }) => {
+  const [isFavorite, setIsFavorite] = useState(initialIsFavorite)
+  const [appliedWithinHour, setAppliedWithinHour] = useState(false)
+
+  useEffect(() => {
+    setIsFavorite(initialIsFavorite)
+  }, [initialIsFavorite])
+
+  useEffect(() => {
+    if (isApplicant && applicationTime) {
+      const now = new Date()
+      const applicationDate = new Date(applicationTime)
+      const timeDifference = now - applicationDate
+      setAppliedWithinHour(timeDifference < 3600000)
+    }
+  }, [isApplicant, applicationTime])
+
+  const toggleFavorite = () => {
+    setIsFavorite(!isFavorite)
+  }
+
   const openLink = () => {
     Linking.openURL(purchaseLink)
+  }
+
+  const handleParticipate = () => {
+    navigation.navigate('Participate')
+  }
+
+  const handleCancelParticipation = () => {
+    // 코드 추가 해야 됨
+    setAppliedWithinHour(false)
   }
 
   const formattedPrice = pricePerUnit.toLocaleString()
@@ -84,6 +118,16 @@ const RecruitDetails = ({
         {/* 카테고리 */}
         <View style={styles.infoContainer}>
           <Text style={styles.categoryText}>{category}</Text>
+          <TouchableOpacity onPress={toggleFavorite}>
+            <Image
+              source={
+                isFavorite
+                  ? require('../../../assets/heart.png')
+                  : require('../../../assets/emptyheart.png')
+              }
+              style={styles.heartImage}
+            />
+          </TouchableOpacity>
         </View>
 
         {/* 상품 정보 */}
@@ -98,7 +142,7 @@ const RecruitDetails = ({
             </View>
             <Text style={[styles.dynamicText, styles.dynamic]}>
               {' '}
-              ₩{formattedPrice}
+              ₩ {formattedPrice}
             </Text>
           </View>
           <View style={styles.infoRow}>
@@ -119,29 +163,40 @@ const RecruitDetails = ({
               {timeLeft}
             </Text>
           </View>
+
+          {/* 구분선 추가 */}
+          <View style={styles.separator} />
         </View>
 
         {/* 하단 상태 텍스트 */}
         <View style={styles.footerContainer}>
-          <View
-            style={[
-              styles.footerBox,
-              isRecruiting
-                ? styles.recruitingFooterBox
-                : styles.closedFooterBox,
-            ]}
-          >
-            <Text
-              style={[
-                styles.footerText,
-                isRecruiting
-                  ? styles.recruitingFooterText
-                  : styles.closedFooterText,
-              ]}
-            >
-              {isRecruiting ? '이미 참여 중' : '신청 불가'}
+          {isClosed ? (
+            <Text style={[styles.footerText, styles.closedFooterText]}>
+              종료되었습니다
             </Text>
-          </View>
+          ) : isApplicant ? (
+            appliedWithinHour ? (
+              <TouchableOpacity
+                style={[styles.footerBox, styles.cancelButton]}
+                onPress={handleCancelParticipation}
+              >
+                <Text style={styles.footerText}>참여 취소하기</Text>
+              </TouchableOpacity>
+            ) : (
+              <Text style={[styles.footerText, styles.recruitingFooterText]}>
+                이미 참여 중
+              </Text>
+            )
+          ) : (
+            <TouchableOpacity
+              style={[styles.footerBox, styles.participateButton]}
+              onPress={handleParticipate}
+            >
+              <Text style={styles.footerText}>
+                {`참여하기 (${applicantQuantity}/${hostDesiredQuantity})`}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </SafeAreaView>
@@ -221,10 +276,17 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     marginTop: '3%',
   },
+  heartImage: {
+    resizeMode: 'contain',
+    width: 22,
+    height: 22,
+    marginTop: 5,
+  },
   linkText: {
     fontSize: 14,
     fontWeight: 'semibold',
     color: '#B3B3B3',
+    marginTop: '1%',
     marginBottom: '8%',
   },
   productInfoContainer: {
@@ -259,6 +321,13 @@ const styles = StyleSheet.create({
   dynamic: {
     color: '#75C743',
   },
+  separator: {
+    width: '120%',
+    height: 17,
+    marginLeft: -20,
+    backgroundColor: '#F6F6F6',
+    marginVertical: 2,
+  },
   footerContainer: {
     position: 'absolute',
     bottom: 20,
@@ -281,6 +350,7 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: 'white',
     textAlign: 'center',
   },
   recruitingFooterText: {
@@ -289,11 +359,15 @@ const styles = StyleSheet.create({
   closedFooterText: {
     color: '#777777',
   },
-  recruitingFooterBox: {
+  participateButton: {
+    borderRadius: 15,
     borderColor: '#75C743',
+    backgroundColor: '#75C743',
   },
-  closedFooterBox: {
-    borderColor: '#777777',
+  cancelButton: {
+    borderRadius: 15,
+    borderColor: '#FF0000',
+    backgroundColor: '#FF0000',
   },
 })
 
