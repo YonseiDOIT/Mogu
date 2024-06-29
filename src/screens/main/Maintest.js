@@ -16,10 +16,16 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Octicons from 'react-native-vector-icons/Octicons'
 import UserInfoHeader from '../../components/UserInfoHeader'
+import Search from './Search'
 
 function Maintest({ navigation }) {
+  const [searchText, setSearchText] = useState('')
   const [selectedSort, setSelectedSort] = useState('기한임박순')
   const [dropdownVisible, setDropdownVisible] = useState(false)
+
+  const handleSearchPress = () => {
+    navigation.navigate('Search')
+  }
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible)
@@ -82,15 +88,21 @@ function Maintest({ navigation }) {
     <View style={styles.screenContainer}>
       <View style={styles.container}>
         <Image source={require('../../assets/m09.png')} style={styles.m09} />
-        <View style={styles.searchContainer}>
-          <TextInput style={styles.searchInput} placeholder="검색" />
-          <TouchableOpacity style={styles.searchButtonContainer}>
-            <Image
-              source={require('../../assets/search.png')}
-              style={styles.searchButton}
-            />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.searchContainer}
+          onPress={handleSearchPress}
+        >
+          <TextInput
+            style={styles.searchInput}
+            placeholder="검색"
+            onTouchStart={handleSearchPress}
+            value={searchText}
+          />
+          <Image
+            source={require('../../assets/search.png')}
+            style={styles.searchButton}
+          />
+        </TouchableOpacity>
         <TouchableOpacity>
           <Image
             source={require('../../assets/alarm.png')}
@@ -244,16 +256,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F3F3',
   },
 
-  searchButtonContainer: {
-    position: 'absolute',
-    right: 10,
-    top: 8,
-  },
+  // searchButtonContainer: {
+  //   position: 'absolute',
+  //   right: 10,
+  //   top: 8,
+  //   zIndex: 1,
+  // },
 
   searchButton: {
     width: 24,
     height: 24,
     resizeMode: 'contain',
+    position: 'absolute',
+    right: 10,
+    top: 8,
   },
 
   alarmButton: {
