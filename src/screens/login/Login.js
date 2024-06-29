@@ -32,7 +32,7 @@ const Login = ({ navigation }) => {
 
   const checkPassword = (inputPassword) => {
     // 유효성 검사 로직
-    const isValid = inputPassword.length >= 6
+    const isValid = inputPassword.length >= 7
     setIsPasswordValid(isValid)
   }
 
