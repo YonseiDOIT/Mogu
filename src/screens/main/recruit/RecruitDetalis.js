@@ -20,20 +20,42 @@ const RecruitDetails = ({
   timeLeft,
   purchaseLink,
   isFavorite: initialIsFavorite,
+  isApplicant,
+  applicantQuantity,
+  hostDesiredQuantity,
+  applicationTime,
 }) => {
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite)
+  const [appliedWithinHour, setAppliedWithinHour] = useState(false)
 
   useEffect(() => {
     setIsFavorite(initialIsFavorite)
   }, [initialIsFavorite])
 
+  useEffect(() => {
+    if (isApplicant && applicationTime) {
+      const now = new Date()
+      const applicationDate = new Date(applicationTime)
+      const timeDifference = now - applicationDate
+      setAppliedWithinHour(timeDifference < 3600000)
+    }
+  }, [isApplicant, applicationTime])
+
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite)
-    // Add logic to update favorite status in user data here
   }
 
   const openLink = () => {
     Linking.openURL(purchaseLink)
+  }
+
+  const handleParticipate = () => {
+    navigation.navigate('Participate')
+  }
+
+  const handleCancelParticipation = () => {
+    // 코드 추가 해야 됨
+    setAppliedWithinHour(false)
   }
 
   const formattedPrice = pricePerUnit.toLocaleString()
@@ -145,25 +167,33 @@ const RecruitDetails = ({
 
         {/* 하단 상태 텍스트 */}
         <View style={styles.footerContainer}>
-          <View
-            style={[
-              styles.footerBox,
-              isRecruiting
-                ? styles.recruitingFooterBox
-                : styles.closedFooterBox,
-            ]}
-          >
-            <Text
-              style={[
-                styles.footerText,
-                isRecruiting
-                  ? styles.recruitingFooterText
-                  : styles.closedFooterText,
-              ]}
-            >
-              {isRecruiting ? '이미 참여 중' : '신청 불가'}
+          {isClosed ? (
+            <Text style={[styles.footerText, styles.closedFooterText]}>
+              종료되었습니다
             </Text>
-          </View>
+          ) : isApplicant ? (
+            appliedWithinHour ? (
+              <TouchableOpacity
+                style={[styles.footerBox, styles.cancelButton]}
+                onPress={handleCancelParticipation}
+              >
+                <Text style={styles.footerText}>참여 취소하기</Text>
+              </TouchableOpacity>
+            ) : (
+              <Text style={[styles.footerText, styles.recruitingFooterText]}>
+                이미 참여 중
+              </Text>
+            )
+          ) : (
+            <TouchableOpacity
+              style={[styles.footerBox, styles.participateButton]}
+              onPress={handleParticipate}
+            >
+              <Text style={styles.footerText}>
+                {`참여하기 (${applicantQuantity}/${hostDesiredQuantity})`}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </SafeAreaView>
@@ -310,6 +340,7 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: 'white',
     textAlign: 'center',
   },
   recruitingFooterText: {
@@ -318,11 +349,15 @@ const styles = StyleSheet.create({
   closedFooterText: {
     color: '#777777',
   },
-  recruitingFooterBox: {
+  participateButton: {
+    borderRadius: 15,
     borderColor: '#75C743',
+    backgroundColor: '#75C743',
   },
-  closedFooterBox: {
-    borderColor: '#777777',
+  cancelButton: {
+    borderRadius: 15,
+    borderColor: '#FF0000',
+    backgroundColor: '#FF0000',
   },
 })
 
