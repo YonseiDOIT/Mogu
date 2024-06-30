@@ -34,6 +34,11 @@ const StackAfterLogin = () => {
         component={SearchResult}
         options={{ headerShown: false }}
       />
+      {/* <Stack.Screen
+        name="RecruitDetails"
+        component={RecruitDetails}
+        options={{ headerShown: false }}
+      /> */}
       <Stack.Screen name="RecruitDetails" options={{ headerShown: false }}>
         {(props) => (
           <RecruitDetails
@@ -44,7 +49,7 @@ const StackAfterLogin = () => {
             productName="사과"
             pricePerUnit={1100}
             remainingQuantity={100}
-            timeLeft="0일 0시간 0분"
+            timeLeft="0일 1시간 0분"
             purchaseLink="https://example.com/purchase"
             isFavorite={true}
             isApplicant={true}

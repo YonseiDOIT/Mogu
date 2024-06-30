@@ -25,6 +25,7 @@ const RecruitDetails = ({
   applicantQuantity,
   hostDesiredQuantity,
   applicationTime,
+  isHost,
 }) => {
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite)
   const [appliedWithinHour, setAppliedWithinHour] = useState(false)
@@ -76,8 +77,18 @@ const RecruitDetails = ({
     setIsModalVisible(false)
   }
 
-  const formattedPrice = pricePerUnit.toLocaleString()
-  const formattedQuantity = remainingQuantity.toLocaleString()
+  const handleCloseRecruitment = () => {
+    setCurrentIsRecruiting(false) // 모집 마감 상태
+  }
+
+  const handleManageParticipants = () => {
+    navigation.navigate('ParticipantInfo') // 참여자 정보 관리
+  }
+
+  const formattedPrice = pricePerUnit ? pricePerUnit.toLocaleString() : ''
+  const formattedQuantity = remainingQuantity
+    ? remainingQuantity.toLocaleString()
+    : ''
 
   const getStatusText = () => {
     if (isClosed || timeLeft === '0일 0시간 0분') {
@@ -147,6 +158,39 @@ const RecruitDetails = ({
     }
   }
 
+  const renderHostButtons = () => {
+    if (isHost) {
+      if (currentIsRecruiting) {
+        return (
+          <>
+            <TouchableOpacity
+              style={styles.manageButton}
+              onPress={handleCloseRecruitment}
+            >
+              <Text style={styles.manageButtonText}>신청 마감하기</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.manageButton}
+              onPress={handleManageParticipants}
+            >
+              <Text style={styles.manageButtonText}>참여자 정보 관리</Text>
+            </TouchableOpacity>
+          </>
+        )
+      } else if (timeLeft !== '0일 0시간 0분') {
+        return (
+          <TouchableOpacity
+            style={styles.manageButton}
+            onPress={handleManageParticipants}
+          >
+            <Text style={styles.manageButtonText}>참여자 정보 관리</Text>
+          </TouchableOpacity>
+        )
+      }
+    }
+    return null
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -160,6 +204,16 @@ const RecruitDetails = ({
           />
         </TouchableOpacity>
 
+        {/* 글 수정하기 */}
+        {isHost && currentIsRecruiting && (
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => navigation.navigate('EditRecruit')}
+          >
+            <Text style={styles.editButtonText}>글 수정하기</Text>
+          </TouchableOpacity>
+        )}
+
         {/* 이미지 업로드 */}
         <View style={styles.imageContainer}>
           <View style={styles.imagePlaceholder} />
@@ -167,18 +221,7 @@ const RecruitDetails = ({
 
         {/* 모집 상태 */}
         <View style={getStatusStyle()}>
-          <Text
-            style={[
-              styles.statusText,
-              isClosed || timeLeft === '0일 0시간 0분'
-                ? styles.closedText
-                : currentIsRecruiting
-                ? styles.recruitingText
-                : styles.closedText,
-            ]}
-          >
-            {getStatusText()}
-          </Text>
+          <Text style={styles.recruitingText}>{getStatusText()}</Text>
         </View>
 
         {/* 카테고리 */}
@@ -239,8 +282,29 @@ const RecruitDetails = ({
           </View>
         </View>
 
-        {/* 하단 상태 텍스트 */}
+        {/* 참여자 - 하단 상태 텍스트 */}
         <View style={styles.footerContainer}>
+          {renderHostButtons()}
+          <TouchableOpacity
+            style={getFooterStyle()}
+            onPress={
+              currentIsApplicant && appliedWithinHour
+                ? handleCancelParticipation
+                : currentIsApplicant
+                ? null
+                : handleParticipate
+            }
+            disabled={
+              !currentIsRecruiting || (currentIsApplicant && !appliedWithinHour)
+            }
+          >
+            <Text style={getFooterTextStyle()}>{getFooterText()}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* 주최자 - 하단 버튼 */}
+        <View style={styles.footerContainer}>
+          {renderHostButtons()}
           <TouchableOpacity
             style={getFooterStyle()}
             onPress={
@@ -308,6 +372,20 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
   },
+  editButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    zIndex: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    backgroundColor: '#75C743',
+    borderRadius: 10,
+  },
+  editButtonText: {
+    color: 'black',
+    fontWeight: 'bold',
+  },
   imageContainer: {
     width: '100%',
     height: 280,
@@ -336,7 +414,7 @@ const styles = StyleSheet.create({
     borderColor: '#75C743',
   },
   recruitingText: {
-    color: 'white',
+    color: '#75C743',
   },
   closedText: {
     color: '#777777',
@@ -373,7 +451,7 @@ const styles = StyleSheet.create({
   },
   productInfoContainer: {
     paddingHorizontal: 20,
-    marginBottom: 20, // 다른 컨텐츠와의 간격 조정
+    marginBottom: 20,
   },
   productName: {
     fontSize: 20,
@@ -456,6 +534,7 @@ const styles = StyleSheet.create({
   },
   footerAlreadyParticipating: {
     borderColor: '#75C743',
+    borderWidth: 1,
     backgroundColor: 'white',
   },
   footerClosed: {
@@ -517,6 +596,17 @@ const styles = StyleSheet.create({
   modalCancelButtonText: {
     color: '#9C9C9C',
     fontSize: 14,
+    fontWeight: 'bold',
+  },
+  manageButton: {
+    backgroundColor: '#75C743',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  manageButtonText: {
+    color: 'white',
     fontWeight: 'bold',
   },
 })
