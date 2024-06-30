@@ -11,6 +11,7 @@ const CreateGroupPurchase = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [totalQuantity, setTotalQuantity] = useState('');
   const [totalPrice, setTotalPrice] = useState('');
+  const [myQuantity, setmyQuantity] = useState('');
   const [unitPrice, setUnitPrice] = useState('');
   const [unitQuantity, setUnitQuantity] = useState('');
   const [endDate, setEndDate] = useState(new Date());
@@ -237,12 +238,14 @@ const CreateGroupPurchase = ({ navigation }) => {
             <TextInput 
               style={[styles.input, { width: 60, height: 35 }]} 
               placeholder="0"
+              value={myQuantity}
+              onChangeText={setmyQuantity}
               keyboardType="numeric"
             />
             <Text style={[styles.rowText, { marginTop: 0 }]}>개 가져갈게요!</Text>
           </View>
           <Text style={{ marginTop: 10, fontSize: 15, fontWeight: 600 }}>
-            {`-> 1개당 `}<Text style={{ color: '#48BD00' }}>{(totalPrice && totalQuantity) ? (totalPrice / totalQuantity).toFixed(0) : '00,000'}</Text>{`원으로 `}<Text style={{ color: '#48BD00' }}>{totalQuantity ? totalQuantity : '00'}</Text>{`개를 판매합니다.`}
+            {`-> 1개당 `}<Text style={{ color: '#48BD00' }}>{(totalPrice && totalQuantity) ? (totalPrice / totalQuantity).toFixed(0) : '00,000'}</Text>{`원으로 `}<Text style={{ color: '#48BD00' }}>{totalQuantity ? (totalQuantity-myQuantity) : '00'}</Text>{`개를 판매합니다.`}
           </Text>
         </View>
         <View style={styles.section}>
@@ -270,7 +273,7 @@ const CreateGroupPurchase = ({ navigation }) => {
         <View style={styles.section}>
           <Text style={styles.label}>최소 공구 수량</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={{ color: '#75C743', fontSize: 15, fontWeight: 600 }}>{unitQuantity ? unitQuantity : totalQuantity}</Text>
+            <Text style={{ color: '#75C743', fontSize: 15, fontWeight: 600 }}>{unitQuantity ? unitQuantity : (totalQuantity-myQuantity)}</Text>
             <Text style={{ fontSize: 15, fontWeight: 600 }}>개 중</Text>
             <TextInput 
               style={[styles.input, { width: 70, height: 35, marginLeft: 10, marginRight: 10 }]} 
