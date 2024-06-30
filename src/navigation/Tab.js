@@ -2,7 +2,7 @@ import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Maintest from '../screens/main/Maintest'
 import LikeScreen from '../screens/like/Like'
-import OngoingScreen from '../screens/mogu_management/MgmtOnGoing'
+import OngoingScreen from '../screens/main/ManageMy'
 import Myinfo from '../screens/mypage/MyInfo'
 
 import { MaterialIcons, Octicons } from '@expo/vector-icons'

@@ -1,20 +1,21 @@
-import React from 'react'
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { MaterialIcons } from '@expo/vector-icons'
-import Maintest from '../screens/main/Maintest'
-import LikeScreen from '../screens/like/Like'
-import OngoingScreen from '../screens/mogu_management/MgmtOnGoing'
-import Myinfo from '../screens/mypage/MyInfo'
+import React from 'react';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { MaterialIcons } from '@expo/vector-icons';
+import Maintest from '../screens/main/Maintest';
+import LikeScreen from '../screens/like/Like';
+import OngoingScreen from '../screens/main/ManageMy';
+import Myinfo from '../screens/mypage/MyInfo';
 
-const Tab = createBottomTabNavigator()
+const Tab = createBottomTabNavigator();
 
 const TabNavigation = () => {
   return (
     <Tab.Navigator
       initialRouteName="Home"
-      tabBarOptions={{
-        activeTintColor: '#000000',
-        inactiveTintColor: '#BDBDBD',
+      screenOptions={{
+        tabBarActiveTintColor: '#000000',
+        tabBarInactiveTintColor: '#BDBDBD',
+        tabBarStyle: [{ display: 'flex' }, null],
       }}
     >
       <Tab.Screen
@@ -62,7 +63,7 @@ const TabNavigation = () => {
         }}
       />
     </Tab.Navigator>
-  )
-}
+  );
+};
 
-export default TabNavigation
+export default TabNavigation;
