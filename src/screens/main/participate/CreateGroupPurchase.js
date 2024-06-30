@@ -339,7 +339,7 @@ const CreateGroupPurchase = ({ navigation }) => {
           <Text style={styles.label}>카카오톡 오픈채팅 링크</Text>
           <TextInput style={styles.input} placeholder="http://카카오톡.openchat" />
         </View>
-        <TouchableOpacity onPress={() => navigation.navigate('Maintest')} style={styles.submitButton}>
+        <TouchableOpacity onPress={() => navigation.navigate('TabNavigation')} style={styles.submitButton}>
           <Text style={styles.submitButtonText}>작성 완료</Text>
         </TouchableOpacity>
       </ScrollView>
