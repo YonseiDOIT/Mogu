@@ -50,7 +50,7 @@ const Login = ({ navigation }) => {
     } else {
       setIsEmailValid(false);
       setIsPasswordValid(false);
-      setIsLoggedIn(true);
+      setIsLoggedIn(true); //-> 이거 수정하면 됩니당 오류가 떠도 로그인되는 코드
     }
   };
 

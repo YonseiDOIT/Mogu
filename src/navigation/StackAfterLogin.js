@@ -17,6 +17,7 @@ import FAQ from '../screens/mypage/FAQ';
 import CreateGroupPurchase from '../screens/main/participate/CreateGroupPurchase';
 import ParticipantInfo from '../screens/main/participate/ParticipantInfo';
 import ManageMy from '../screens/main/ManageMy';
+import FinishedMy from '../screens/main/FinishedMy';
 
 const Stack = createStackNavigator();
 
@@ -116,6 +117,11 @@ const StackAfterLogin = () => {
       <Stack.Screen
         name="ManageMy"
         component={ManageMy}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="FinishedMy"
+        component={FinishedMy}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
