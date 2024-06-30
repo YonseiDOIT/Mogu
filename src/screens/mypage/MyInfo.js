@@ -39,7 +39,7 @@ const MyInfo = ({ navigation }) => {
         <Text style={[Myinfo_styles.title, { marginTop: 10 }]}>모구 소식</Text>
         <Pressable
           style={Myinfo_styles.button}
-          onPress={navigation.navigate('NotificationCheck')}
+          onPress={()=>navigation.navigate('NotificationCheck')}
         >
           <Text style={Myinfo_styles.text}>
             <Image
@@ -49,7 +49,9 @@ const MyInfo = ({ navigation }) => {
             공지사항
           </Text>
         </Pressable>
-        <Pressable style={Myinfo_styles.button}>
+        <Pressable style={Myinfo_styles.button}
+          onPress={()=>navigation.navigate('FAQ')}
+>
           <Text style={Myinfo_styles.text}>
             <Image
               style={Myinfo_styles.image}

@@ -1,56 +1,58 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react';
 import {
   TouchableOpacity,
   StyleSheet,
   Text,
   View,
-  Alert,
   Image,
-} from 'react-native'
-import { NavigationContainer } from '@react-navigation/native'
-import { TextInput } from 'react-native-gesture-handler'
-import Header from '../../components/Header'
+} from 'react-native';
+import { TextInput } from 'react-native-gesture-handler';
+import Header from '../../components/Header';
+import { AuthContext } from '../../App'; // AuthContext 임포트
 
 const Login = ({ navigation }) => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [isEmailValid, setIsEmailValid] = useState(true)
-  const [isPasswordValid, setIsPasswordValid] = useState(true)
-  const [emailTouched, setEmailTouched] = useState(false)
-  const [passwordTouched, setPasswordTouched] = useState(false)
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isEmailValid, setIsEmailValid] = useState(true);
+  const [isPasswordValid, setIsPasswordValid] = useState(true);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+
+  const { setIsLoggedIn } = useContext(AuthContext); // AuthContext 사용
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword)
-  }
+    setShowPassword(!showPassword);
+  };
 
   const checkEmail = (inputEmail) => {
-    //필요한 유효성 검사 로직
-    const isValid = /^[^@\s]+@/.test(inputEmail)
-    setIsEmailValid(isValid)
-  }
+    // 필요한 유효성 검사 로직
+    const isValid = /^[^@\s]+@/.test(inputEmail);
+    setIsEmailValid(isValid);
+  };
 
   const checkPassword = (inputPassword) => {
     // 유효성 검사 로직
-    const isValid = inputPassword.length >= 7
-    setIsPasswordValid(isValid)
-  }
+    const isValid = inputPassword.length >= 7;
+    setIsPasswordValid(isValid);
+  };
 
   const handleLogin = async () => {
-    checkEmail(email)
-    checkPassword(password)
+    checkEmail(email);
+    checkPassword(password);
 
     // 임시로 설정된 이메일과 비밀번호 검증
     if (email === 'mogu' && password === '121212') {
-      setIsEmailValid(true)
-      setIsPasswordValid(true)
-      navigation.navigate('Maintest')
+      setIsEmailValid(true);
+      setIsPasswordValid(true);
+      setIsLoggedIn(true);
+       // 로그인 상태 업데이트
     } else {
-      setIsEmailValid(false)
-      setIsPasswordValid(false)
-      navigation.navigate('Maintest')
+      setIsEmailValid(false);
+      setIsPasswordValid(false);
+      setIsLoggedIn(true);
     }
-  }
+  };
 
   return (
     <View style={styles.container}>
@@ -91,8 +93,8 @@ const Login = ({ navigation }) => {
             ]}
             value={email}
             onChangeText={(text) => {
-              setEmail(text)
-              setEmailTouched(true)
+              setEmail(text);
+              setEmailTouched(true);
             }}
             onBlur={() => checkEmail(email)}
             onFocus={() => setEmailTouched(false)}
@@ -137,8 +139,8 @@ const Login = ({ navigation }) => {
             ]}
             value={password}
             onChangeText={(text) => {
-              setPassword(text)
-              setPasswordTouched(true)
+              setPassword(text);
+              setPasswordTouched(true);
             }}
             onBlur={() => checkPassword(password)}
             onFocus={() => setPasswordTouched(false)}
@@ -173,15 +175,13 @@ const Login = ({ navigation }) => {
       </View>
       <View style={styles.noAccount}>
         <Text>아직 계정이 없나요?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Join')}>
-          <TouchableOpacity onPress={() => navigation.navigate('JoinMail')}>
-            <Text style={styles.join}>가입하기</Text>
-          </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('JoinMail')}>
+          <Text style={styles.join}>가입하기</Text>
         </TouchableOpacity>
       </View>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -290,6 +290,6 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     marginTop: 6,
   },
-})
+});
 
-export default Login
+export default Login;
