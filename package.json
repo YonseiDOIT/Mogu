@@ -45,7 +45,9 @@
     "styled-components": "^6.1.11"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.0"
+    "@babel/core": "^7.24.0",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^12.5.1"
   },
   "private": true
 }

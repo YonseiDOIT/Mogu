@@ -43,6 +43,31 @@ const StackAfterLogin = () => {
         component={SignOutFinish}
         options={{ headerShown: false }}
       />
+      {/* <Stack.Screen
+        name="RecruitDetails"
+        component={RecruitDetails}
+        options={{ headerShown: false }}
+      /> */}
+      <Stack.Screen name="RecruitDetails" options={{ headerShown: false }}>
+        {(props) => (
+          <RecruitDetails
+            {...props}
+            isRecruiting={false}
+            isClosed={false}
+            category="과일"
+            productName="사과"
+            pricePerUnit={1100}
+            remainingQuantity={100}
+            timeLeft="0일 1시간 0분"
+            purchaseLink="https://example.com/purchase"
+            isFavorite={true}
+            isApplicant={true}
+            applicantQuantity={5}
+            hostDesiredQuantity={10}
+            applicationTime={new Date().getTime() - 1800000} // 30분 전
+          />
+        )}
+      </Stack.Screen>
       <Stack.Screen
         name="Useredit"
         component={Useredit}
