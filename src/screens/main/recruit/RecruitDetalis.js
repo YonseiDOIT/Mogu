@@ -29,6 +29,10 @@ const RecruitDetails = ({
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite)
   const [appliedWithinHour, setAppliedWithinHour] = useState(false)
   const [isModalVisible, setIsModalVisible] = useState(false)
+  const [currentApplicantQuantity, setCurrentApplicantQuantity] =
+    useState(applicantQuantity)
+  const [currentIsApplicant, setCurrentIsApplicant] = useState(isApplicant)
+  const [currentIsRecruiting, setCurrentIsRecruiting] = useState(isRecruiting)
 
   useEffect(() => {
     setIsFavorite(initialIsFavorite)
@@ -43,6 +47,12 @@ const RecruitDetails = ({
     }
   }, [isApplicant, applicationTime])
 
+  useEffect(() => {
+    if (timeLeft === '0일 0시간 0분') {
+      setCurrentIsRecruiting(false)
+    }
+  }, [timeLeft])
+
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite)
   }
@@ -52,7 +62,8 @@ const RecruitDetails = ({
   }
 
   const handleParticipate = () => {
-    navigation.navigate('Participate')
+    setCurrentIsApplicant(true)
+    setCurrentApplicantQuantity(currentApplicantQuantity + 1)
   }
 
   const handleCancelParticipation = () => {
@@ -60,7 +71,8 @@ const RecruitDetails = ({
   }
 
   const confirmCancelParticipation = () => {
-    setAppliedWithinHour(false)
+    setCurrentIsApplicant(false)
+    setCurrentApplicantQuantity(currentApplicantQuantity - 1)
     setIsModalVisible(false)
   }
 
@@ -68,9 +80,9 @@ const RecruitDetails = ({
   const formattedQuantity = remainingQuantity.toLocaleString()
 
   const getStatusText = () => {
-    if (isClosed) {
+    if (isClosed || timeLeft === '0일 0시간 0분') {
       return '종료되었습니다.'
-    } else if (isRecruiting) {
+    } else if (currentIsRecruiting) {
       return '참여 모집 중'
     } else {
       return '마감 후 구매 진행 중'
@@ -78,12 +90,60 @@ const RecruitDetails = ({
   }
 
   const getStatusStyle = () => {
-    if (isClosed) {
+    if (isClosed || timeLeft === '0일 0시간 0분') {
       return [styles.statusContainer, styles.closed]
-    } else if (isRecruiting) {
+    } else if (currentIsRecruiting) {
       return [styles.statusContainer, styles.recruitingBackground]
     } else {
       return [styles.statusContainer, styles.closedBackground]
+    }
+  }
+
+  const getFooterStyle = () => {
+    if (isClosed || timeLeft === '0일 0시간 0분') {
+      return [styles.footerBox, styles.footerClosed]
+    } else if (currentIsRecruiting) {
+      if (currentIsApplicant && appliedWithinHour) {
+        return [styles.footerBox, styles.cancelButton]
+      } else if (currentIsApplicant) {
+        return [styles.footerBox, styles.footerAlreadyParticipating]
+      } else {
+        return [styles.footerBox, styles.participateButton]
+      }
+    } else {
+      return [styles.footerBox, styles.footerClosed]
+    }
+  }
+
+  const getFooterTextStyle = () => {
+    if (isClosed || timeLeft === '0일 0시간 0분') {
+      return [styles.footerText, styles.closedFooterText]
+    } else if (currentIsRecruiting) {
+      if (currentIsApplicant && appliedWithinHour) {
+        return [styles.footerText]
+      } else if (currentIsApplicant) {
+        return [styles.footerText, styles.recruitingFooterText]
+      } else {
+        return [styles.footerText]
+      }
+    } else {
+      return [styles.footerText, styles.closedFooterText]
+    }
+  }
+
+  const getFooterText = () => {
+    if (isClosed || timeLeft === '0일 0시간 0분') {
+      return '종료된 공구'
+    } else if (currentIsRecruiting) {
+      if (currentIsApplicant && appliedWithinHour) {
+        return '× 참여 취소하기'
+      } else if (currentIsApplicant) {
+        return '이미 참여 중'
+      } else {
+        return `참여하기 (${currentApplicantQuantity}/${hostDesiredQuantity})`
+      }
+    } else {
+      return '신청 불가'
     }
   }
 
@@ -110,9 +170,9 @@ const RecruitDetails = ({
           <Text
             style={[
               styles.statusText,
-              isClosed
+              isClosed || timeLeft === '0일 0시간 0분'
                 ? styles.closedText
-                : isRecruiting
+                : currentIsRecruiting
                 ? styles.recruitingText
                 : styles.closedText,
             ]}
@@ -181,34 +241,23 @@ const RecruitDetails = ({
 
         {/* 하단 상태 텍스트 */}
         <View style={styles.footerContainer}>
-          {isClosed ? (
-            <Text style={[styles.footerText, styles.closedFooterText]}>
-              종료되었습니다
-            </Text>
-          ) : isApplicant ? (
-            appliedWithinHour ? (
-              <TouchableOpacity
-                style={[styles.footerBox, styles.cancelButton]}
-                onPress={handleCancelParticipation}
-              >
-                <Text style={styles.footerText}>× 참여 취소하기</Text>
-              </TouchableOpacity>
-            ) : (
-              <Text style={[styles.footerText, styles.recruitingFooterText]}>
-                이미 참여 중
-              </Text>
-            )
-          ) : (
-            <TouchableOpacity
-              style={[styles.footerBox, styles.participateButton]}
-              onPress={handleParticipate}
-            >
-              <Text style={styles.footerText}>
-                {`참여하기 (${applicantQuantity}/${hostDesiredQuantity})`}
-              </Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            style={getFooterStyle()}
+            onPress={
+              currentIsApplicant && appliedWithinHour
+                ? handleCancelParticipation
+                : currentIsApplicant
+                ? null
+                : handleParticipate
+            }
+            disabled={
+              !currentIsRecruiting || (currentIsApplicant && !appliedWithinHour)
+            }
+          >
+            <Text style={getFooterTextStyle()}>{getFooterText()}</Text>
+          </TouchableOpacity>
         </View>
+
         <Modal
           isVisible={isModalVisible}
           style={styles.modal}
@@ -248,13 +297,11 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingTop: 20,
-    backgroundColor: 'white',
   },
   backButton: {
     position: 'absolute',
-    top: 10,
-    left: 10,
+    top: 20,
+    left: 20,
     zIndex: 1,
   },
   backImage: {
@@ -262,25 +309,23 @@ const styles = StyleSheet.create({
     height: 24,
   },
   imageContainer: {
-    height: 200,
+    width: '100%',
+    height: 280,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
   },
   imagePlaceholder: {
-    width: '111%',
-    height: '130%',
-    backgroundColor: 'lightgray',
-    top: '-5%',
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#f0f0f0',
   },
   statusContainer: {
-    marginTop: 10,
     alignItems: 'center',
     padding: 5,
   },
   statusText: {
     fontSize: 14,
-    fontWeight: 'semibold',
+    fontWeight: '600',
   },
   recruitingBackground: {
     backgroundColor: '#75C743',
@@ -305,31 +350,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    marginTop: 10,
   },
   categoryText: {
     fontSize: 14,
-    fontWeight: 'semibold',
+    fontWeight: '600',
     color: '#75C743',
     textDecorationLine: 'underline',
-    marginTop: '3%',
+    marginTop: '5%',
   },
   heartImage: {
     resizeMode: 'contain',
     width: 22,
     height: 22,
-    marginTop: 5,
+    marginTop: '60%',
   },
   linkText: {
     fontSize: 14,
-    fontWeight: 'semibold',
+    fontWeight: '600',
     color: '#B3B3B3',
     marginTop: '1%',
     marginBottom: '8%',
   },
   productInfoContainer: {
-    marginTop: 10,
     paddingHorizontal: 20,
+    marginBottom: 20, // 다른 컨텐츠와의 간격 조정
   },
   productName: {
     fontSize: 20,
@@ -409,6 +453,14 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     borderColor: '#C7434B',
     backgroundColor: '#C7434B',
+  },
+  footerAlreadyParticipating: {
+    borderColor: '#75C743',
+    backgroundColor: 'white',
+  },
+  footerClosed: {
+    borderColor: '#777777',
+    backgroundColor: 'white',
   },
   modal: {
     flex: 1,

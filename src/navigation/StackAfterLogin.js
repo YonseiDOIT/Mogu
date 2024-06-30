@@ -38,13 +38,15 @@ const StackAfterLogin = () => {
         {(props) => (
           <RecruitDetails
             {...props}
-            isRecruiting={true}
+            isRecruiting={false}
+            isClosed={false}
             category="과일"
             productName="사과"
             pricePerUnit={1100}
             remainingQuantity={100}
             timeLeft="0일 0시간 0분"
             purchaseLink="https://example.com/purchase"
+            isFavorite={true}
             isApplicant={true}
             applicantQuantity={5}
             hostDesiredQuantity={10}
@@ -52,6 +54,7 @@ const StackAfterLogin = () => {
           />
         )}
       </Stack.Screen>
+
       <Stack.Screen
         name="MyInfoCheck"
         component={MyInfoCheck}
