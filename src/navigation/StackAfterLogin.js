@@ -61,7 +61,7 @@ const StackAfterLogin = () => {
             applicantQuantity={5}
             hostDesiredQuantity={10}
             applicationTime={new Date().getTime() - 1800000} // 30분 전
-            isHost={true}
+            isHost={false}
           />
         )}
       </Stack.Screen>
