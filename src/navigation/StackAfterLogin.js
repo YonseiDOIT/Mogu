@@ -48,7 +48,7 @@ const StackAfterLogin = () => {
         {(props) => (
           <RecruitDetails
             {...props}
-            isRecruiting={true}
+            isRecruiting={false}
             isClosed={false}
             category="과일"
             productName="사과"
