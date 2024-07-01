@@ -208,16 +208,21 @@ function Maintest() {
               )}
               <TouchableOpacity
                 style={styles.itemBox}
-                onPress={() => handleFavoriteToggle(item.id)}
+                onPress={() => navigation.navigate('CreateGroupPurchase')}
               >
-                <Image
-                  source={
-                    item.favorite
-                      ? require('../../assets/heart.png')
-                      : require('../../assets/emptyheart.png')
-                  }
-                  style={styles.heartIcon}
-                />
+                <TouchableOpacity
+                  onPress={() => handleFavoriteToggle(item.id)}
+                  style={styles.heartIconContainer}
+                >
+                  <Image
+                    source={
+                      item.favorite
+                        ? require('../../assets/heart.png')
+                        : require('../../assets/emptyheart.png')
+                    }
+                    style={styles.heartIcon}
+                  />
+                </TouchableOpacity>
               </TouchableOpacity>
               <View style={styles.timeContainer}>
                 <Text style={styles.itemText}>{formatTime(item.time)}</Text>
@@ -423,22 +428,25 @@ const styles = StyleSheet.create({
 
   itemWrapper: {
     width: '48%',
-    marginBottom: 5,
+    marginBottom: 15,
   },
 
   itemBox: {
     width: '100%',
-    height: '65%',
+    height: 170,
     backgroundColor: '#F3F3F3',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
   },
 
-  heartIcon: {
+  heartIconContainer: {
     position: 'absolute',
     top: '105%',
     right: 5,
+  },
+  heartIcon: {
     width: 24,
     height: 24,
     resizeMode: 'contain',
