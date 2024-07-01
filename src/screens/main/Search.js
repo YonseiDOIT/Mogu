@@ -64,29 +64,6 @@ const Search = ({ navigation }) => {
       )
     })
 
-  const data = [
-    { id: '1', title: '항목 1' },
-    { id: '2', title: '항목 2' },
-    { id: '3', title: '항목 3' },
-    { id: '4', title: '항목 4' },
-    { id: '5', title: '항목 5' },
-    { id: '6', title: '항목 6' },
-  ]
-
-  const renderItem = ({ item }) => (
-    <View style={styles.listItem}>
-      <Text style={styles.listItemText}>
-        <Text style={item.id <= 3 && styles.onethree}>{item.id}</Text>
-        {'\t'}
-        {item.title}
-      </Text>
-      <Image
-        source={require('../../assets/searchnext.png')}
-        style={styles.listItemImage}
-      />
-    </View>
-  )
-
   return (
     <View style={styles.screenContainer}>
       <View style={{ flex: 1 }}>
@@ -131,16 +108,6 @@ const Search = ({ navigation }) => {
           >
             {renderRecentSearches()}
           </ScrollView>
-
-          <Text style={styles.weekTitle}>
-            최근 일주일동안 등록 수가 많은 순서예요!
-          </Text>
-          <FlatList
-            data={data}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-            style={styles.weekList}
-          />
         </View>
       </View>
     </View>
@@ -212,6 +179,7 @@ const styles = StyleSheet.create({
   },
   recentSearchesContainer: {
     alignItems: 'center',
+    marginTop: -620,
   },
   searchItem: {
     flexDirection: 'row',
@@ -222,9 +190,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#DEDEDE',
     borderRadius: 25,
-    marginBottom: 10,
     marginRight: 10,
-    top: '-20%',
     left: '1%',
   },
   searchItemTouchable: {
@@ -235,27 +201,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginLeft: 5,
   },
-  weekTitle: {
-    fontSize: 18,
-    marginBottom: '50%',
-    marginLeft: 10,
-  },
-  weekList: {
-    marginLeft: 10,
-    width: '95%',
-    bottom: '21%',
-  },
-  listItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#DEDEDE',
-  },
-  listItemText: {
-    fontSize: 16,
-  },
+
   onethree: {
     color: '#00B812',
   },
