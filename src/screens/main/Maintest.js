@@ -206,19 +206,24 @@ function Maintest() {
                   style={styles.deadlineImage}
                 />
               )}
-              <TouchableOpacity
+              <View
                 style={styles.itemBox}
-                onPress={() => handleFavoriteToggle(item.id)}
+                onPress={() => navigation.navigate('CreateGroupPurchase')} // 바꾸기
               >
-                <Image
-                  source={
-                    item.favorite
-                      ? require('../../assets/heart.png')
-                      : require('../../assets/emptyheart.png')
-                  }
-                  style={styles.heartIcon}
-                />
-              </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleFavoriteToggle(item.id)}
+                  style={styles.heartIconContainer}
+                >
+                  <Image
+                    source={
+                      item.favorite
+                        ? require('../../assets/heart.png')
+                        : require('../../assets/emptyheart.png')
+                    }
+                    style={styles.heartIcon}
+                  />
+                </TouchableOpacity>
+              </View>
               <View style={styles.timeContainer}>
                 <Text style={styles.itemText}>{formatTime(item.time)}</Text>
                 <MaterialIcons
@@ -433,8 +438,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
   },
-
+  heartIconContainer: {
+    position: 'absolute',
+    top: '105%',
+    right: 5,
+  },
   heartIcon: {
     position: 'absolute',
     top: '105%',
