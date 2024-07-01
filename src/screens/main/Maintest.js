@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import {
   View,
   TextInput,
@@ -16,6 +16,40 @@ function Maintest() {
   const [searchText, setSearchText] = useState('')
   const [selectedSort, setSelectedSort] = useState('기한임박순')
   const [dropdownVisible, setDropdownVisible] = useState(false)
+  const [items, setItems] = useState([
+    {
+      id: 1,
+      quantity: '5개',
+      time: '23',
+      title: '상품 1',
+      price: '3,000',
+      favorite: true,
+    },
+    {
+      id: 2,
+      quantity: '3개',
+      time: '1430',
+      title: '상품 2',
+      price: '500',
+      favorite: false,
+    },
+    {
+      id: 3,
+      quantity: '7개',
+      time: '1440',
+      title: '상품 3',
+      price: '15,000',
+      favorite: true,
+    },
+    {
+      id: 4,
+      quantity: '1개',
+      time: '3000',
+      title: '상품 4',
+      price: '4,200',
+      favorite: false,
+    },
+  ])
 
   const handleSearchPress = () => {
     navigation.navigate('Search')
@@ -47,36 +81,17 @@ function Maintest() {
     }
   }
 
-  const items = [
-    {
-      id: 1,
-      quantity: '5개',
-      time: '23', // 시간
-      title: '상품 1',
-      price: '3,000',
-    },
-    {
-      id: 2,
-      quantity: '3개',
-      time: '60',
-      title: '상품 2',
-      price: '500',
-    },
-    {
-      id: 3,
-      quantity: '7개',
-      time: '180',
-      title: '상품 3',
-      price: '15,000',
-    },
-    {
-      id: 4,
-      quantity: '1개',
-      time: '30',
-      title: '상품 4',
-      price: '4,200',
-    },
-  ]
+  const isDeadlineSoon = (time) => {
+    const totalMinutes = parseInt(time, 10)
+    return totalMinutes < 1440 // 24시간 미만
+  }
+
+  const handleFavoriteToggle = (itemId) => {
+    const updatedItems = items.map((item) =>
+      item.id === itemId ? { ...item, favorite: !item.favorite } : item
+    )
+    setItems(updatedItems)
+  }
 
   return (
     <View style={styles.screenContainer}>
@@ -90,8 +105,8 @@ function Maintest() {
             style={styles.searchInput}
             placeholder="내게 필요한 상품을 찾아보세요!"
             value={searchText}
-            editable={false} // Make the TextInput read-only
-            pointerEvents="none" // Disable pointer events for the TextInput
+            editable={false}
+            pointerEvents="none"
           />
           <Image
             source={require('../../assets/search.png')}
@@ -185,23 +200,38 @@ function Maintest() {
         <View style={styles.itemsGrid}>
           {items.map((item) => (
             <View key={item.id} style={styles.itemWrapper}>
-              <TouchableOpacity style={styles.itemBox} />
-              <View style={styles.row}>
-                <Text style={styles.itemText}>수량 {item.quantity}</Text>
-                <View style={styles.timeContainer}>
-                  <MaterialIcons
-                    name="access-time"
-                    size={16}
-                    color="#333"
-                    style={styles.timeIcon}
-                  />
-                  <Text style={styles.itemText}>{formatTime(item.time)}</Text>
-                </View>
+              {isDeadlineSoon(item.time) && (
+                <Image
+                  source={require('../../assets/deadline.png')}
+                  style={styles.deadlineImage}
+                />
+              )}
+              <TouchableOpacity
+                style={styles.itemBox}
+                onPress={() => handleFavoriteToggle(item.id)}
+              >
+                <Image
+                  source={
+                    item.favorite
+                      ? require('../../assets/heart.png')
+                      : require('../../assets/emptyheart.png')
+                  }
+                  style={styles.heartIcon}
+                />
+              </TouchableOpacity>
+              <View style={styles.timeContainer}>
+                <Text style={styles.itemText}>{formatTime(item.time)}</Text>
+                <MaterialIcons
+                  name="access-time"
+                  size={16}
+                  color="#333"
+                  style={styles.timeIcon}
+                />
               </View>
               <Text style={styles.itemTitle}>{item.title}</Text>
-              <View style={styles.rowPrice}>
-                <Text style={styles.itemPrice}>{item.price}</Text>
-                <Text style={styles.priceWon}> 원</Text>
+              <View style={styles.row}>
+                <Text style={styles.itemText}>{`수량 ${item.quantity}`}</Text>
+                <Text style={styles.itemPrice}>{`${item.price} 원`}</Text>
               </View>
             </View>
           ))}
@@ -326,7 +356,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
     alignItems: 'flex-end',
-    zIndex: 2, // 추가
+    zIndex: 2,
   },
 
   sortButton: {
@@ -361,9 +391,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     width: '28%',
     zIndex: 3,
-    // Android
     elevation: 5,
-    // iOS
     shadowColor: '#000',
     shadowOffset: { width: 1, height: 1 },
     shadowOpacity: 0.1,
@@ -403,6 +431,17 @@ const styles = StyleSheet.create({
     height: '65%',
     backgroundColor: '#F3F3F3',
     borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  heartIcon: {
+    position: 'absolute',
+    top: '105%',
+    right: 5,
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
   },
 
   row: {
@@ -410,11 +449,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 5,
-  },
-
-  rowPrice: {
-    flexDirection: 'row',
-    alignContent: 'center',
   },
 
   timeContainer: {
@@ -470,6 +504,13 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     resizeMode: 'contain',
+  },
+
+  deadlineImage: {
+    position: 'absolute',
+    width: 42,
+    height: 42,
+    zIndex: 1,
   },
 })
 
