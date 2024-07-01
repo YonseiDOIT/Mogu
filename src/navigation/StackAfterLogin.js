@@ -23,7 +23,7 @@ const Stack = createStackNavigator()
 
 const StackAfterLogin = () => {
   return (
-    <Stack.Navigator initialRouteName="RecruitDetails">
+    <Stack.Navigator initialRouteName="TabNavigation">
       <Stack.Screen
         name="TabNavigation"
         component={TabNavigation}
@@ -48,7 +48,7 @@ const StackAfterLogin = () => {
         {(props) => (
           <RecruitDetails
             {...props}
-            isRecruiting={true}
+            isRecruiting={false}
             isClosed={false}
             category="과일"
             productName="사과"
@@ -65,6 +65,12 @@ const StackAfterLogin = () => {
           />
         )}
       </Stack.Screen>
+
+      <Stack.Screen
+        name="Search"
+        component={Search}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="Useredit"
         component={Useredit}
