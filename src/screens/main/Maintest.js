@@ -113,12 +113,6 @@ function Maintest() {
             style={styles.searchButton}
           />
         </TouchableOpacity>
-        <TouchableOpacity>
-          <Image
-            source={require('../../assets/alarm.png')}
-            style={styles.alarmButton}
-          />
-        </TouchableOpacity>
       </View>
       <View style={styles.separator} />
       <View style={styles.categoriesWrapper}>
@@ -301,13 +295,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 10,
     top: 8,
-  },
-
-  alarmButton: {
-    width: 25,
-    height: 25,
-    resizeMode: 'contain',
-    marginLeft: 10,
   },
 
   separator: {
