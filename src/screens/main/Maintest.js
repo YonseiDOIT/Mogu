@@ -206,9 +206,9 @@ function Maintest() {
                   style={styles.deadlineImage}
                 />
               )}
-              <View
+              <TouchableOpacity
                 style={styles.itemBox}
-                onPress={() => navigation.navigate('CreateGroupPurchase')} // 바꾸기
+                onPress={() => navigation.navigate('CreateGroupPurchase')}
               >
                 <TouchableOpacity
                   onPress={() => handleFavoriteToggle(item.id)}
@@ -223,7 +223,7 @@ function Maintest() {
                     style={styles.heartIcon}
                   />
                 </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
               <View style={styles.timeContainer}>
                 <Text style={styles.itemText}>{formatTime(item.time)}</Text>
                 <MaterialIcons
@@ -428,27 +428,25 @@ const styles = StyleSheet.create({
 
   itemWrapper: {
     width: '48%',
-    marginBottom: 5,
+    marginBottom: 15,
   },
 
   itemBox: {
     width: '100%',
-    height: '65%',
+    height: 170,
     backgroundColor: '#F3F3F3',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
   },
+
   heartIconContainer: {
     position: 'absolute',
     top: '105%',
     right: 5,
   },
   heartIcon: {
-    position: 'absolute',
-    top: '105%',
-    right: 5,
     width: 24,
     height: 24,
     resizeMode: 'contain',
