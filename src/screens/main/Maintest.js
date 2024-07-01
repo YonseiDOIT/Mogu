@@ -7,18 +7,12 @@ import {
   TouchableOpacity,
   ScrollView,
   Text,
-  Pressable,
-  Switch,
 } from 'react-native'
-import { NavigationContainer } from '@react-navigation/native'
 import { useNavigation } from '@react-navigation/native'
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import Octicons from 'react-native-vector-icons/Octicons'
-import UserInfoHeader from '../../components/UserInfoHeader'
-import Search from './Search'
 
-function Maintest({ navigation }) {
+function Maintest() {
+  const navigation = useNavigation()
   const [searchText, setSearchText] = useState('')
   const [selectedSort, setSelectedSort] = useState('기한임박순')
   const [dropdownVisible, setDropdownVisible] = useState(false)
@@ -94,16 +88,17 @@ function Maintest({ navigation }) {
         >
           <TextInput
             style={styles.searchInput}
-            placeholder="검색"
-            onTouchStart={handleSearchPress}
+            placeholder="내게 필요한 상품을 찾아보세요!"
             value={searchText}
+            editable={false} // Make the TextInput read-only
+            pointerEvents="none" // Disable pointer events for the TextInput
           />
           <Image
             source={require('../../assets/search.png')}
             style={styles.searchButton}
           />
         </TouchableOpacity>
-        <TouchableOpacity> 
+        <TouchableOpacity>
           <Image
             source={require('../../assets/alarm.png')}
             style={styles.alarmButton}
@@ -121,12 +116,13 @@ function Maintest({ navigation }) {
             style={styles.categoryContainer}
             showsHorizontalScrollIndicator={false}
           >
-            <Text style={styles.categoryText}>물 · 음료</Text>
-            <Text style={styles.categoryText}>과일</Text>
-            <Text style={styles.categoryText}>유제품</Text>
-            <Text style={styles.categoryText}>건강식</Text>
-            <Text style={styles.categoryText}>위생용품</Text>
-            <Text style={styles.categoryText}>기타</Text>
+            {['물 · 음료', '과일', '유제품', '건강식', '위생용품', '기타'].map(
+              (category, index) => (
+                <TouchableOpacity key={index}>
+                  <Text style={styles.categoryText}>{category}</Text>
+                </TouchableOpacity>
+              )
+            )}
           </ScrollView>
         </View>
         <View style={styles.fixedButtonContainer}>
@@ -138,10 +134,13 @@ function Maintest({ navigation }) {
             style={styles.categoryContainer}
             showsHorizontalScrollIndicator={false}
           >
-            <Text style={styles.categoryText}>연세플라자</Text>
-            <Text style={styles.categoryText}>연탄불고기</Text>
-            <Text style={styles.categoryText}>매지놀이터</Text>
-            <Text style={styles.categoryText}>기타</Text>
+            {['연세플라자', '연탄불고기', '매지놀이터', '기타'].map(
+              (category, index) => (
+                <TouchableOpacity key={index}>
+                  <Text style={styles.categoryText}>{category}</Text>
+                </TouchableOpacity>
+              )
+            )}
           </ScrollView>
         </View>
       </View>
@@ -237,7 +236,7 @@ const styles = StyleSheet.create({
   },
 
   m09: {
-    width: 50,
+    width: 35,
     resizeMode: 'contain',
     marginRight: 10,
     marginLeft: 10,
@@ -256,12 +255,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F3F3',
   },
 
-  // searchButtonContainer: {
-  //   position: 'absolute',
-  //   right: 10,
-  //   top: 8,
-  //   zIndex: 1,
-  // },
+  searchButtonContainer: {
+    position: 'absolute',
+  },
 
   searchButton: {
     width: 24,

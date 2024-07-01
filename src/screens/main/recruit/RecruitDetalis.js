@@ -315,11 +315,15 @@ const RecruitDetails = ({
               <View style={styles.infoLabelContainer}>
                 <Text style={styles.staticText}>개당</Text>
               </View>
+
+              {/* 가격 */}
               <Text style={[styles.dynamicText, styles.dynamic]}>
                 {' '}
                 ₩ {formattedPrice}
               </Text>
             </View>
+
+            {/* 남은 개수 */}
             <View style={styles.infoRow}>
               <View style={styles.infoLabelContainer}>
                 <Text style={styles.staticText}>남은 개수</Text>
@@ -329,6 +333,8 @@ const RecruitDetails = ({
                 {formattedQuantity}개
               </Text>
             </View>
+
+            {/* 마감까지 */}
             <View style={styles.infoRow}>
               <View style={styles.infoLabelContainer}>
                 <Text style={styles.staticText}>마감까지</Text>
@@ -353,6 +359,7 @@ const RecruitDetails = ({
         {renderHostButtons()}
         {renderParticipantButtons()}
 
+        {/* 참여 취소 */}
         <Modal isVisible={isModalVisible}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>참여를 취소하시겠습니까?</Text>
@@ -376,23 +383,28 @@ const RecruitDetails = ({
           </View>
         </Modal>
 
+        {/* 공구 종료 */}
         <Modal isVisible={closeRecruitmentModalVisible}>
           <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>공구를 종료하시겠습니까?</Text>
             <Text style={styles.modalTitle}>
-              정말로 모집을 마감하시겠습니까?
+              모든 구매자가 상품을 수령했거나 해당 공구를{'\n'}더이상 진행하지
+              않으려면 종료 버튼을 눌러주세요.{'\n'} 종료 시 게시글이
+              비활성화됩니다.
             </Text>
+
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
                 style={styles.modalButton}
                 onPress={confirmCloseRecruitment}
               >
-                <Text style={styles.modalButtonText}>네</Text>
+                <Text style={styles.modalButtonGo}>종료하기</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.modalButton}
                 onPress={() => setCloseRecruitmentModalVisible(false)}
               >
-                <Text style={styles.modalButtonText}>아니오</Text>
+                <Text style={styles.modalButtonCancel}>취소</Text>
               </TouchableOpacity>
             </View>
           </View>
