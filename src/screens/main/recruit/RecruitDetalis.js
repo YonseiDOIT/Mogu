@@ -351,21 +351,22 @@ const RecruitDetails = ({
 
         <Modal isVisible={isModalVisible}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>
-              정말로 참여를 취소하시겠습니까?
+            <Text style={styles.modalTitle}>참여를 취소하시겠습니까?</Text>
+            <Text style={styles.modalText}>
+              해당 공동구매에 더이상 참여할 수 없습니다.{' '}
             </Text>
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
-                style={styles.modalButton}
+                style={styles.modalButtonGo}
                 onPress={confirmCancelParticipation}
               >
-                <Text style={styles.modalButtonText}>네</Text>
+                <Text style={[styles.modalButtonGoText]}>계속하기</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.modalButton}
+                style={styles.modalButtonCancel}
                 onPress={() => setIsModalVisible(false)}
               >
-                <Text style={styles.modalButtonText}>아니오</Text>
+                <Text style={[styles.modalButtonCancelText]}>취소</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -593,43 +594,6 @@ const styles = StyleSheet.create({
     borderColor: '#777777',
     backgroundColor: 'white',
   },
-  modal: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    paddingLeft: '8%',
-    paddingRight: '8%',
-    paddingBottom: '7.5%',
-    paddingTop: '9%',
-    borderRadius: 12,
-    borderColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  modalSubText: {
-    fontSize: 14,
-    color: '#CC0000',
-    marginBottom: 25,
-    textAlign: 'center',
-  },
-  modalButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  modalButton: {
-    padding: 11.5,
-    borderRadius: 8,
-    width: '45%',
-    height: 38,
-    alignItems: 'center',
-  },
   confirmButton: {
     backgroundColor: '#C7434B',
     marginLeft: 10,
@@ -645,11 +609,40 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
   },
-  modalCancelButtonText: {
+  modalButtonTextCancel: {
+    color: '#9C9C9C',
+  },
+  modalButtonGo: {
+    borderRadius: 8,
+    backgroundColor: '#C7434B',
+    width: '45%',
+    height: 38,
+    alignItems: 'center',
+    paddingVertical: 10,
+    marginTop: 10,
+  },
+  modalButtonGoText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  modalButtonCancel: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#777777',
+    backgroundColor: 'white',
+    width: '45%',
+    height: 38,
+    alignItems: 'center',
+    paddingVertical: 10,
+    marginTop: 10,
+  },
+  modalButtonCancelText: {
     color: '#9C9C9C',
     fontSize: 14,
     fontWeight: 'bold',
   },
+
   hostButtonsContainer: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -711,6 +704,44 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: '4%',
     marginLeft: 20,
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    width: '80% ',
+    borderRadius: '12',
+    padding: 20,
+    height: '20%',
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  modalText: {
+    fontSize: 14,
+    color: '#CC0000',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  modal: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    paddingLeft: '8%',
+    paddingRight: '8%',
+    paddingBottom: '7.5%',
+    paddingTop: '9%',
+    borderRadius: 12,
+    borderColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 })
 
