@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   Linking,
 } from 'react-native'
+import { ScrollView } from 'react-native-gesture-handler'
 import Modal from 'react-native-modal'
 
 const RecruitDetails = ({
@@ -258,94 +259,97 @@ const RecruitDetails = ({
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Image
-            source={require('../../../assets/back.png')}
-            style={styles.backImage}
-          />
-        </TouchableOpacity>
-
-        {/* 글 수정하기 */}
-        {isHost && currentIsRecruiting && (
+        <ScrollView>
           <TouchableOpacity
-            style={styles.editButton}
-            onPress={() => navigation.navigate('EditRecruit')}
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
           >
-            <Text style={styles.editButtonText}>글 수정하기</Text>
-          </TouchableOpacity>
-        )}
-
-        {/* 이미지 업로드 */}
-        <View style={styles.imageContainer}>
-          <View style={styles.imagePlaceholder} />
-        </View>
-
-        {/* 모집 상태 */}
-        <View style={getStatusStyle()}>
-          <Text style={styles.statusText}>{getStatusText()}</Text>
-        </View>
-
-        {/* 카테고리 */}
-        <View style={styles.infoContainer}>
-          <Text style={styles.categoryText}>{category}</Text>
-          <TouchableOpacity onPress={toggleFavorite}>
             <Image
-              source={
-                isFavorite
-                  ? require('../../../assets/heart.png')
-                  : require('../../../assets/emptyheart.png')
-              }
-              style={styles.heartImage}
+              source={require('../../../assets/back.png')}
+              style={styles.backImage}
             />
           </TouchableOpacity>
-        </View>
 
-        {/* 상품 정보 */}
-        <View style={styles.productInfoContainer}>
-          <Text style={styles.productName}>{productName}</Text>
-          <TouchableOpacity onPress={openLink}>
-            <Text style={styles.linkText}>구매 링크{'>'}</Text>
-          </TouchableOpacity>
-          <View style={styles.infoRow}>
-            <View style={styles.infoLabelContainer}>
-              <Text style={styles.staticText}>개당</Text>
-            </View>
-            <Text style={[styles.dynamicText, styles.dynamic]}>
-              {' '}
-              ₩ {formattedPrice}
-            </Text>
-          </View>
-          <View style={styles.infoRow}>
-            <View style={styles.infoLabelContainer}>
-              <Text style={styles.staticText}>남은 개수</Text>
-            </View>
-            <Text style={[styles.dynamicText, styles.dynamic]}>
-              {' '}
-              {formattedQuantity}개
-            </Text>
-          </View>
-          <View style={styles.infoRow}>
-            <View style={styles.infoLabelContainer}>
-              <Text style={styles.staticText}>마감까지</Text>
-            </View>
-            <Text style={[styles.dynamicText, styles.dynamic]}>
-              {' '}
-              {timeLeft}
-            </Text>
-          </View>
-        </View>
+          {/* 글 수정하기 */}
+          {isHost && currentIsRecruiting && (
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => navigation.navigate('EditRecruit')}
+            >
+              <Text style={styles.editButtonText}>글 수정하기</Text>
+            </TouchableOpacity>
+          )}
 
-        {/* 구분선 추가 */}
-        <View style={styles.separator} />
+          {/* 이미지 업로드 */}
+          <View style={styles.imageContainer}>
+            <View style={styles.imagePlaceholder} />
+          </View>
 
-        {/* 공지 */}
-        <View>
-          <Text style={[styles.announceTitle]}>공지</Text>
-          <Text style={[styles.announce]}>공지 예시</Text>
-        </View>
+          {/* 모집 상태 */}
+          <View style={getStatusStyle()}>
+            <Text style={styles.statusText}>{getStatusText()}</Text>
+          </View>
+
+          {/* 카테고리 */}
+          <View style={styles.infoContainer}>
+            <Text style={styles.categoryText}>{category}</Text>
+            <TouchableOpacity onPress={toggleFavorite}>
+              <Image
+                source={
+                  isFavorite
+                    ? require('../../../assets/heart.png')
+                    : require('../../../assets/emptyheart.png')
+                }
+                style={styles.heartImage}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* 상품 정보 */}
+          <View style={styles.productInfoContainer}>
+            <Text style={styles.productName}>{productName}</Text>
+            <TouchableOpacity onPress={openLink}>
+              <Text style={styles.linkText}>구매 링크{'>'}</Text>
+            </TouchableOpacity>
+            <View style={styles.infoRow}>
+              <View style={styles.infoLabelContainer}>
+                <Text style={styles.staticText}>개당</Text>
+              </View>
+              <Text style={[styles.dynamicText, styles.dynamic]}>
+                {' '}
+                ₩ {formattedPrice}
+              </Text>
+            </View>
+            <View style={styles.infoRow}>
+              <View style={styles.infoLabelContainer}>
+                <Text style={styles.staticText}>남은 개수</Text>
+              </View>
+              <Text style={[styles.dynamicText, styles.dynamic]}>
+                {' '}
+                {formattedQuantity}개
+              </Text>
+            </View>
+            <View style={styles.infoRow}>
+              <View style={styles.infoLabelContainer}>
+                <Text style={styles.staticText}>마감까지</Text>
+              </View>
+              <Text style={[styles.dynamicText, styles.dynamic]}>
+                {' '}
+                {timeLeft}
+              </Text>
+            </View>
+          </View>
+
+          {/* 구분선 추가 */}
+          <View style={styles.separator} />
+
+          {/* 공지 */}
+          <View>
+            <Text style={[styles.announceTitle]}>공지</Text>
+            <Text style={[styles.announce]}>공지 예시</Text>
+          </View>
+        </ScrollView>
+
         {renderHostButtons()}
         {renderParticipantButtons()}
 
@@ -550,7 +554,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '90%',
-    bottom: -50,
     left: '5%',
     right: '5%',
     padding: 10,
