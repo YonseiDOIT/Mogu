@@ -9,7 +9,8 @@ import {
 } from 'react-native'
 import Header from '../../components/Header'
 import axios from 'axios'
-import { BASE_URL } from '../../api'
+import { BASE_URL } from '../../services/api'
+
 
 const JoinMail = ({ navigation }) => {
   const [emailId, setEmailId] = useState('')

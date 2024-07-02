@@ -11,6 +11,7 @@ const CreateGroupPurchase = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [totalQuantity, setTotalQuantity] = useState('');
   const [totalPrice, setTotalPrice] = useState('');
+  const [myQuantity, setmyQuantity] = useState('');
   const [unitPrice, setUnitPrice] = useState('');
   const [unitQuantity, setUnitQuantity] = useState('');
   const [endDate, setEndDate] = useState(new Date());
@@ -19,6 +20,7 @@ const CreateGroupPurchase = ({ navigation }) => {
   const [text, setText] = useState('');
   const [category, setCategory] = useState(''); 
   const [otherCategory, setOtherCategory] = useState('');
+  const [otherLocation, setOtherLocation] = useState('');
   const webviewRef = useRef(null);
   const [location, setLocation] = useState({
     latitude: 37.2770,
@@ -237,12 +239,14 @@ const CreateGroupPurchase = ({ navigation }) => {
             <TextInput 
               style={[styles.input, { width: 60, height: 35 }]} 
               placeholder="0"
+              value={myQuantity}
+              onChangeText={setmyQuantity}
               keyboardType="numeric"
             />
             <Text style={[styles.rowText, { marginTop: 0 }]}>개 가져갈게요!</Text>
           </View>
           <Text style={{ marginTop: 10, fontSize: 15, fontWeight: 600 }}>
-            {`-> 1개당 `}<Text style={{ color: '#48BD00' }}>{(totalPrice && totalQuantity) ? (totalPrice / totalQuantity).toFixed(0) : '00,000'}</Text>{`원으로 `}<Text style={{ color: '#48BD00' }}>{totalQuantity ? totalQuantity : '00'}</Text>{`개를 판매합니다.`}
+            {`-> 1개당 `}<Text style={{ color: '#48BD00' }}>{(totalPrice && totalQuantity) ? (totalPrice / totalQuantity).toFixed(0) : '00,000'}</Text>{`원으로 `}<Text style={{ color: '#48BD00' }}>{totalQuantity ? (totalQuantity-myQuantity) : '00'}</Text>{`개를 판매합니다.`}
           </Text>
         </View>
         <View style={styles.section}>
@@ -252,7 +256,7 @@ const CreateGroupPurchase = ({ navigation }) => {
               value={endDate}
               mode="date"
               display="default"
-              minimumDate={new Date()}
+              minimumDate={new Date(minimumDate.getTime() + 2 * 24 * 60 * 60 * 1000)}
               maximumDate={new Date(minimumDate.getTime() + 7 * 24 * 60 * 60 * 1000)}
               onChange={handleConfirmDate}
               style={[styles.dateTimePicker]}
@@ -270,7 +274,7 @@ const CreateGroupPurchase = ({ navigation }) => {
         <View style={styles.section}>
           <Text style={styles.label}>최소 공구 수량</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={{ color: '#75C743', fontSize: 15, fontWeight: 600 }}>{unitQuantity ? unitQuantity : totalQuantity}</Text>
+            <Text style={{ color: '#75C743', fontSize: 15, fontWeight: 600 }}>{unitQuantity ? unitQuantity : (totalQuantity-myQuantity)}</Text>
             <Text style={{ fontSize: 15, fontWeight: 600 }}>개 중</Text>
             <TextInput 
               style={[styles.input, { width: 70, height: 35, marginLeft: 10, marginRight: 10 }]} 
@@ -328,15 +332,24 @@ const CreateGroupPurchase = ({ navigation }) => {
             {markerLocation && <Marker coordinate={markerLocation} />}
             {!markerLocation && <Marker coordinate={location} />}
           </MapView>
-          <Text style={{ marginTop: 10, color: '#777777', fontSize: 13, fontWeight: 300 }}>
-            {selectedPlace === '기타' ? '직접 선택하기' : `${selectedPlace} 일대`}
-          </Text>
+          <View style={{ marginTop: 10, color: '#777777', fontSize: 13, fontWeight: 300 }}>
+            {selectedPlace === '기타' ? (
+                  <TextInput 
+                    style={[styles.input1, { marginTop: 10 }]} 
+                    placeholder="장소에 대한 설명을 적어주세요." 
+                    value={otherLocation} // 장소 설명 보내기
+                    onChangeText={setOtherLocation}
+                  />
+                ) : (
+                  <Text>{`${selectedPlace} 일대`}</Text>
+                )}          
+                </View>
         </View>
         <View style={styles.section}>
           <Text style={styles.label}>카카오톡 오픈채팅 링크</Text>
           <TextInput style={styles.input} placeholder="http://카카오톡.openchat" />
         </View>
-        <TouchableOpacity onPress={() => navigation.navigate('Maintest')} style={styles.submitButton}>
+        <TouchableOpacity onPress={() => navigation.navigate('TabNavigation')} style={styles.submitButton}>
           <Text style={styles.submitButtonText}>작성 완료</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -391,6 +404,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 10,
+    borderRadius: 5,
+    backgroundColor: '#fff',
+  },
+  input1: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    height:20,
+    fontSize:12,
+    width:200,
     borderRadius: 5,
     backgroundColor: '#fff',
   },
