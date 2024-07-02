@@ -37,6 +37,12 @@ const RecruitDetails = ({
   const [currentIsRecruiting, setCurrentIsRecruiting] = useState(isRecruiting)
   const [closeRecruitmentModalVisible, setCloseRecruitmentModalVisible] =
     useState(false)
+  const [isOptionsVisible, setIsOptionsVisible] = useState(false)
+  const [isEndModalVisible, setIsEndModalVisible] = useState(false)
+  const [isCloseConfirmationModalVisible, setIsCloseConfirmationModalVisible] =
+    useState(false)
+  const [isCloseRecruitmentModalVisible, setIsCloseRecruitmentModalVisible] =
+    useState(false)
 
   useEffect(() => {
     setIsFavorite(initialIsFavorite)
@@ -88,6 +94,30 @@ const RecruitDetails = ({
   const confirmCloseRecruitment = () => {
     setCurrentIsRecruiting(false)
     setCloseRecruitmentModalVisible(false)
+  }
+
+  // 신청 마감하기 버튼을 눌렀을 때
+  const handleEndRecruitment = () => {
+    // setIsEndModalVisible(true)
+    setIsCloseConfirmationModalVisible(true) // 신청 마감 확인 모달을 열기
+  }
+
+  // 신청 마감 확인 모달에서 마감하기 버튼을 눌렀을 때
+  const handleConfirmEndRecruitment = () => {
+    setIsCloseConfirmationModalVisible(false) // 신청 마감 확인 모달을 닫기
+    setIsCloseRecruitmentModalVisible(true) // 공구 종료 모달을 열기
+  }
+
+  // 공구 종료하기 버튼을 눌렀을 때 실행되는 함수
+  const handleEndRecruitmentFinal = () => {
+    // 여기에 공구 종료 처리 로직을 추가할 수 있습니다.
+    setIsCloseRecruitmentModalVisible(false) // 공구 종료 모달을 닫기
+  }
+
+  const confirmEndRecruitment = () => {
+    setCurrentIsRecruiting(false)
+    setIsEndModalVisible(false)
+    setIsCloseRecruitmentModalVisible(false)
   }
 
   const handleManageParticipants = () => {
@@ -188,14 +218,26 @@ const RecruitDetails = ({
   }
 
   const renderHostButtons = () => {
-    if (isHost && !currentIsApplicant) {
+    console.log(
+      'renderHostButtons called',
+      isHost,
+      currentIsApplicant,
+      currentIsRecruiting
+    )
+
+    if (isHost) {
       return (
-        <View style={[styles.hostButtonsContainer, { flexDirection: 'row' }]}>
+        <View style={styles.hostButtonsContainer}>
           <TouchableOpacity
-            style={styles.manageButton}
+            style={[
+              styles.manageButton,
+              currentIsRecruiting && styles.closeButton,
+            ]}
             onPress={handleCloseRecruitment}
           >
-            <Text style={styles.manageButtonText}>신청 마감하기</Text>
+            <Text style={styles.manageButtonText}>
+              {currentIsRecruiting ? '신청 마감하기' : '공구 종료하기'}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.manageButtonP}
@@ -206,6 +248,7 @@ const RecruitDetails = ({
         </View>
       )
     }
+    return null
   }
 
   const renderParticipantButtons = () => {
@@ -272,12 +315,25 @@ const RecruitDetails = ({
 
           {/* 글 수정하기 */}
           {isHost && currentIsRecruiting && (
-            <TouchableOpacity
-              style={styles.editButton}
-              onPress={() => navigation.navigate('EditRecruit')}
-            >
-              <Text style={styles.editButtonText}>글 수정하기</Text>
-            </TouchableOpacity>
+            <View style={styles.optionsContainer}>
+              <TouchableOpacity
+                style={styles.optionsButton}
+                onPress={() => setIsOptionsVisible(!isOptionsVisible)}
+              >
+                <Text style={styles.optionsButtonText}>⋮</Text>
+              </TouchableOpacity>
+              {isOptionsVisible && (
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => {
+                    setIsOptionsVisible(false)
+                    navigation.navigate('EditRecruit')
+                  }}
+                >
+                  <Text style={styles.editButtonText}>수정하기</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           )}
 
           {/* 이미지 업로드 */}
@@ -360,55 +416,87 @@ const RecruitDetails = ({
         {renderParticipantButtons()}
 
         {/* 참여 취소 */}
-        <Modal isVisible={isModalVisible}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>참여를 취소하시겠습니까?</Text>
+        {currentIsApplicant && (
+          <Modal isVisible={isModalVisible}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>참여를 취소하시겠습니까?</Text>
+              <Text style={styles.modalText}>
+                해당 공동구매에 더이상 참여할 수 없습니다.{' '}
+              </Text>
+              <View style={styles.modalButtonContainer}>
+                <TouchableOpacity
+                  style={styles.modalButtonGo}
+                  onPress={confirmCancelParticipation}
+                >
+                  <Text style={[styles.modalButtonGoText]}>계속하기</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButtonCancel}
+                  onPress={() => setIsModalVisible(false)}
+                >
+                  <Text style={[styles.modalButtonCancelText]}>취소</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        )}
+
+        {/* 모집 마감 */}
+        <Modal
+          isVisible={closeRecruitmentModalVisible}
+          onBackdropPress={() => setCloseRecruitmentModalVisible(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>신청을 마감하시겠습니까?</Text>
             <Text style={styles.modalText}>
-              해당 공동구매에 더이상 참여할 수 없습니다.{' '}
+              해당 공동구매에 더이상 다른{'\n'}
+              사용자가 참여할 수 없습니다.
             </Text>
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
                 style={styles.modalButtonGo}
-                onPress={confirmCancelParticipation}
+                onPress={confirmCloseRecruitment}
               >
-                <Text style={[styles.modalButtonGoText]}>계속하기</Text>
+                <Text style={styles.modalButtonGoText}>마감하기</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.modalButtonCancel}
-                onPress={() => setIsModalVisible(false)}
+                onPress={() => setCloseRecruitmentModalVisible(false)}
               >
-                <Text style={[styles.modalButtonCancelText]}>취소</Text>
+                <Text style={styles.modalButtonCancelText}>취소</Text>
               </TouchableOpacity>
             </View>
           </View>
         </Modal>
 
         {/* 공구 종료 */}
-        <Modal isVisible={closeRecruitmentModalVisible}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>공구를 종료하시겠습니까?</Text>
-            <Text style={styles.modalTitle}>
-              모든 구매자가 상품을 수령했거나 해당 공구를{'\n'}더이상 진행하지
-              않으려면 종료 버튼을 눌러주세요.{'\n'} 종료 시 게시글이
-              비활성화됩니다.
-            </Text>
+        {isHost && !currentIsRecruiting && (
+          <Modal isVisible={closeRecruitmentModalVisible}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>공구를 종료하시겠습니까?</Text>
+              <Text style={styles.modalTitle}>
+                모든 구매자가 상품을 수령했거나 해당 공구를{'\n'}더이상 진행하지
+                않으려면 종료 버튼을 눌러주세요.{'\n'} 종료 시 게시글이
+                비활성화됩니다.
+              </Text>
 
-            <View style={styles.modalButtonContainer}>
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={confirmCloseRecruitment}
-              >
-                <Text style={styles.modalButtonGo}>종료하기</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={() => setCloseRecruitmentModalVisible(false)}
-              >
-                <Text style={styles.modalButtonCancel}>취소</Text>
-              </TouchableOpacity>
+              <View style={styles.modalButtonContainer}>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={confirmCloseRecruitment}
+                >
+                  <Text style={styles.modalButtonGo}>종료하기</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => setCloseRecruitmentModalVisible(false)}
+                >
+                  <Text style={styles.modalButtonCancel}>취소</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        </Modal>
+          </Modal>
+        )}
       </View>
     </SafeAreaView>
   )
@@ -432,6 +520,19 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
   },
+  optionsContainer: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    zIndex: 1,
+  },
+  optionsButton: {
+    padding: 8,
+  },
+  optionsButtonText: {
+    fontSize: 24,
+  },
+
   editButton: {
     position: 'absolute',
     top: 20,
@@ -442,7 +543,6 @@ const styles = StyleSheet.create({
   },
   editButtonText: {
     color: 'black',
-    textDecorationLine: 'underline',
     fontWeight: 'bold',
   },
   imageContainer: {
@@ -659,11 +759,14 @@ const styles = StyleSheet.create({
   },
 
   hostButtonsContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 10,
+    bottom: 30,
   },
   manageButton: {
-    backgroundColor: '#75C743',
+    backgroundColor: '#C7434B',
+    borderColor: '#C7434B',
     paddingVertical: 11,
     paddingHorizontal: 20,
     borderRadius: 10,
@@ -672,7 +775,6 @@ const styles = StyleSheet.create({
     height: 42,
     margin: 5,
     bottom: '-15%',
-    borderColor: '#75C743',
     elevation: 5, // Android 그림자
     shadowColor: '#000', // iOS 그림자
     shadowOffset: { width: 0, height: 2 }, // iOS 그림자 오프셋
@@ -709,6 +811,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  closeButton: {
+    backgroundColor: '#75C743',
+    borderColor: '#75C743',
+  },
+
   announceTitle: {
     fontSize: 20,
     fontWeight: 'bold',
