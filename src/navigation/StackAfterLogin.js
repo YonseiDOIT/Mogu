@@ -18,6 +18,7 @@ import CreateGroupPurchase from '../screens/main/participate/CreateGroupPurchase
 import ParticipantInfo from '../screens/main/participate/ParticipantInfo'
 import ManageMy from '../screens/main/ManageMy'
 import FinishedMy from '../screens/main/FinishedMy'
+import EditGroupPurchase from '../screens/main/participate/EditGroupPurchase'
 
 const Stack = createStackNavigator()
 
@@ -124,6 +125,11 @@ const StackAfterLogin = () => {
       <Stack.Screen
         name="FinishedMy"
         component={FinishedMy}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="EditGroupPurchase"
+        component={EditGroupPurchase}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
