@@ -23,7 +23,7 @@ const Stack = createStackNavigator()
 
 const StackAfterLogin = () => {
   return (
-    <Stack.Navigator initialRouteName="RecruitDetails">
+    <Stack.Navigator initialRouteName="TabNavigation">
       <Stack.Screen
         name="TabNavigation"
         component={TabNavigation}
@@ -48,20 +48,20 @@ const StackAfterLogin = () => {
         {(props) => (
           <RecruitDetails
             {...props}
-            isRecruiting={true}
+            isRecruiting={false}
             isClosed={false}
             category="과일"
             productName="사과"
             pricePerUnit={10000}
             remainingQuantity={10}
-            timeLeft="0일 12시간 0분"
+            timeLeft="0일 1시간 0분"
             purchaseLink="https://example.com/purchase"
             isFavorite={true}
             isApplicant={true}
             applicantQuantity={5}
             hostDesiredQuantity={10}
             applicationTime={new Date().getTime() - 1800000} // 30분 전
-            isHost={true}
+            isHost={false}
           />
         )}
       </Stack.Screen>

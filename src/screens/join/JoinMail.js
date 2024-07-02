@@ -8,15 +8,14 @@ import {
   Image,
 } from 'react-native'
 import Header from '../../components/Header'
+import axios from 'axios'
+import { BASE_URL } from '../../api'
 
 const JoinMail = ({ navigation }) => {
   const [emailId, setEmailId] = useState('')
   const [emailTouched, setEmailTouched] = useState(false)
   const [error, setError] = useState('')
   const [isEmailRegistered, setIsEmailRegistered] = useState(false)
-
-  // 가입된 이메일 아이디 목록
-  const registeredEmailIds = ['abc', '123']
 
   const handleEmailChange = (text) => {
     const trimmedEmail = text.trim() // 이메일 입력 시 공백 제거
@@ -31,12 +30,22 @@ const JoinMail = ({ navigation }) => {
     }
   }
 
-  const checkEmailExistence = (trimmedEmail) => {
-    if (registeredEmailIds.includes(trimmedEmail)) {
-      setIsEmailRegistered(true)
-      setError('이미 가입된 메일입니다. 로그인해주세요!')
-    } else {
-      setError('')
+  const checkEmailExistence = async (trimmedEmail) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/check-email`, {
+        params: { memberEmail: `${trimmedEmail}@yonsei.ac.kr` },
+      })
+      const isRegistered = response.data
+
+      if (isRegistered) {
+        setIsEmailRegistered(true)
+        setError('이미 가입된 메일입니다. 로그인해주세요!')
+      } else {
+        setError('')
+      }
+    } catch (error) {
+      console.error('Failed to check email existence:', error)
+      setError('이메일 확인 중 오류가 발생했습니다.')
     }
   }
 
