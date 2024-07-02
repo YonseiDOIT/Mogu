@@ -9,6 +9,8 @@ import {
 } from 'react-native'
 import { TextInput } from 'react-native-gesture-handler'
 import Header from '../../components/Header'
+import axios from 'axios'
+import { BASE_URL } from '../../api'
 
 const JoinVerifyNumber = ({ navigation, route }) => {
   const { userMail } = route.params
@@ -27,6 +29,7 @@ const JoinVerifyNumber = ({ navigation, route }) => {
   // 계속하기 버튼 클릭
   const handleContinue = () => {
     if (verifiCode === randomCode) {
+      sendVerificationCode(userMail)
       navigation.navigate('Join')
     } else {
       setIsCodeCorrect(false)
@@ -47,6 +50,15 @@ const JoinVerifyNumber = ({ navigation, route }) => {
   const getLabelStyle = () => {
     return {
       color: isFocused ? (isCodeCorrect ? '#75C743' : '#CC0000') : '#777777',
+    }
+  }
+
+  const sendVerificationCode = async (email) => {
+    try {
+      await axios.post(`${BASE_URL}/sendPwd`, { memberEmail: email })
+      console.log('인증번호가 성공적으로 전송되었습니다.')
+    } catch (error) {
+      console.error('인증번호 전송 실패 에러:', error)
     }
   }
 
