@@ -20,6 +20,7 @@ const CreateGroupPurchase = ({ navigation }) => {
   const [text, setText] = useState('');
   const [category, setCategory] = useState(''); 
   const [otherCategory, setOtherCategory] = useState('');
+  const [otherLocation, setOtherLocation] = useState('');
   const webviewRef = useRef(null);
   const [location, setLocation] = useState({
     latitude: 37.2770,
@@ -255,7 +256,7 @@ const CreateGroupPurchase = ({ navigation }) => {
               value={endDate}
               mode="date"
               display="default"
-              minimumDate={new Date()}
+              minimumDate={new Date(minimumDate.getTime() + 2 * 24 * 60 * 60 * 1000)}
               maximumDate={new Date(minimumDate.getTime() + 7 * 24 * 60 * 60 * 1000)}
               onChange={handleConfirmDate}
               style={[styles.dateTimePicker]}
@@ -331,9 +332,18 @@ const CreateGroupPurchase = ({ navigation }) => {
             {markerLocation && <Marker coordinate={markerLocation} />}
             {!markerLocation && <Marker coordinate={location} />}
           </MapView>
-          <Text style={{ marginTop: 10, color: '#777777', fontSize: 13, fontWeight: 300 }}>
-            {selectedPlace === '기타' ? '직접 선택하기' : `${selectedPlace} 일대`}
-          </Text>
+          <View style={{ marginTop: 10, color: '#777777', fontSize: 13, fontWeight: 300 }}>
+            {selectedPlace === '기타' ? (
+                  <TextInput 
+                    style={[styles.input1, { marginTop: 10 }]} 
+                    placeholder="장소에 대한 설명을 적어주세요." 
+                    value={otherLocation} // 장소 설명 보내기
+                    onChangeText={setOtherLocation}
+                  />
+                ) : (
+                  <Text>{`${selectedPlace} 일대`}</Text>
+                )}          
+                </View>
         </View>
         <View style={styles.section}>
           <Text style={styles.label}>카카오톡 오픈채팅 링크</Text>
@@ -394,6 +404,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 10,
+    borderRadius: 5,
+    backgroundColor: '#fff',
+  },
+  input1: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    height:20,
+    fontSize:12,
+    width:200,
     borderRadius: 5,
     backgroundColor: '#fff',
   },
