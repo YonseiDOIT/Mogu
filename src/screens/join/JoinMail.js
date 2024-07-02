@@ -11,7 +11,6 @@ import Header from '../../components/Header'
 import axios from 'axios'
 import { BASE_URL } from '../../services/api'
 
-
 const JoinMail = ({ navigation }) => {
   const [emailId, setEmailId] = useState('')
   const [emailTouched, setEmailTouched] = useState(false)
@@ -45,7 +44,7 @@ const JoinMail = ({ navigation }) => {
         setError('')
       }
     } catch (error) {
-      console.error('Failed to check email existence:', error)
+      console.error('이메일 확인 중 오류 발생:', error)
       setError('이메일 확인 중 오류가 발생했습니다.')
     }
   }

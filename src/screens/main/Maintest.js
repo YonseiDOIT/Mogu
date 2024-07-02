@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   View,
   TextInput,
@@ -20,7 +20,7 @@ function Maintest() {
     {
       id: 1,
       quantity: '5개',
-      time: '23',
+      time: '1380',
       title: '상품 1',
       price: '3,000',
       favorite: true,
@@ -50,6 +50,19 @@ function Maintest() {
       favorite: false,
     },
   ])
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setItems((prevItems) => {
+        return prevItems.map((item) => {
+          const newTime = Math.max(parseInt(item.time, 10) - 1, 0).toString()
+          return { ...item, time: newTime }
+        })
+      })
+    }, 1000) // 1분마다 업데이트
+
+    return () => clearInterval(intervalId)
+  }, [])
 
   const handleSearchPress = () => {
     navigation.navigate('Search')
