@@ -10,7 +10,7 @@ import {
 import { TextInput } from 'react-native-gesture-handler'
 import Header from '../../components/Header'
 import axios from 'axios'
-import { BASE_URL } from '../../api'
+import { BASE_URL } from '../../services/api'
 
 const JoinVerifyNumber = ({ navigation, route }) => {
   const { userMail } = route.params
