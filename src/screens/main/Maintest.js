@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
 
   itemWrapper: {
     width: '48%',
-    marginBottom: 15,
+    marginBottom: 20,
   },
 
   itemBox: {
