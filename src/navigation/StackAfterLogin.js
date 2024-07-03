@@ -72,7 +72,6 @@ const StackAfterLogin = () => {
         component={Participate}
         options={{ headerShown: false }}
       />
-
       <Stack.Screen
         name="Search"
         component={Search}
