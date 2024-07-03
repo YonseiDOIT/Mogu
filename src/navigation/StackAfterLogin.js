@@ -6,7 +6,8 @@ import SignOut from '../screens/mypage/SignOut'
 import SignOutFinish from '../screens/mypage/SignOutFinish'
 import Search from '../screens/main/Search'
 import SearchResult from '../screens/main/SearchResult'
-import RecruitDetails from '../screens/main/recruit/RecruitDetalis'
+import RecruitDetails from '../screens/main/participate/RecruitDetalis'
+import Participate from '../screens/main/participate/Participate'
 import Useredit from '../screens/mypage/Useredit'
 import Phoneedit from '../screens/mypage/Phoneedit'
 import Passwordedit from '../screens/mypage/Passwordedit'
@@ -24,7 +25,7 @@ const Stack = createStackNavigator()
 
 const StackAfterLogin = () => {
   return (
-    <Stack.Navigator initialRouteName="TabNavigation">
+    <Stack.Navigator initialRouteName="Participate">
       <Stack.Screen
         name="TabNavigation"
         component={TabNavigation}
@@ -66,6 +67,11 @@ const StackAfterLogin = () => {
           />
         )}
       </Stack.Screen>
+      <Stack.Screen
+        name="Participate"
+        component={Participate}
+        options={{ headerShown: false }}
+      />
 
       <Stack.Screen
         name="Search"

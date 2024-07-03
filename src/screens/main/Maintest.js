@@ -19,15 +19,17 @@ function Maintest() {
   const [items, setItems] = useState([
     {
       id: 1,
-      quantity: '5개',
-      time: '1380',
+      remainingQuantity: '5',
+      totalQuantity: '10',
+      time: '1380', // 23시간
       title: '상품 1',
       price: '3,000',
       favorite: true,
     },
     {
       id: 2,
-      quantity: '3개',
+      remainingQuantity: '3',
+      totalQuantity: '5',
       time: '1430',
       title: '상품 2',
       price: '500',
@@ -35,7 +37,8 @@ function Maintest() {
     },
     {
       id: 3,
-      quantity: '7개',
+      remainingQuantity: '7',
+      totalQuantity: '10',
       time: '1440',
       title: '상품 3',
       price: '15,000',
@@ -43,7 +46,8 @@ function Maintest() {
     },
     {
       id: 4,
-      quantity: '1개',
+      remainingQuantity: '1',
+      totalQuantity: '1',
       time: '3000',
       title: '상품 4',
       price: '4,200',
@@ -59,7 +63,7 @@ function Maintest() {
           return { ...item, time: newTime }
         })
       })
-    }, 1000) // 1분마다 업데이트
+    }, 1000) // 1초마다 업데이트
 
     return () => clearInterval(intervalId)
   }, [])
@@ -232,18 +236,33 @@ function Maintest() {
                 </TouchableOpacity>
               </TouchableOpacity>
               <View style={styles.timeContainer}>
-                <Text style={styles.itemText}>{formatTime(item.time)}</Text>
                 <MaterialIcons
                   name="access-time"
                   size={16}
                   color="#333"
-                  style={styles.timeIcon}
+                  style={[
+                    styles.timeIcon,
+                    isDeadlineSoon(item.time) && styles.deadlineSoonText,
+                  ]}
                 />
+                <Text
+                  style={[
+                    styles.itemText,
+                    isDeadlineSoon(item.time) && styles.deadlineSoonText,
+                  ]}
+                >
+                  {formatTime(item.time)}
+                </Text>
               </View>
               <Text style={styles.itemTitle}>{item.title}</Text>
               <View style={styles.row}>
-                <Text style={styles.itemText}>{`수량 ${item.quantity}`}</Text>
-                <Text style={styles.itemPrice}>{`${item.price} 원`}</Text>
+                <Text
+                  style={styles.itemText}
+                >{`수량 ${item.remainingQuantity}/${item.totalQuantity}`}</Text>
+                <Text style={styles.itemPriceWrapper}>
+                  <Text style={styles.itemPrice}>{item.price}</Text>
+                  <Text style={styles.priceWon}> 원</Text>
+                </Text>
               </View>
             </View>
           ))}
@@ -428,7 +447,7 @@ const styles = StyleSheet.create({
 
   itemWrapper: {
     width: '48%',
-    marginBottom: 15,
+    marginBottom: 20,
   },
 
   itemBox: {
@@ -469,12 +488,16 @@ const styles = StyleSheet.create({
     height: 16,
     marginRight: 5,
     marginTop: 5,
+    color: '#777777',
   },
 
   itemText: {
     marginTop: 5,
     fontSize: 12,
-    color: '#333333',
+    color: '#777777',
+  },
+  deadlineSoonText: {
+    color: '#F25151',
   },
 
   itemTitle: {
