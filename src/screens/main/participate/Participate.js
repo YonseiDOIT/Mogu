@@ -7,21 +7,24 @@ import {
   TouchableOpacity,
   TextInput,
   SafeAreaView,
+  ScrollView,
 } from 'react-native'
 
 const Participate = ({
   navigation,
   route,
-  productName,
-  pricePerUnit,
-  remainingQuantity,
+  productName = '사과',
+  pricePerUnit = 10000,
+  remainingQuantity = 10,
 }) => {
   const [quantity, setQuantity] = useState('')
   const [confirmChecked, setConfirmChecked] = useState(false)
   const [receiveChecked, setReceiveChecked] = useState(false)
 
   const handleConfirmParticipation = () => {
-    navigation.goBack()
+    if (parseInt(quantity) <= remainingQuantity) {
+      navigation.goBack()
+    }
   }
 
   const handleConfirmCheckboxToggle = () => {
@@ -32,9 +35,28 @@ const Participate = ({
     setReceiveChecked(!receiveChecked)
   }
 
+  const formatNumberWithCommas = (number) => {
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  }
+
+  const isButtonDisabled = () => {
+    return (
+      !quantity ||
+      !confirmChecked ||
+      !receiveChecked ||
+      parseInt(quantity) > remainingQuantity
+    )
+  }
+
+  const calculatedAmount = () => {
+    const qty = parseInt(quantity)
+    if (isNaN(qty) || qty <= 0 || qty > remainingQuantity) return 0
+    return pricePerUnit * qty
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -57,31 +79,28 @@ const Participate = ({
         <Text style={styles.productName}>{productName}</Text>
 
         {/* 개당 가격 */}
-        <View style={styles.infoRow}>
-          <View style={styles.infoLabelContainer}>
-            <Text style={styles.staticText}>개당</Text>
-          </View>
+        <View style={styles.infoRowNS}>
+          <Text style={styles.staticText}>개당</Text>
           <Text style={[styles.dynamicText, styles.dynamic]}>
             {' '}
-            ₩ {pricePerUnit}
+            ₩ {formatNumberWithCommas(pricePerUnit)}
           </Text>
         </View>
 
         {/* 남은 개수 */}
-        <View style={styles.infoRow}>
-          <View style={styles.infoLabelContainer}>
-            <Text style={styles.staticText}>남은 개수</Text>
-          </View>
+        <View style={styles.infoRowNS}>
+          <Text style={styles.staticText}>남은 개수</Text>
           <Text style={[styles.dynamicText, styles.dynamic]}>
             {' '}
-            {remainingQuantity}개
+            {formatNumberWithCommas(remainingQuantity)}
           </Text>
+          <Text style={styles.quantity}>개</Text>
         </View>
 
         {/* 희망 개수 */}
         <View style={styles.infoRow}>
           <Text style={styles.inputContainerTitle}>희망 개수</Text>
-          <View style={styles.inputContainer}>
+          <View style={styles.quantityContainer}>
             <TextInput
               style={styles.quantityInput}
               onChangeText={(text) => setQuantity(text)}
@@ -89,20 +108,22 @@ const Participate = ({
               keyboardType="numeric"
             />
           </View>
-          <Text>개</Text>
+          <Text style={styles.unitText}>개</Text>
         </View>
 
         {/* 부담 금액 */}
         <View style={styles.infoRow}>
           <Text style={styles.inputContainerTitle}>부담 금액</Text>
-          <View style={styles.inputContainerWon}></View>
-          <Text>원</Text>
+          <View style={styles.amount}>
+            <Text style={styles.amountText}>
+              {formatNumberWithCommas(calculatedAmount())}
+            </Text>
+            <Text style={styles.unitText}>원</Text>
+          </View>
         </View>
 
         {/* 확정 */}
-        <View>
-          <Text style={[styles.confirm]}>확정</Text>
-        </View>
+        <Text style={styles.confirm}>확정</Text>
 
         {/* 확정 체크박스 */}
         <TouchableOpacity
@@ -135,22 +156,24 @@ const Participate = ({
             style={styles.checkboxImage}
           />
         </TouchableOpacity>
+      </ScrollView>
 
-        <TouchableOpacity
-          style={[
-            styles.confirmButton,
-            !quantity || !confirmChecked || !receiveChecked
-              ? styles.confirmButtonInactive
-              : styles.confirmButtonActive,
-          ]}
-          onPress={handleConfirmParticipation}
-          disabled={!quantity || !confirmChecked || !receiveChecked}
-        >
-          <Text style={styles.confirmButtonText}>
-            {remainingQuantity}개 {pricePerUnit}원으로 참여할게요!
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={[
+          styles.confirmButton,
+          isButtonDisabled()
+            ? styles.confirmButtonInactive
+            : styles.confirmButtonActive,
+        ]}
+        onPress={handleConfirmParticipation}
+        disabled={isButtonDisabled()}
+      >
+        <Text style={styles.confirmButtonText}>
+          {formatNumberWithCommas(quantity)}개{' '}
+          {formatNumberWithCommas(calculatedAmount())}
+          원으로 참여할게요!
+        </Text>
+      </TouchableOpacity>
     </SafeAreaView>
   )
 }
@@ -161,12 +184,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   container: {
-    flex: 1,
+    flexGrow: 1,
+    paddingBottom: 80,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
+    marginBottom: 20,
   },
   backButton: {
     marginRight: 10,
@@ -183,13 +208,16 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'black',
-    marginTop: '4%',
+    marginTop: '5%',
+    marginBottom: '5%',
+    marginLeft: 20,
   },
   staticText: {
     fontSize: 18,
     fontWeight: 'bold',
     color: 'black',
     marginLeft: 20,
+    marginRight: '3%',
   },
   dynamicText: {
     fontSize: 18,
@@ -201,43 +229,62 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#75C743',
   },
-  infoRow: {
+  infoRowNS: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    marginBottom: 8,
   },
-  infoLabelContainer: {
-    width: 80,
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   productInfo: {
     fontSize: 16,
     marginBottom: 5,
   },
-
   inputContainerTitle: {
-    borderColor: 'black',
-    marginBottom: 10,
     marginLeft: 20,
-    paddingHorizontal: 10,
     fontSize: 16,
   },
-  inputContainer: {
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: '#DEDEDE',
     borderRadius: 8,
-    marginBottom: 10,
     paddingHorizontal: 10,
+    marginRight: -150,
   },
-  inputContainerWon: {
-    marginBottom: 10,
-    paddingHorizontal: 10,
+  amount: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  amountText: {
+    fontSize: 16,
+    fontWeight: 'semibold',
   },
   quantityInput: {
-    fontSize: 16,
-    paddingVertical: 10,
+    fontSize: 14,
+    width: 100,
+    height: 30,
+    textAlign: 'right',
+  },
+  quantity: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'black',
+    marginLeft: '1%',
+    marginTop: '15%',
+  },
+  unitText: {
+    fontSize: 14,
+    marginLeft: 5,
+    marginRight: 20,
   },
   checkboxContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 10,
     marginLeft: 20,
@@ -271,13 +318,14 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   confirmButton: {
-    width: '100%',
-    position: 'absolute',
-    bottom: 20,
+    width: '90%',
+    alignSelf: 'center',
     borderRadius: 15,
     paddingVertical: 15,
     alignItems: 'center',
     alignContent: 'center',
+    position: 'absolute',
+    bottom: '5%',
   },
   confirmButtonActive: {
     backgroundColor: '#75C743',
