@@ -4,35 +4,46 @@ import {
   StyleSheet,
   Text,
   View,
+  TextInput,
   TouchableWithoutFeedback,
   Keyboard,
 } from 'react-native'
-import { TextInput } from 'react-native-gesture-handler'
 import Header from '../../components/Header'
 import axios from 'axios'
 import { BASE_URL } from '../../services/api'
 
 const JoinVerifyNumber = ({ navigation, route }) => {
-  const { userMail } = route.params
+  const { email } = route.params
   const [isFocused, setIsFocused] = useState(false)
-  const [verifiCode, setVerifiCode] = useState('')
+  const [verificationCode, setVerificationCode] = useState('')
   const [isCodeCorrect, setIsCodeCorrect] = useState(true)
-
-  const randomCode = '121212' // 임시 랜덤 코드
+  const [error, setError] = useState('')
 
   // 인증번호 입력
   const handleVerifyCodeChange = (text) => {
-    setVerifiCode(text)
-    setIsCodeCorrect(true) // 인증번호 입력이 변경될 때 마다 검사
+    setVerificationCode(text)
+    setIsCodeCorrect(true) // 인증번호 입력이 변경될 때마다 검사
   }
 
   // 계속하기 버튼 클릭
-  const handleContinue = () => {
-    if (verifiCode === randomCode) {
-      sendVerificationCode(userMail)
-      navigation.navigate('Join')
-    } else {
+  const handleContinue = async () => {
+    try {
+      const response = await axios.post(`${BASE_URL}/verifyCode`, {
+        memberEmail: `${email}@yonsei.ac.kr`,
+        verificationCode,
+      })
+
+      if (response.data.status === 'SUCCESS') {
+        // 인증번호 일치 시, 다음 화면으로 이동
+        navigation.navigate('JoinPassword', { email })
+      } else {
+        setIsCodeCorrect(false)
+        setError('올바르지 않은 인증번호입니다.')
+      }
+    } catch (error) {
+      console.error('인증번호 확인 실패 에러:', error)
       setIsCodeCorrect(false)
+      setError('인증번호 확인 중 오류가 발생했습니다.')
     }
   }
 
@@ -53,15 +64,6 @@ const JoinVerifyNumber = ({ navigation, route }) => {
     }
   }
 
-  const sendVerificationCode = async (email) => {
-    try {
-      await axios.post(`${BASE_URL}/sendPwd`, { memberEmail: email })
-      console.log('인증번호가 성공적으로 전송되었습니다.')
-    } catch (error) {
-      console.error('인증번호 전송 실패 에러:', error)
-    }
-  }
-
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
@@ -69,7 +71,7 @@ const JoinVerifyNumber = ({ navigation, route }) => {
         <View style={styles.textContainer}>
           <Text style={styles.login}>가입하기</Text>
           <Text style={styles.description}>
-            {userMail ? `${userMail} @yonsei.ac.kr` : ''} 메일을 확인해주세요!
+            {email}@yonsei.ac.kr 메일을 확인해주세요!
           </Text>
         </View>
 
@@ -80,7 +82,7 @@ const JoinVerifyNumber = ({ navigation, route }) => {
           </View>
           <View style={[styles.inputContainer, getInputBorderStyle()]}>
             <TextInput
-              placeholder="6자리 인증번호를 입력해주세요."
+              placeholder="인증번호를 입력해주세요."
               style={styles.input}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
@@ -95,6 +97,15 @@ const JoinVerifyNumber = ({ navigation, route }) => {
           )}
         </View>
 
+        {/* 에러 메시지 */}
+        {error !== '' && (
+          <View style={styles.errorContainer}>
+            <Text style={[styles.errorText, { color: '#CC0000' }]}>
+              {error}
+            </Text>
+          </View>
+        )}
+
         {/* 계속하기 버튼 */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
@@ -102,11 +113,11 @@ const JoinVerifyNumber = ({ navigation, route }) => {
               styles.loginButton,
               {
                 backgroundColor:
-                  verifiCode.length === 6 ? '#75C743' : '#DEDEDE',
+                  verificationCode.length === 10 ? '#75C743' : '#DEDEDE',
               },
             ]}
             onPress={handleContinue}
-            disabled={verifiCode.length !== 6}
+            disabled={verificationCode.length !== 10}
           >
             <Text style={styles.buttonText}>계속하기</Text>
           </TouchableOpacity>

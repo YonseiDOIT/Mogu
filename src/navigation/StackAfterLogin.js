@@ -25,7 +25,7 @@ const Stack = createStackNavigator()
 
 const StackAfterLogin = () => {
   return (
-    <Stack.Navigator initialRouteName="Participate">
+    <Stack.Navigator initialRouteName="TabNavigation">
       <Stack.Screen
         name="TabNavigation"
         component={TabNavigation}
