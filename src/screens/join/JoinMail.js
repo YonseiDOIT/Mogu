@@ -6,6 +6,7 @@ import {
   View,
   TextInput,
   Image,
+  Alert,
 } from 'react-native'
 import Header from '../../components/Header'
 import axios from 'axios'
@@ -17,64 +18,89 @@ const JoinMail = ({ navigation }) => {
   const [error, setError] = useState('')
   const [isEmailRegistered, setIsEmailRegistered] = useState(false)
 
+  // 이메일 입력 시
   const handleEmailChange = (text) => {
-    const trimmedEmail = text.trim() // 이메일 입력 시 공백 제거
-    setEmailId(trimmedEmail)
+    const email = text.trim() // 이메일 입력 시 공백 제거
+    console.log('handleEmailChange - 입력된 이메일:', email)
+    setEmailId(email)
     setEmailTouched(false)
     setIsEmailRegistered(false)
     setError('')
-
-    // 입력된 이메일이 있을 때만 가입 여부 검사
-    if (trimmedEmail.length > 0) {
-      checkEmailExistence(trimmedEmail)
-    }
   }
 
-  const checkEmailExistence = async (trimmedEmail) => {
+  // 이메일 중복 확인 요청
+  const checkEmailExistence = async (email) => {
     try {
+      console.log('checkEmailExistence - 확인할 이메일:', email)
       const response = await axios.get(`${BASE_URL}/check-email`, {
-        params: { memberEmail: `${trimmedEmail}@yonsei.ac.kr` },
+        params: { memberEmail: `${email}@yonsei.ac.kr` },
       })
+      console.log('checkEmailExistence - 응답 데이터:', response.data)
       const isRegistered = response.data
 
       if (isRegistered) {
+        console.log('checkEmailExistence - 이메일이 이미 등록됨')
         setIsEmailRegistered(true)
         setError('이미 가입된 메일입니다. 로그인해주세요!')
       } else {
+        console.log('checkEmailExistence - 이메일이 등록되지 않음')
         setError('')
+        // 가입되지 않은 경우, 인증 번호 발송 요청
+        await sendVerificationCode(email)
       }
     } catch (error) {
-      console.error('이메일 확인 중 오류 발생:', error)
+      console.error('checkEmailExistence - 이메일 확인 중 오류 발생:', error)
       setError('이메일 확인 중 오류가 발생했습니다.')
     }
   }
 
-  const getButtonStyle = () => {
-    return emailId.length > 0 && !isEmailRegistered
-      ? { ...styles.loginButton, backgroundColor: '#75C743' }
-      : { ...styles.loginButton, backgroundColor: '#DEDEDE', color: 'white' }
-  }
+  // 인증번호 발송 요청
+  const sendVerificationCode = async (email) => {
+    try {
+      const formattedEmail = `${email}@yonsei.ac.kr`
+      console.log(
+        'sendVerificationCode - 인증번호 발송할 이메일:',
+        formattedEmail
+      )
+      const response = await axios.post(
+        `${BASE_URL}/sendVerificationCode`,
+        null,
+        {
+          params: { memberEmail: formattedEmail },
+        }
+      )
 
-  const navigateToVerifyNumber = () => {
-    if (isEmailRegistered) {
-      // 이미 가입된 경우, 에러 메시지만 설정하고 넘어가지 않음
-      setError('이미 가입된 메일입니다. 로그인해주세요!')
-    } else {
-      // 가입되지 않은 경우, 인증 번호 입력 화면으로 이동
-      navigation.navigate('JoinVerifyNumber', { userMail: emailId })
+      if (response.data.status === 'SUCCESS') {
+        console.log('sendVerificationCode - 인증번호 발송 성공')
+        navigation.navigate('JoinVerifyNumber', { email })
+      } else {
+        console.log('sendVerificationCode - 인증번호 발송 실패')
+        setError('인증번호 발송에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('sendVerificationCode - 인증번호 발송 실패 에러:', error)
+      setError('인증번호 발송 중 오류가 발생했습니다.')
     }
   }
 
-  const getLabelStyle = () => {
-    return {
-      color: isEmailRegistered ? '#CC0000' : '#75C743',
+  // 인증하기 버튼 클릭 시
+  const handleVerify = () => {
+    if (emailId.trim().length > 0 && !isEmailRegistered) {
+      checkEmailExistence(emailId.trim())
     }
   }
 
+  // 입력 컨테이너 스타일 설정
   const getInputContainerStyle = () => {
     return {
       borderColor: isEmailRegistered ? '#CC0000' : '#75C743',
       backgroundColor: 'white', // 안쪽 색깔은 흰색으로 유지
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderRadius: 15,
+      paddingHorizontal: 10,
+      height: 47,
     }
   }
 
@@ -100,7 +126,14 @@ const JoinMail = ({ navigation }) => {
             resizeMode="contain"
           />
           {(emailTouched || emailId) && (
-            <Text style={[styles.label, getLabelStyle()]}>연세메일</Text>
+            <Text
+              style={[
+                styles.label,
+                { color: isEmailRegistered ? '#CC0000' : '#75C743' },
+              ]}
+            >
+              연세메일
+            </Text>
           )}
           <TextInput
             placeholder="연세메일"
@@ -127,10 +160,12 @@ const JoinMail = ({ navigation }) => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={{
-            ...getButtonStyle(),
-            opacity: emailId.length === 0 || isEmailRegistered ? 0.5 : 1,
+            ...styles.loginButton,
+            backgroundColor:
+              emailId.length > 0 && !isEmailRegistered ? '#75C743' : '#DEDEDE',
+            opacity: emailId.length > 0 && !isEmailRegistered ? 1 : 0.5,
           }}
-          onPress={navigateToVerifyNumber}
+          onPress={handleVerify}
           disabled={emailId.length === 0 || isEmailRegistered}
         >
           <Text style={styles.buttonText}>인증하기</Text>
