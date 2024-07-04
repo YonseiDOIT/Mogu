@@ -8,6 +8,8 @@ import {
   TextInput,
 } from 'react-native'
 import Header from '../../components/Header'
+import axios from 'axios'
+import { BASE_URL } from '../../services/api'
 
 const Join = ({ navigation }) => {
   const [isChecked, setIsChecked] = useState(false)
@@ -19,6 +21,10 @@ const Join = ({ navigation }) => {
   const [isNicknameValid, setIsNicknameValid] = useState(true)
   const [isPhoneNumberValid, setIsPhoneNumberValid] = useState(false)
   const [isJoinButtonEnabled, setIsJoinButtonEnabled] = useState(false)
+  const [isNicknameDuplicateChecked, setIsNicknameDuplicateChecked] =
+    useState(false)
+  const [isPhoneNumberDuplicateChecked, setIsPhoneNumberDuplicateChecked] =
+    useState(false)
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword)
@@ -32,10 +38,29 @@ const Join = ({ navigation }) => {
     return formattedValue
   }
 
-  const handlePhoneNumberChange = (input) => {
+  const handlePhoneNumberChange = async (input) => {
     const formattedPhoneNumber = formatPhoneNumber(input)
     setPhoneNumber(formattedPhoneNumber)
-    setIsPhoneNumberValid(/^\d{3}-\d{3,4}-\d{4}$/.test(formattedPhoneNumber))
+    const isValid = /^\d{3}-\d{3,4}-\d{4}$/.test(formattedPhoneNumber)
+    setIsPhoneNumberValid(isValid)
+
+    if (isValid) {
+      try {
+        const response = await axios.get(
+          `${BASE_URL}/phone/${formattedPhoneNumber}`
+        )
+        if (response.data === '사용 가능한 번호입니다.') {
+          setIsPhoneNumberDuplicateChecked(true)
+          setIsPhoneNumberValid(true)
+        } else {
+          setIsPhoneNumberDuplicateChecked(false)
+          setIsPhoneNumberValid(false)
+        }
+      } catch (error) {
+        console.error('핸드폰 번호 중복 확인 실패:', error)
+        setIsPhoneNumberValid(false)
+      }
+    }
   }
 
   const checkPassword = (text) => {
@@ -43,13 +68,26 @@ const Join = ({ navigation }) => {
     setIsPasswordValid(text.length >= 7)
   }
 
-  const checkNickname = (text) => {
-    setNickname(text)
-    const isValid =
-      text.length >= 2 &&
-      text.length <= 10 &&
-      !['duplicate1', 'duplicate2'].includes(text)
-    setIsNicknameValid(isValid)
+  const checkNickname = async (nickname) => {
+    setNickname(nickname)
+    if (nickname.trim() === '') {
+      setIsNicknameValid(true) // 빈 닉네임은 유효한 것으로 간주
+      return
+    }
+
+    try {
+      const response = await axios.get(`${BASE_URL}/nicknames/${nickname}`)
+      if (response.data === '사용 가능한 닉네임입니다.') {
+        setIsNicknameDuplicateChecked(true)
+        setIsNicknameValid(true)
+      } else {
+        setIsNicknameDuplicateChecked(false)
+        setIsNicknameValid(false)
+      }
+    } catch (error) {
+      console.error('닉네임 중복 확인 실패:', error)
+      setIsNicknameValid(false)
+    }
   }
 
   useEffect(() => {
@@ -59,6 +97,21 @@ const Join = ({ navigation }) => {
       setIsJoinButtonEnabled(false)
     }
   }, [isNicknameValid, isPasswordValid, isPhoneNumberValid, isChecked])
+
+  const handleSignUp = async () => {
+    try {
+      const response = await axios.post(`${BASE_URL}/sign-up`, {
+        email: 'duck@naver.com',
+        nickname: nickname,
+        phone: phoneNumber,
+        password: password,
+      })
+      console.log('회원가입 성공')
+      navigation.navigate('JoinWelcome')
+    } catch (error) {
+      console.error('회원가입 실패:', error)
+    }
+  }
 
   return (
     <View style={styles.container}>
