@@ -6,7 +6,6 @@ import {
   View,
   TextInput,
   Image,
-  Alert,
 } from 'react-native'
 import Header from '../../components/Header'
 import axios from 'axios'
