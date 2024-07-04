@@ -43,7 +43,7 @@ const JoinVerifyNumber = ({ navigation, route }) => {
         navigation.navigate('Join', { email })
       } else {
         setIsCodeCorrect(false)
-        setError('올바르지 않은 인증번호입니다.')
+        // setError('올바르지 않은 인증번호입니다.')
       }
     } catch (error) {
       console.error('인증번호 확인 실패 에러:', error)
