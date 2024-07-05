@@ -6,12 +6,14 @@ import {
   View,
   Image,
   TextInput,
+  Alert,
 } from 'react-native'
 import Header from '../../components/Header'
 import axios from 'axios'
 import { BASE_URL } from '../../services/api'
 
-const Join = ({ navigation }) => {
+const Join = ({ navigation, route }) => {
+  const { email } = route.params
   const [isChecked, setIsChecked] = useState(false)
   const [phoneNumber, setPhoneNumber] = useState('')
   const [nickname, setNickname] = useState('')
@@ -25,6 +27,7 @@ const Join = ({ navigation }) => {
     useState(false)
   const [isPhoneNumberDuplicateChecked, setIsPhoneNumberDuplicateChecked] =
     useState(false)
+  const [error, setError] = useState(null)
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword)
@@ -47,18 +50,30 @@ const Join = ({ navigation }) => {
     if (isValid) {
       try {
         const response = await axios.get(
-          `${BASE_URL}/phone/${formattedPhoneNumber}`
+          `${BASE_URL}/phone/${formattedPhoneNumber}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
         )
+        console.log('Phone Number Check Response:', response.data)
+
         if (response.data === '사용 가능한 번호입니다.') {
+          // setIsPhoneNumberValid(true) // 휴대폰 번호 사용 가능
           setIsPhoneNumberDuplicateChecked(true)
-          setIsPhoneNumberValid(true)
         } else {
+          // setIsPhoneNumberValid(false) // 휴대폰 번호 중복
           setIsPhoneNumberDuplicateChecked(false)
-          setIsPhoneNumberValid(false)
+          console.log('이미 사용 중인 번호입니다.')
+          Alert.alert('알림', '이미 사용 중인 번호입니다.')
         }
       } catch (error) {
         console.error('핸드폰 번호 중복 확인 실패:', error)
-        setIsPhoneNumberValid(false)
+        setIsPhoneNumberValid(false) // 요청 실패 시 유효하지 않음으로 처리
+        setIsPhoneNumberDuplicateChecked(false)
+        setError('휴대폰 번호 확인 실패')
+        Alert.alert('알림', '휴대폰 번호 확인에 실패했습니다.')
       }
     }
   }
@@ -68,51 +83,73 @@ const Join = ({ navigation }) => {
     setIsPasswordValid(text.length >= 7)
   }
 
-  const checkNickname = async (nickname) => {
+  const handleNicknameChange = async (nickname) => {
     setNickname(nickname)
-    if (nickname.trim() === '') {
-      setIsNicknameValid(true) // 빈 닉네임은 유효한 것으로 간주
-      return
-    }
+    setIsNicknameValid(true) // 기본적으로 유효하다고 가정
 
+    // 서버에 닉네임 중복 확인 요청
     try {
-      const response = await axios.get(`${BASE_URL}/nicknames/${nickname}`)
+      const response = await axios.get(`${BASE_URL}/nicknames/${nickname}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      console.log('닉네임 체크:', response.data)
+
       if (response.data === '사용 가능한 닉네임입니다.') {
-        setIsNicknameDuplicateChecked(true)
-        setIsNicknameValid(true)
+        setIsNicknameDuplicateChecked(true) // 중복 체크 완료
       } else {
+        setIsNicknameValid(false) // 닉네임 중복
         setIsNicknameDuplicateChecked(false)
-        setIsNicknameValid(false)
+        console.log('이미 사용 중인 닉네임입니다.')
       }
     } catch (error) {
       console.error('닉네임 중복 확인 실패:', error)
-      setIsNicknameValid(false)
+      setIsNicknameValid(false) // 요청 실패 시 유효하지 않음으로 처리
+      setIsNicknameDuplicateChecked(false)
+      setError('닉네임 확인 실패')
+      Alert.alert('알림', '닉네임 확인에 실패했습니다.')
     }
   }
 
   useEffect(() => {
-    if (isNicknameValid && isPasswordValid && isPhoneNumberValid && isChecked) {
-      setIsJoinButtonEnabled(true)
-    } else {
-      setIsJoinButtonEnabled(false)
-    }
-  }, [isNicknameValid, isPasswordValid, isPhoneNumberValid, isChecked])
+    setIsJoinButtonEnabled(
+      isChecked &&
+        isPhoneNumberValid &&
+        isNicknameValid &&
+        isPasswordValid &&
+        isNicknameDuplicateChecked &&
+        isPhoneNumberDuplicateChecked
+    )
+  }, [
+    isChecked,
+    isPhoneNumberValid,
+    isNicknameValid,
+    isPasswordValid,
+    isNicknameDuplicateChecked,
+    isPhoneNumberDuplicateChecked,
+  ])
 
-  const handleSignUp = async () => {
+  const handleJoin = async () => {
     try {
       const response = await axios.post(`${BASE_URL}/sign-up`, {
-        email: 'duck@naver.com',
-        nickname: nickname,
+        email: `${email}@yonsei.ac.kr`,
         phone: phoneNumber,
+        nickname: nickname,
         password: password,
       })
-      console.log('회원가입 성공')
-      navigation.navigate('JoinWelcome')
+
+      if (response.data.status === 'SUCCESS') {
+        navigation.navigate('JoinWelcome')
+      } else {
+        console.error('회원가입 실패:', response.data.message)
+      }
     } catch (error) {
-      console.error('회원가입 실패:', error)
+      console.error('회원가입 에러:', error)
+      setError('회원가입 에러 발생') // 회원가입 에러 발생 시 에러 상태 업데이트
+      Alert.alert('알림', '회원가입 중 오류가 발생했습니다.')
     }
   }
-
   return (
     <View style={styles.container}>
       <Header />
@@ -166,7 +203,7 @@ const Join = ({ navigation }) => {
               },
             ]}
             value={nickname}
-            onChangeText={checkNickname}
+            onChangeText={handleNicknameChange}
           />
         </View>
         {!isNicknameValid && nickname.length > 0 && (
@@ -224,6 +261,9 @@ const Join = ({ navigation }) => {
             keyboardType="numeric"
           />
         </View>
+        {!isPhoneNumberValid && phoneNumber.length > 0 && (
+          <Text style={styles.errorText}>이미 존재하는 번호입니다.</Text>
+        )}
       </View>
 
       <View style={styles.form}>
@@ -326,7 +366,8 @@ const Join = ({ navigation }) => {
           ]}
           onPress={() => {
             if (isJoinButtonEnabled) {
-              navigation.navigate('JoinWelcome')
+              // navigation.navigate('JoinWelcome')
+              handleJoin()
             }
           }}
           disabled={!isJoinButtonEnabled}

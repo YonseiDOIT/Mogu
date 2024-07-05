@@ -7,7 +7,7 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert, // 추가
+  Alert,
 } from 'react-native'
 import Header from '../../components/Header'
 import axios from 'axios'
@@ -40,7 +40,7 @@ const JoinVerifyNumber = ({ navigation, route }) => {
 
       if (response.data.status === 'SUCCESS') {
         // 인증번호 일치 시, 다음 화면으로 이동
-        navigation.navigate('Join', { email })
+        navigation.navigate('Join', { email: memberEmail })
       } else {
         setIsCodeCorrect(false)
         // setError('올바르지 않은 인증번호입니다.')
@@ -49,7 +49,6 @@ const JoinVerifyNumber = ({ navigation, route }) => {
       console.error('인증번호 확인 실패 에러:', error)
       setIsCodeCorrect(false)
       setError('인증번호 확인 중 오류가 발생했습니다.')
-      // 추가: 오류 발생 시 사용자에게 알림
       Alert.alert('오류', '인증번호 확인 중 문제가 발생했습니다.')
     }
   }
