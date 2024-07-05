@@ -8,14 +8,16 @@ import {
   Image,
 } from 'react-native'
 import Header from '../../components/Header'
+import { useNavigation } from '@react-navigation/native'
 import axios from 'axios'
 import { BASE_URL } from '../../services/api'
 
-const JoinMail = ({ navigation }) => {
+const JoinMail = () => {
   const [emailId, setEmailId] = useState('')
   const [emailTouched, setEmailTouched] = useState(false)
   const [error, setError] = useState('')
   const [isEmailRegistered, setIsEmailRegistered] = useState(false)
+  const navigation = useNavigation()
 
   // 이메일 입력 시
   const handleEmailChange = (text) => {
@@ -71,7 +73,7 @@ const JoinMail = ({ navigation }) => {
 
       if (response.data.status === 'SUCCESS') {
         console.log('sendVerificationCode - 인증번호 발송 성공')
-        navigation.navigate('JoinVerifyNumber', { email })
+        navigation.navigate('JoinVerifyNumber', { email: memberEmail })
       } else {
         console.log('sendVerificationCode - 인증번호 발송 실패')
         setError('인증번호 발송에 실패했습니다.')
