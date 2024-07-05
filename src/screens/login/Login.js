@@ -1,20 +1,14 @@
 import React, { useState, useContext } from 'react'
-import {
-  TouchableOpacity,
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  AsyncStorage,
-} from 'react-native' // AsyncStorage 추가
+import { TouchableOpacity, StyleSheet, Text, View, Image } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { TextInput } from 'react-native-gesture-handler'
 import Header from '../../components/Header'
-import { AuthContext } from '../../App' // AuthContext 임포트
+import { AuthContext } from '../../App'
 import axios from 'axios'
 import { BASE_URL } from '../../services/api'
 
 const Login = ({ navigation }) => {
-  const [email, setEmail] = useState('')
+  const [emailPrefix, setEmailPrefix] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isEmailValid, setIsEmailValid] = useState(true)
@@ -23,53 +17,85 @@ const Login = ({ navigation }) => {
   const [passwordTouched, setPasswordTouched] = useState(false)
   const [loginError, setLoginError] = useState('')
 
-  const { setIsLoggedIn } = useContext(AuthContext) // AuthContext 사용
+  const { setIsLoggedIn } = useContext(AuthContext)
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword)
   }
 
-  const checkEmail = (inputEmail) => {
-    // 이메일 형식 검사 정규식
-    const emailPattern = /^[a-zA-Z0-9._-]+$/
-    const isValid = emailPattern.test(inputEmail)
-    setIsEmailValid(isValid)
-  }
+  const checkEmail = async () => {
+    const emailPattern = /^[a-zA-Z0-9._-]+$/ // 이메일 앞부분만 검사
+    const isValid = emailPattern.test(emailPrefix)
 
-  const checkPassword = (inputPassword) => {
-    // 비밀번호 길이 검사
-    const isValid = inputPassword.length >= 7
-    setIsPasswordValid(isValid)
+    if (isValid) {
+      try {
+        const fullEmail = `${emailPrefix}@yonsei.ac.kr`
+        console.log('입력한 이메일:', fullEmail)
+
+        const response = await axios.get(`${BASE_URL}/check-email`, {
+          params: {
+            memberEmail: fullEmail,
+          },
+        })
+
+        console.log('이메일 서버 응답:', response.data)
+        setIsPasswordValid(response.data.isValid)
+      } catch (error) {
+        console.error('이메일 유효성 검사 중 오류가 발생했습니다:', error)
+        setIsPasswordValid(false)
+        setLoginError('서버에서 알 수 없는 오류가 발생했습니다.')
+      }
+    } else {
+      setIsPasswordValid(false)
+      setLoginError('올바른 이메일 형식이 아닙니다.')
+    }
   }
 
   const handleLogin = async () => {
-    checkEmail(email)
-    checkPassword(password)
+    const fullEmail = `${emailPrefix}@yonsei.ac.kr`
+    checkEmail()
 
-    if (isEmailValid && isPasswordValid) {
+    if (isPasswordValid) {
       try {
         const response = await axios.post(`${BASE_URL}/sign-in`, {
-          email: `${email}@yonsei.ac.kr`,
+          email: fullEmail,
           password: password,
         })
-        console.log('로그인 응답:', response.data) // 응답 데이터 로그 추가
-        if (response.data.success) {
-          // 토큰 저장
-          await AsyncStorage.setItem('token', response.data.token)
+
+        console.log('로그인 응답:', response.data)
+        if (response.data.status === 'SUCCESS') {
+          await AsyncStorage.setItem('token', response.data.data.token)
           setIsLoggedIn(true)
-          navigation.navigate('Maintest') // 로그인 성공 후 이동할 화면
+          navigation.navigate('Maintest')
         } else {
           setLoginError('이메일 또는 비밀번호가 일치하지 않습니다.')
         }
       } catch (error) {
         console.error('로그인 중 오류가 발생했습니다:', error)
+
         if (error.response) {
-          console.error('응답 데이터:', error.response.data) // 오류 응답 데이터 로그 추가
-          console.error('응답 상태 코드:', error.response.status) // 응답 상태 코드 로그 추가
-          console.error('응답 헤더:', error.response.headers) // 응답 헤더 로그 추가
+          if (error.response.status === 403) {
+            console.error('서버에서 권한이 없는 접근으로 거부되었습니다.')
+            setLoginError('이메일 또는 비밀번호가 일치하지 않습니다.')
+          } else {
+            console.error('서버에서 알 수 없는 오류가 발생했습니다.')
+          }
+        } else {
+          console.error('네트워크 오류:', error.message)
+          setLoginError('네트워크 오류가 발생했습니다. 다시 시도해주세요.')
         }
-        setLoginError('로그인 중 오류가 발생했습니다. 다시 시도해주세요.')
       }
+    }
+  }
+
+  const checkPassword = (inputPassword) => {
+    const isValid = inputPassword.length >= 7
+    setIsPasswordValid(isValid)
+
+    if (!isValid) {
+      setLoginError('비밀번호는 최소 7자 이상이어야 합니다.')
+    } else {
+      setLoginError('')
     }
   }
 
@@ -98,7 +124,7 @@ const Login = ({ navigation }) => {
             style={[styles.image, { display: emailTouched ? 'none' : 'flex' }]}
             resizeMode="contain"
           />
-          {(emailTouched || email) && (
+          {(emailTouched || emailPrefix) && (
             <Text
               style={[
                 styles.label,
@@ -114,20 +140,20 @@ const Login = ({ navigation }) => {
               styles.input,
               { borderColor: isEmailValid ? '#75C743' : '#CC0000' },
             ]}
-            value={email}
+            value={emailPrefix}
             onChangeText={(text) => {
-              setEmail(text)
+              setEmailPrefix(text)
               setEmailTouched(true)
-              checkEmail(text)
             }}
             onBlur={() => {
-              checkEmail(email)
+              checkEmail()
               setEmailTouched(false)
             }}
             onFocus={() => setEmailTouched(true)}
           />
           <Text style={styles.emailFix}>@yonsei.ac.kr</Text>
         </View>
+
         {!isEmailValid && (
           <Text style={styles.errorText}>올바른 이메일 형식이 아닙니다.</Text>
         )}
