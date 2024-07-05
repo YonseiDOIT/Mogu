@@ -1,17 +1,18 @@
-import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
-import Welcome from '../screens/login/Welcome';
-import Login from '../screens/login/Login';
-import FindPassword from '../screens/login/FindPassword';
-import VerifyNumber from '../screens/login/VerifyNumber';
-import ResetPassword from '../screens/login/ResetPassword';
-import JoinMail from '../screens/join/JoinMail';
-import JoinVerifyNumber from '../screens/join/JoinVerifyNumber';
-import TermsAgree from '../screens/join/TermsAgree';
-import JoinWelcome from '../screens/join/JoinWelcome';
-import Join from '../screens/join/Join';
+import React from 'react'
+import { createStackNavigator } from '@react-navigation/stack'
+import Welcome from '../screens/login/Welcome'
+import Login from '../screens/login/Login'
+import FindPassword from '../screens/login/FindPassword'
+import VerifyNumber from '../screens/login/VerifyNumber'
+import ResetPassword from '../screens/login/ResetPassword'
+import JoinMail from '../screens/join/JoinMail'
+import JoinVerifyNumber from '../screens/join/JoinVerifyNumber'
+import TermsAgree from '../screens/join/TermsAgree'
+import JoinWelcome from '../screens/join/JoinWelcome'
+import Join from '../screens/join/Join'
+import Maintest from '../screens/main/Maintest'
 
-const Stack = createStackNavigator();
+const Stack = createStackNavigator()
 
 const StackBeforeLogin = () => {
   return (
@@ -66,8 +67,13 @@ const StackBeforeLogin = () => {
         component={Join}
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="Maintest"
+        component={Maintest}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
-  );
-};
+  )
+}
 
-export default StackBeforeLogin;
+export default StackBeforeLogin
