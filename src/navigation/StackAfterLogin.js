@@ -32,11 +32,7 @@ const StackAfterLogin = () => {
         component={TabNavigation}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
-        name="Maintest"
-        component={Maintest}
-        options={{ headerShown: false }}
-      />
+
       <Stack.Screen
         name="MyInfoCheck"
         component={MyInfoCheck}
