@@ -71,8 +71,9 @@ const Useredit = ({ navigation }) => {
 
       const response = await axios.put(
         `${BASE_URL}/member/update-nickname`,
-        { nickname },
+        {},
         {
+          params: { nickname },
           headers: {
             Authorization: `Bearer ${storedToken}`,
           },
@@ -83,7 +84,7 @@ const Useredit = ({ navigation }) => {
 
       if (response.status === 200) {
         if (response.data.status === 'SUCCESS') {
-          navigation.navigate('MyInfoCheck')
+          navigation.navigate('MyInfoCheck', { updatedNickname: nickname })
         } else {
           throw new Error(
             response.data.message || '닉네임 변경에 실패했습니다.'

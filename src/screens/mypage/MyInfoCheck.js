@@ -20,7 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
 import { BASE_URL } from '../../services/api'
 
-const MyInfoCheck = ({ navigation }) => {
+const MyInfoCheck = ({ navigation, route }) => {
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [userInfo, setUserInfo] = useState({
     email: '',
@@ -54,6 +54,15 @@ const MyInfoCheck = ({ navigation }) => {
     }
     fetchUserInfo()
   }, [navigation])
+
+  useEffect(() => {
+    if (route.params?.updatedNickname) {
+      setUserInfo((prevUserInfo) => ({
+        ...prevUserInfo,
+        nickname: route.params.updatedNickname,
+      }))
+    }
+  }, [route.params?.updatedNickname])
 
   const onPressModalOpen = () => {
     console.log('팝업을 여는 중입니다.')
