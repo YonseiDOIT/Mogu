@@ -84,7 +84,7 @@ const Useredit = ({ navigation }) => {
 
       if (response.status === 200) {
         if (response.data.status === 'SUCCESS') {
-          navigation.navigate('MyInfoCheck', { updatedNickname: nickname })
+          navigation.navigate('Editend', { updatedNickname: nickname })
         } else {
           throw new Error(
             response.data.message || '닉네임 변경에 실패했습니다.'
