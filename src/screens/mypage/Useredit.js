@@ -35,21 +35,14 @@ const Useredit = ({ navigation }) => {
       console.log('토큰 확인:', storedToken)
 
       if (storedToken) {
-        setAuthToken(storedToken)
+        axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`
       } else {
         console.log('토큰이 없습니다.')
-        // 토큰이 없을 때 처리
+        Alert.alert('인증 오류', '인증이 만료되었습니다. 다시 로그인해주세요.')
+        navigation.navigate('Login')
       }
     } catch (error) {
       console.error('토큰 읽기 오류:', error)
-    }
-  }
-
-  const setAuthToken = (token) => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-    } else {
-      delete axios.defaults.headers.common['Authorization']
     }
   }
 
@@ -101,35 +94,60 @@ const Useredit = ({ navigation }) => {
       }
     } catch (error) {
       console.error('닉네임 변경 중 오류가 발생했습니다:', error)
-      handleErrorResponse(error)
+      if (error.response) {
+        console.log('서버 응답 상태 코드:', error.response.status)
+        console.log('서버 응답 헤더:', error.response.headers)
+        console.log('서버 응답 데이터:', error.response.data)
+        const errorMessage =
+          error.response.data.message || '상세 오류 메시지가 없습니다.'
+        console.log('상세 오류 메시지:', errorMessage)
+
+        if (error.response.status === 403) {
+          Alert.alert('권한 오류', '닉네임 변경 권한이 없습니다.')
+        } else {
+          Alert.alert('오류', errorMessage)
+        }
+      } else if (error.request) {
+        console.error('요청이 전송되었으나 응답이 없습니다:', error.request)
+        Alert.alert('오류', '서버 응답이 없습니다. 인터넷 연결을 확인해주세요.')
+      } else {
+        console.error('요청 설정 중 오류가 발생했습니다:', error.message)
+        Alert.alert(
+          '오류',
+          '요청 설정 중 오류가 발생했습니다. 다시 시도해주세요.'
+        )
+      }
+
+      if (error.message === '토큰이 없습니다.') {
+        Alert.alert('인증 오류', '인증이 만료되었습니다. 다시 로그인해주세요.')
+        await AsyncStorage.removeItem('token')
+        navigation.navigate('Login')
+      }
     }
   }
 
   const handleErrorResponse = async (error) => {
     if (error.response) {
+      console.log('서버 응답 상태 코드:', error.response.status)
+      console.log('서버 응답 헤더:', error.response.headers)
       console.log('서버 응답 데이터:', error.response.data)
+      const errorMessage =
+        error.response.data.message || '상세 오류 메시지가 없습니다.'
+      console.log('상세 오류 메시지:', errorMessage)
+
       if (error.response.status === 403) {
         Alert.alert('권한 오류', '닉네임 변경 권한이 없습니다.')
       } else {
-        Alert.alert(
-          '오류',
-          error.response.data.message ||
-            '오류가 발생했습니다. 다시 시도해주세요.'
-        )
+        Alert.alert('오류', errorMessage)
       }
     } else if (error.request) {
       console.error('요청이 전송되었으나 응답이 없습니다:', error.request)
-      Alert.alert('오류', '서버 응답이 없습니다. 인터넷 연결을 확인해주세요.')
     } else {
       console.error('요청 설정 중 오류가 발생했습니다:', error.message)
-      Alert.alert(
-        '오류',
-        '요청 설정 중 오류가 발생했습니다. 다시 시도해주세요.'
-      )
     }
 
     if (error.message === '토큰이 없습니다.') {
-      Alert.alert('인증 오류', '인증이 만료되었습니다. 다시 로그인해주세요.')
+      console.log('토큰이 만료되었습니다. 다시 로그인해주세요.')
       await AsyncStorage.removeItem('token')
       navigation.navigate('Login')
     }
