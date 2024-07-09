@@ -21,7 +21,7 @@ function Maintest() {
       id: 1,
       remainingQuantity: '5',
       totalQuantity: '10',
-      time: '1380', // 23시간
+      time: '13800', // 23시간
       title: '상품 1',
       price: '3,000',
       favorite: true,
@@ -30,7 +30,7 @@ function Maintest() {
       id: 2,
       remainingQuantity: '3',
       totalQuantity: '5',
-      time: '1430',
+      time: '24000',
       title: '상품 2',
       price: '500',
       favorite: false,
@@ -39,7 +39,7 @@ function Maintest() {
       id: 3,
       remainingQuantity: '7',
       totalQuantity: '10',
-      time: '1440',
+      time: '360000',
       title: '상품 3',
       price: '15,000',
       favorite: true,
@@ -82,25 +82,29 @@ function Maintest() {
   }
 
   const formatTime = (time) => {
-    const totalMinutes = parseInt(time, 10)
-    if (totalMinutes >= 1440) {
-      const days = Math.floor(totalMinutes / 1440)
-      const hours = Math.floor((totalMinutes % 1440) / 60)
-      const minutes = totalMinutes % 60
+    const totalSeconds = parseInt(time, 10)
+
+    // 남은 시간을 초, 분, 시간, 일로 변환하는 로직
+    const days = Math.floor(totalSeconds / (60 * 60 * 24))
+    const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60))
+    const minutes = Math.floor((totalSeconds % (60 * 60)) / 60)
+    const seconds = totalSeconds % 60
+
+    if (days > 0) {
       return `${days}일 ${hours}시간 ${minutes}분`
-    } else if (totalMinutes >= 60) {
-      const hours = Math.floor(totalMinutes / 60)
-      const minutes = totalMinutes % 60
-      return `${hours}시간 ${minutes}분`
+    } else if (hours > 0) {
+      return `${hours}시간 ${minutes}분 ${seconds}초`
+    } else if (minutes > 0) {
+      return `${minutes}분 ${seconds}초`
     } else {
-      const seconds = (totalMinutes * 60) % 60
-      return `${totalMinutes}분 ${seconds}초`
+      return `${seconds}초`
     }
   }
 
   const isDeadlineSoon = (time) => {
-    const totalMinutes = parseInt(time, 10)
-    return totalMinutes < 1440 // 24시간 미만
+    const totalSeconds = parseInt(time, 10)
+    const totalMinutes = totalSeconds / 60
+    return totalMinutes < 1440 // 24시간 미만 (1440분)
   }
 
   const handleFavoriteToggle = (itemId) => {
