@@ -8,14 +8,14 @@ import {
 } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 
-const Editend = ({ navigation }) => {
+const Editend = ({ navigation, route }) => {
+  const { updatedNickname } = route.params || {}
+
   return (
     <View style={styles.container}>
       <View style={styles.textContainer}>
         <Text style={styles.resetPw}>수정되었습니다 :)</Text>
-        <Text style={styles.description}>
-            지금 바로 공구에 참여해보세요
-        </Text>
+        <Text style={styles.description}>지금 바로 공구에 참여해보세요</Text>
       </View>
       <ImageBackground
         source={require('../../assets/passwordRe.png')}
@@ -26,7 +26,9 @@ const Editend = ({ navigation }) => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.back}
-          onPress={() => navigation.navigate('MyInfoCheck')}
+          onPress={() =>
+            navigation.navigate('MyInfoCheck', { updatedNickname })
+          }
         >
           <Text style={styles.buttonText}>되돌아가기</Text>
         </TouchableOpacity>
