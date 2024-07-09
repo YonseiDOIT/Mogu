@@ -144,8 +144,9 @@ const MyInfoCheck = ({ navigation, route }) => {
               style={[{ left: 10 }]}
               secureTextEntry={true}
               editable={false}
-              value={userInfo.password}
-            ></TextInput>
+            >
+              ●●●●●●●
+            </TextInput>
           </View>
           <Pressable onPress={() => navigation.navigate('Passwordedit')}>
             <Image
