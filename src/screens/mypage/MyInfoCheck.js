@@ -62,7 +62,13 @@ const MyInfoCheck = ({ navigation, route }) => {
         nickname: route.params.updatedNickname,
       }))
     }
-  }, [route.params?.updatedNickname])
+    if (route.params?.updatedPhone) {
+      setUserInfo((prevUserInfo) => ({
+        ...prevUserInfo,
+        phone: route.params.updatedPhone,
+      }))
+    }
+  }, [route.params?.updatedNickname, route.params?.updatedPhone])
 
   const onPressModalOpen = () => {
     console.log('팝업을 여는 중입니다.')

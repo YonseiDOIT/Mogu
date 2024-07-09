@@ -1,34 +1,76 @@
-import React, { useEffect, useState } from 'react';
-import { TouchableOpacity, Modal, StyleSheet, Image, Text, View, TextInput } from 'react-native';
-import PhoneEditHeader from '../../components/PhoneEditHeader';
-import Editend from './Editend';
+import React, { useEffect, useState } from 'react'
+import {
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Text,
+  View,
+  TextInput,
+} from 'react-native'
+import PhoneEditHeader from '../../components/PhoneEditHeader'
+import { Phone } from '@mui/icons-material'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import axios from 'axios'
+import { BASE_URL } from '../../services/api'
 
 const Phoneedit = ({ navigation }) => {
-  const [nickname, setNickname] = useState('');
-  const [message, setMessage] = useState('');
-  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [phone, setPhone] = useState('')
+  const [nickname, setNickname] = useState('')
+  const [message, setMessage] = useState('')
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true)
 
-  const lengthcheck = (text) => {
-    setNickname(text);
-    if (text.length === 0) {
-      setMessage('');
-      setIsButtonDisabled(true);
-    } else if (text.length < 13) {
-      setMessage('ex) 010-1234-1234');
-      setIsButtonDisabled(true);
+  const formatPhoneNumber = (text) => {
+    // 숫자만 남기고 입력된 문자열을 필터링
+    const cleaned = text.replace(/\D/g, '')
+    const match = cleaned.match(/^(\d{3})(\d{4})(\d{4})$/)
+    if (match) {
+      setPhone(`${match[1]}-${match[2]}-${match[3]}`)
+      setIsButtonDisabled(false)
+      setMessage('')
     } else {
-      setMessage('');
-      setIsButtonDisabled(false);
+      setPhone(text)
+      setIsButtonDisabled(true)
+      setMessage('ex) 010-1234-1234')
     }
-  };
+  }
+
+  const updatePhoneNumber = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token')
+      if (!token) {
+        throw new Error('토큰이 없습니다.')
+      }
+      const response = await axios.put(
+        `${BASE_URL}/member/update-phone`,
+        null,
+        {
+          params: {
+            phone,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      if (response.data.status === 'SUCCESS') {
+        navigation.navigate('Editend', { updatedPhone: phone })
+      }
+    } catch (error) {
+      console.error('전화번호를 업데이트하는 중 오류가 발생했습니다:', error)
+      setMessage('전화번호 업데이트에 실패했습니다.')
+    }
+  }
+
   return (
     <View style={styles.container}>
       <PhoneEditHeader />
       <View style={styles.mail}>
-        <View style={[
+        <View
+          style={[
             styles.id,
-            nickname.length === 0 ? styles.normalborder :styles.successborder
-          ]}>
+            nickname.length === 0 ? styles.normalborder : styles.successborder,
+          ]}
+        >
           <Image
             source={require('../../assets/phone.png')}
             style={[styles.idmail, { height: 21, top: 12 }]}
@@ -36,17 +78,20 @@ const Phoneedit = ({ navigation }) => {
           <View style={[styles.idinfo, { left: 15 }]}>
             <TextInput
               style={styles.usernametext}
-              placeholder='전화번호를 입력하세요'
-              value={nickname}
-              onChangeText={lengthcheck} // Add this line to update the nickname state
+              placeholder="전화번호를 입력하세요"
+              value={phone}
+              onChangeText={formatPhoneNumber}
               editable={true}
+              keyboardType="numeric"
             />
           </View>
         </View>
         <Text
           style={[
             styles.overlapped,
-            nickname === 'Yonsei' ? styles.error : styles.success,
+            phone.length > 0 && !/^010-\d{4}-\d{4}$/.test(phone)
+              ? styles.error
+              : styles.success,
           ]}
         >
           {message}
@@ -59,23 +104,23 @@ const Phoneedit = ({ navigation }) => {
             styles.contButton,
             isButtonDisabled ? styles.disabledButton : null,
           ]}
-          onPress={()=>navigation.navigate(Editend)}
-          disabled={isButtonDisabled} // Disable button based on input length
+          onPress={updatePhoneNumber}
+          disabled={isButtonDisabled}
         >
           <Text style={styles.buttonText}>수정하기</Text>
         </TouchableOpacity>
       </View>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
   },
-  mail:{
-    marginTop:180
+  mail: {
+    marginTop: 180,
   },
   idmail: {
     width: 30,
@@ -169,7 +214,7 @@ const styles = StyleSheet.create({
   },
   overlapped: {
     fontSize: 12,
-    marginTop:-10,
+    marginTop: -10,
     marginLeft: 40,
   },
   error: {
@@ -178,20 +223,20 @@ const styles = StyleSheet.create({
   success: {
     color: '#4EAA16',
   },
-  normalborder:{
+  normalborder: {
     borderColor: '#C4C4C4',
   },
-  errorborder:{
-    borderColor:'red'
+  errorborder: {
+    borderColor: 'red',
   },
-  successborder:{
-    borderColor:'#4EAA16'
+  successborder: {
+    borderColor: '#4EAA16',
   },
   join: {
     textDecorationLine: 'underline',
     fontWeight: 'bold',
     marginLeft: 15,
   },
-});
+})
 
-export default Phoneedit;
+export default Phoneedit
