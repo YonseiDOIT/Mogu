@@ -7,8 +7,11 @@ import {
   View,
 } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
+import Header from '../../components/Header'
+import axios from 'axios'
+import { BASE_URL } from '../../services/api'
 
-const ResetPassword = ({ navigation }) => {
+const ResetPassword = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <View style={styles.textContainer}>

@@ -31,7 +31,7 @@ const JoinVerifyNumber = ({ navigation, route }) => {
     try {
       // 서버에 인증번호 확인 요청 보내기
       const response = await axios.post(`${BASE_URL}/verifyCode`, {
-        email: `${email}@yonsei.ac.kr`,
+        email: email,
         code: verificationCode,
       })
 
@@ -40,7 +40,7 @@ const JoinVerifyNumber = ({ navigation, route }) => {
 
       if (response.data.status === 'SUCCESS') {
         // 인증번호 일치 시, 다음 화면으로 이동
-        navigation.navigate('Join', { email: memberEmail })
+        navigation.navigate('Join', { email: email })
       } else {
         setIsCodeCorrect(false)
         // setError('올바르지 않은 인증번호입니다.')
@@ -76,9 +76,7 @@ const JoinVerifyNumber = ({ navigation, route }) => {
         <Header />
         <View style={styles.textContainer}>
           <Text style={styles.login}>가입하기</Text>
-          <Text style={styles.description}>
-            {email}@yonsei.ac.kr 메일을 확인해주세요!
-          </Text>
+          <Text style={styles.description}>{email} 메일을 확인해주세요!</Text>
         </View>
 
         {/* 인증번호 입력란 */}

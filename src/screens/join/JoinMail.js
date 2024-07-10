@@ -73,7 +73,7 @@ const JoinMail = () => {
 
       if (response.data.status === 'SUCCESS') {
         console.log('sendVerificationCode - 인증번호 발송 성공')
-        navigation.navigate('JoinVerifyNumber', { email: memberEmail })
+        navigation.navigate('JoinVerifyNumber', { email: formattedEmail })
       } else {
         console.log('sendVerificationCode - 인증번호 발송 실패')
         setError('인증번호 발송에 실패했습니다.')

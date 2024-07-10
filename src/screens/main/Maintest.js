@@ -30,7 +30,7 @@ function Maintest() {
       id: 2,
       remainingQuantity: '3',
       totalQuantity: '5',
-      time: '24000',
+      time: '0',
       title: '상품 2',
       price: '500',
       favorite: false,
