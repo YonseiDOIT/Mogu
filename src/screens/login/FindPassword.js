@@ -3,9 +3,34 @@ import { TouchableOpacity, StyleSheet, Text, View } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { TextInput } from 'react-native-gesture-handler'
 import Header from '../../components/Header'
+import axios from 'axios'
+import { BASE_URL } from '../../services/api'
 
 const FindPassword = ({ navigation }) => {
   const [userMail, setUserMail] = useState('')
+
+  const handleContinue = async () => {
+    const memberEmail = `${userMail}@yonsei.ac.kr`
+    try {
+      const response = await axios.post(`${BASE_URL}/sendPwd`, null, {
+        params: {
+          memberEmail: memberEmail,
+        },
+      })
+
+      console.log('서버 응답:', response.data)
+
+      if (response.data.status === 'SUCCESS') {
+        Alert.alert('성공', response.data.message)
+        navigation.navigate('VerifyNumber', { userMail: memberEmail })
+      } else {
+        Alert.alert('오류', response.data.message)
+      }
+    } catch (error) {
+      console.error('비밀번호 찾기 실패 에러:', error)
+      Alert.alert('오류', '비밀번호 찾기 중 문제가 발생했습니다.')
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -38,7 +63,7 @@ const FindPassword = ({ navigation }) => {
             navigation.navigate('VerifyNumber', { userMail: userMail })
           }
         >
-          <Text style={styles.buttonText}>계속하기</Text>
+          <Text style={styles.buttonText}>인증메일 보내기</Text>
         </TouchableOpacity>
       </View>
     </View>
