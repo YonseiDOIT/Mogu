@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
-import { TouchableOpacity, StyleSheet, Text, View } from 'react-native'
-import { NavigationContainer } from '@react-navigation/native'
+import { TouchableOpacity, StyleSheet, Text, View, Alert } from 'react-native'
 import { TextInput } from 'react-native-gesture-handler'
 import Header from '../../components/Header'
 import axios from 'axios'
@@ -11,12 +10,19 @@ const FindPassword = ({ navigation }) => {
 
   const handleContinue = async () => {
     const memberEmail = `${userMail}@yonsei.ac.kr`
+    console.log('요청을 보낼 이메일:', memberEmail)
+
     try {
-      const response = await axios.post(`${BASE_URL}/sendPwd`, null, {
-        params: {
-          memberEmail: memberEmail,
-        },
-      })
+      const response = await axios.post(
+        `${BASE_URL}/sendPwd`,
+        { memberEmail },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        }
+      )
 
       console.log('서버 응답:', response.data)
 
@@ -27,8 +33,29 @@ const FindPassword = ({ navigation }) => {
         Alert.alert('오류', response.data.message)
       }
     } catch (error) {
-      console.error('비밀번호 찾기 실패 에러:', error)
-      Alert.alert('오류', '비밀번호 찾기 중 문제가 발생했습니다.')
+      handleRequestError(error)
+    }
+  }
+
+  const handleRequestError = (error) => {
+    console.error('비밀번호 찾기 실패 에러:', error)
+
+    if (error.response) {
+      console.error('응답 데이터:', error.response.data)
+      console.error('응답 상태 코드:', error.response.status)
+      console.error('응답 헤더:', error.response.headers)
+      Alert.alert(
+        '오류',
+        `비밀번호 찾기 실패: ${
+          error.response.data || '상세한 오류 메시지가 없습니다.'
+        }`
+      )
+    } else if (error.request) {
+      console.error('요청 데이터:', error.request)
+      Alert.alert('오류', '서버로부터 응답을 받지 못했습니다.')
+    } else {
+      console.error('에러 메시지:', error.message)
+      Alert.alert('오류', `요청 중 에러 발생: ${error.message}`)
     }
   }
 
@@ -51,18 +78,13 @@ const FindPassword = ({ navigation }) => {
             style={styles.input}
             value={userMail}
             onChangeText={(text) => setUserMail(text)}
-          ></TextInput>
+          />
           <Text style={styles.inputMail}>@ yonsei.ac.kr</Text>
         </View>
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.contButton}
-          onPress={() =>
-            navigation.navigate('VerifyNumber', { userMail: userMail })
-          }
-        >
+        <TouchableOpacity style={styles.contButton} onPress={handleContinue}>
           <Text style={styles.buttonText}>인증메일 보내기</Text>
         </TouchableOpacity>
       </View>

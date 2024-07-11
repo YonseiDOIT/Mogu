@@ -132,17 +132,26 @@ const Join = ({ navigation, route }) => {
 
   const handleJoin = async () => {
     try {
-      const response = await axios.post(`${BASE_URL}/sign-up`, {
-        email: `${email}@yonsei.ac.kr`,
-        phone: phoneNumber,
-        nickname: nickname,
-        password: password,
-      })
+      const response = await axios.post(
+        `${BASE_URL}/sign-up`,
+        {
+          email: `${email}@yonsei.ac.kr`,
+          phone: phoneNumber,
+          nickname: nickname,
+          password: password,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
 
       if (response.data.status === 'SUCCESS') {
         navigation.navigate('JoinWelcome')
       } else {
         console.error('회원가입 실패:', response.data.message)
+        Alert.alert('알림', '회원가입에 실패했습니다. 다시 시도해 주세요.')
       }
     } catch (error) {
       console.error('회원가입 에러:', error)
@@ -150,6 +159,7 @@ const Join = ({ navigation, route }) => {
       Alert.alert('알림', '회원가입 중 오류가 발생했습니다.')
     }
   }
+
   return (
     <View style={styles.container}>
       <Header />
@@ -366,7 +376,6 @@ const Join = ({ navigation, route }) => {
           ]}
           onPress={() => {
             if (isJoinButtonEnabled) {
-              // navigation.navigate('JoinWelcome')
               handleJoin()
             }
           }}
@@ -436,7 +445,7 @@ const styles = StyleSheet.create({
     height: 24,
     marginRight: 10,
     marginLeft: 10,
-    marginTop: -2, // 이미지 위치를 조금 올림
+    marginTop: -2,
     opacity: 0.5,
     position: 'absolute',
   },
