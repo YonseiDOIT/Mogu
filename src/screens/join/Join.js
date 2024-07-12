@@ -33,6 +33,7 @@ const Join = ({ navigation, route }) => {
     setShowPassword(!showPassword)
   }
 
+  // 휴대폰 번호 형식 변환
   const formatPhoneNumber = (input) => {
     const value = input.replace(/\D/g, '') // 숫자가 아닌 문자열 모두 제거
     const formattedValue = value
@@ -41,6 +42,7 @@ const Join = ({ navigation, route }) => {
     return formattedValue
   }
 
+  // 휴대폰 번호 입력
   const handlePhoneNumberChange = async (input) => {
     const formattedPhoneNumber = formatPhoneNumber(input)
     setPhoneNumber(formattedPhoneNumber)
@@ -52,18 +54,20 @@ const Join = ({ navigation, route }) => {
         const response = await axios.get(
           `${BASE_URL}/phone/${formattedPhoneNumber}`,
           {
+            params: {
+              phone: formattedPhoneNumber,
+            },
             headers: {
               'Content-Type': 'application/json',
             },
+            withCredentials: true, // CORS
           }
         )
         console.log('Phone Number Check Response:', response.data)
 
         if (response.data === '사용 가능한 번호입니다.') {
-          // setIsPhoneNumberValid(true) // 휴대폰 번호 사용 가능
           setIsPhoneNumberDuplicateChecked(true)
         } else {
-          // setIsPhoneNumberValid(false) // 휴대폰 번호 중복
           setIsPhoneNumberDuplicateChecked(false)
           console.log('이미 사용 중인 번호입니다.')
           Alert.alert('알림', '이미 사용 중인 번호입니다.')
@@ -74,15 +78,21 @@ const Join = ({ navigation, route }) => {
         setIsPhoneNumberDuplicateChecked(false)
         setError('휴대폰 번호 확인 실패')
         Alert.alert('알림', '휴대폰 번호 확인에 실패했습니다.')
+
+        console.log('Error Details:', error)
+        console.log('Error Request:', error.request)
+        console.log('Error Message:', error.message)
       }
     }
   }
 
+  // 비밀번호 입력
   const checkPassword = (text) => {
     setPassword(text)
     setIsPasswordValid(text.length >= 7)
   }
 
+  // 닉네임 입력
   const handleNicknameChange = async (nickname) => {
     setNickname(nickname)
     setIsNicknameValid(true) // 기본적으로 유효하다고 가정
@@ -93,6 +103,7 @@ const Join = ({ navigation, route }) => {
         headers: {
           'Content-Type': 'application/json',
         },
+        withCredentials: true, // CORS
       })
       console.log('닉네임 체크:', response.data)
 
@@ -109,6 +120,10 @@ const Join = ({ navigation, route }) => {
       setIsNicknameDuplicateChecked(false)
       setError('닉네임 확인 실패')
       Alert.alert('알림', '닉네임 확인에 실패했습니다.')
+
+      console.log('Error Details:', error)
+      console.log('Error Request:', error.request)
+      console.log('Error Message:', error.message)
     }
   }
 
@@ -130,6 +145,7 @@ const Join = ({ navigation, route }) => {
     isPhoneNumberDuplicateChecked,
   ])
 
+  // 가입하기 버튼
   const handleJoin = async () => {
     try {
       const response = await axios.post(
@@ -144,6 +160,7 @@ const Join = ({ navigation, route }) => {
           headers: {
             'Content-Type': 'application/json',
           },
+          withCredentials: true, // CORS
         }
       )
 
@@ -155,8 +172,22 @@ const Join = ({ navigation, route }) => {
       }
     } catch (error) {
       console.error('회원가입 에러:', error)
-      setError('회원가입 에러 발생') // 회원가입 에러 발생 시 에러 상태 업데이트
-      Alert.alert('알림', '회원가입 중 오류가 발생했습니다.')
+
+      if (error.response) {
+        console.error('서버 응답 데이터:', error.response.data)
+        console.error('서버 응답 상태 코드:', error.response.status)
+        Alert.alert('알림', '회원가입 중 오류가 발생했습니다.')
+      } else if (error.request) {
+        console.error('요청 실패:', error.request)
+        Alert.alert('알림', '네트워크 연결을 확인해주세요.')
+      } else {
+        console.error('오류 메시지:', error.message)
+        Alert.alert('알림', '회원가입 요청에 실패했습니다.')
+      }
+
+      console.log('Error Details:', error)
+      console.log('Error Request:', error.request)
+      console.log('Error Message:', error.message)
     }
   }
 
@@ -237,12 +268,11 @@ const Join = ({ navigation, route }) => {
             style={[
               styles.label,
               {
-                color:
-                  phoneNumber.length > 0
-                    ? isPhoneNumberValid
-                      ? '#4EAA16'
-                      : '#D9D9D9'
-                    : '#D9D9D9',
+                color: isPhoneNumberValid
+                  ? phoneNumber.length > 0
+                    ? '#4EAA16'
+                    : '#D9D9D9'
+                  : '#CC0000',
               },
             ]}
           >
@@ -272,7 +302,10 @@ const Join = ({ navigation, route }) => {
           />
         </View>
         {!isPhoneNumberValid && phoneNumber.length > 0 && (
-          <Text style={styles.errorText}>이미 존재하는 번호입니다.</Text>
+          <Text style={styles.errorText}>올바른 전화번호 형식이 아닙니다.</Text>
+        )}
+        {!isPhoneNumberDuplicateChecked && (
+          <Text style={styles.errorText}>이미 가입된 번호입니다.</Text>
         )}
       </View>
 
