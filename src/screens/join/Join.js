@@ -151,7 +151,7 @@ const Join = ({ navigation, route }) => {
       const response = await axios.post(
         `${BASE_URL}/sign-up`,
         {
-          email: `${email}@yonsei.ac.kr`,
+          email: email,
           phone: phoneNumber,
           nickname: nickname,
           password: password,
