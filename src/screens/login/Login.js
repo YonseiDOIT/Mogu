@@ -75,7 +75,6 @@ const Login = ({ navigation }) => {
         }
       } catch (error) {
         console.error('로그인 중 오류가 발생했습니다:', error)
-
         if (error.response) {
           if (error.response.status === 403) {
             console.error('서버에서 권한이 없는 접근으로 거부되었습니다.')

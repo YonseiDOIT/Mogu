@@ -1,9 +1,22 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Image, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Image,
+  ActivityIndicator,
+  Alert
+} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CreateGroupPurchaseHeader from '../../../components/CreateGroupPurchaseHeader';
 import { WebView } from 'react-native-webview';
 import MapView, { Marker } from 'react-native-maps';
+import axios from 'axios';
+import { BASE_URL } from '../../../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CreateGroupPurchase = ({ navigation }) => {
   const [link, setLink] = useState('');
@@ -12,13 +25,12 @@ const CreateGroupPurchase = ({ navigation }) => {
   const [totalQuantity, setTotalQuantity] = useState('');
   const [totalPrice, setTotalPrice] = useState('');
   const [myQuantity, setmyQuantity] = useState('');
-  const [unitPrice, setUnitPrice] = useState('');
   const [unitQuantity, setUnitQuantity] = useState('');
   const [endDate, setEndDate] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
   const [minimumDate, setMinimumDate] = useState(new Date());
   const [text, setText] = useState('');
-  const [category, setCategory] = useState(''); 
+  const [category, setCategory] = useState('');
   const [otherCategory, setOtherCategory] = useState('');
   const [otherLocation, setOtherLocation] = useState('');
   const webviewRef = useRef(null);
@@ -31,6 +43,30 @@ const CreateGroupPurchase = ({ navigation }) => {
   const [markerLocation, setMarkerLocation] = useState(null);
   const [selectedPlace, setSelectedPlace] = useState('연세플라자');
   const mapRef = useRef(null);
+  const [chatUrl, setChatUrl] = useState('');
+  const [name, setName] = useState('');
+  const [mqq, setMqq] = useState('');
+  const [token, setToken] = useState(null); // State variable to store the token
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      const storedToken = await getToken();
+      setToken(storedToken);
+    };
+    fetchToken();
+  }, []);
+
+  const getToken = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token !== null) {
+        console.log('Token:', token);
+        return token;
+      }
+    } catch (e) {
+      console.error('Failed to fetch the token', e);
+    }
+  };
 
   const handlePlaceSelect = (place) => {
     let newLocation;
@@ -135,6 +171,55 @@ const CreateGroupPurchase = ({ navigation }) => {
     setEndTime(currentTime);
   };
 
+  const handleSubmit = async () => {
+    try {
+      const endDateTime = new Date(
+        endDate.getFullYear(),
+        endDate.getMonth(),
+        endDate.getDate(),
+        endTime.getHours(),
+        endTime.getMinutes()
+      );
+
+      const payload = {
+        name,
+        url: link,
+        image: {
+          uploadFileName: image.split('/').pop(),
+          storeFileName: image,
+        },
+        category: category === '기타' ? otherCategory : category,
+        price: totalPrice,
+        qty: totalQuantity,
+        remainingQty: totalQuantity - myQuantity,
+        endDate: endDateTime.toISOString(),
+        mqq,
+        content: text,
+        location: selectedPlace === '기타' ? otherLocation : selectedPlace,
+        latitude: selectedPlace === '기타' ? markerLocation.latitude : location.latitude,
+        longitude: selectedPlace === '기타' ? markerLocation.longitude : location.longitude,
+        locationName: selectedPlace === '기타' ? otherLocation : selectedPlace,
+        status: '모집중',
+        chatUrl,
+      };
+
+      const response = await axios.post(`${BASE_URL}/products/register`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Use the token from state
+        },
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        Alert.alert('Success', '공동 구매가 성공적으로 등록되었습니다.');
+        navigation.navigate('TabNavigation');
+      } else {
+        throw new Error('Failed to register group purchase');
+      }
+    } catch (error) {
+      Alert.alert('Error', error.message || '공동 구매 등록에 실패했습니다.');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -143,17 +228,22 @@ const CreateGroupPurchase = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.section}>
           <Text style={styles.label}>상품명</Text>
-          <TextInput style={styles.input} placeholder="오렌지주스 1500ml 1팩" />
+          <TextInput
+            style={styles.input}
+            placeholder="오렌지주스 1500ml 1팩"
+            value={name}
+            onChangeText={setName}
+          />
         </View>
         <View style={styles.section}>
           <Text style={styles.label_link}>구매 링크</Text>
-          <Text style={{ fontSize: 13, fontWeight: 200, marginBottom: 10 }}>링크를 올리면 자동으로 이미지가 연동돼요!</Text>          
+          <Text style={{ fontSize: 13, fontWeight: 200, marginBottom: 10 }}>링크를 올리면 자동으로 이미지가 연동돼요!</Text>
           <View style={styles.linkContainer}>
-            <TextInput 
-              style={[styles.input, styles.linkInput]} 
-              placeholder="https://www.example.com" 
-              value={link} 
-              onChangeText={handleLinkChange} 
+            <TextInput
+              style={[styles.input, styles.linkInput]}
+              placeholder="https://www.example.com"
+              value={link}
+              onChangeText={handleLinkChange}
             />
             {loading ? (
               <ActivityIndicator size="small" color="#75C743" />
@@ -165,48 +255,48 @@ const CreateGroupPurchase = ({ navigation }) => {
         <View style={styles.section}>
           <Text style={styles.label}>분류</Text>
           <View style={styles.row}>
-            <TouchableOpacity 
-              style={[styles.button, category === '물,음료' && styles.activeButton]} 
+            <TouchableOpacity
+              style={[styles.button, category === '물,음료' && styles.activeButton]}
               onPress={() => setCategory('물,음료')}
             >
               <Text style={[category === '물,음료' && styles.activeText]}>물,음료</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.button, category === '과일' && styles.activeButton]} 
+            <TouchableOpacity
+              style={[styles.button, category === '과일' && styles.activeButton]}
               onPress={() => setCategory('과일')}
             >
               <Text style={[category === '과일' && styles.activeText]}>과일</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.button, category === '유제품' && styles.activeButton]} 
+            <TouchableOpacity
+              style={[styles.button, category === '유제품' && styles.activeButton]}
               onPress={() => setCategory('유제품')}
             >
               <Text style={[category === '유제품' && styles.activeText]}>유제품</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.button, category === '건강식' && styles.activeButton]} 
+            <TouchableOpacity
+              style={[styles.button, category === '건강식' && styles.activeButton]}
               onPress={() => setCategory('건강식')}
             >
               <Text style={[category === '건강식' && styles.activeText]}>건강식</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.button, category === '위생용품' && styles.activeButton]} 
+            <TouchableOpacity
+              style={[styles.button, category === '위생용품' && styles.activeButton]}
               onPress={() => setCategory('위생용품')}
             >
               <Text style={[category === '위생용품' && styles.activeText]}>위생용품</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.button, category === '기타' && styles.activeButton]} 
+            <TouchableOpacity
+              style={[styles.button, category === '기타' && styles.activeButton]}
               onPress={() => setCategory('기타')}
             >
               <Text style={[category === '기타' && styles.activeText]}>기타</Text>
             </TouchableOpacity>
           </View>
           {category === '기타' && (
-            <TextInput 
-              style={[styles.input, { marginTop: 10 }]} 
-              placeholder="기타 내용을 입력하세요" 
-              value={otherCategory} 
+            <TextInput
+              style={[styles.input, { marginTop: 10 }]}
+              placeholder="기타 내용을 입력하세요"
+              value={otherCategory}
               onChangeText={setOtherCategory}
             />
           )}
@@ -217,18 +307,18 @@ const CreateGroupPurchase = ({ navigation }) => {
           <Text style={{ color: '#777777', fontSize: 13, fontWeight: 300, marginTop: 5, marginBottom: 7 }}>모집 마감 이후 결제할 전체 수량을 작성해주세요.</Text>
           <View style={styles.row}>
             <Text style={[styles.rowText, { marginTop: 10 }]}>모두 합하여</Text>
-            <TextInput 
-              style={[styles.input, { width: 60, height: 35 }]} 
+            <TextInput
+              style={[styles.input, { width: 60, height: 35 }]}
               placeholder="0"
-              value={totalQuantity} 
+              value={totalQuantity}
               onChangeText={setTotalQuantity}
               keyboardType="numeric"
             />
             <Text style={[styles.rowText, { marginTop: 10 }]}>개, 총</Text>
-            <TextInput 
-              style={[styles.input, { width: 80, height: 35 }]} 
-              placeholder="0,000" 
-              value={totalPrice} 
+            <TextInput
+              style={[styles.input, { width: 80, height: 35 }]}
+              placeholder="0,000"
+              value={totalPrice}
               onChangeText={setTotalPrice}
               keyboardType="numeric"
             />
@@ -236,8 +326,8 @@ const CreateGroupPurchase = ({ navigation }) => {
           </View>
           <View style={{ flexDirection: 'row', marginTop: 10, height: 55, borderBottomColor: '#DEDEDE', borderBottomWidth: 1 }}>
             <Text style={[styles.rowText, { marginTop: 0 }]}>저는 여기서</Text>
-            <TextInput 
-              style={[styles.input, { width: 60, height: 35 }]} 
+            <TextInput
+              style={[styles.input, { width: 60, height: 35 }]}
               placeholder="0"
               value={myQuantity}
               onChangeText={setmyQuantity}
@@ -276,10 +366,12 @@ const CreateGroupPurchase = ({ navigation }) => {
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Text style={{ color: '#75C743', fontSize: 15, fontWeight: 600 }}>{unitQuantity ? unitQuantity : (totalQuantity-myQuantity)}</Text>
             <Text style={{ fontSize: 15, fontWeight: 600 }}>개 중</Text>
-            <TextInput 
-              style={[styles.input, { width: 70, height: 35, marginLeft: 10, marginRight: 10 }]} 
+            <TextInput
+              style={[styles.input, { width: 70, height: 35, marginLeft: 10, marginRight: 10 }]}
               placeholder="0"
               keyboardType="numeric"
+              value={mqq}
+              onChangeText={setMqq}
             />
             <Text style={{ fontSize: 15, fontWeight: 600 }}>개</Text>
           </View>
@@ -288,7 +380,8 @@ const CreateGroupPurchase = ({ navigation }) => {
         <View style={styles.section}>
           <Text style={styles.label}>공지</Text>
           <Text style={{ color: '#777777', fontSize: 13, fontWeight: 300, marginBottom: 7 }}>기존 가격, 제품의 단위(개당 ml등), 수령 예상 일자와 시간을 구체적으로 작성하면 더 효과적으로 공구 참여자를 모을 수 있어요.</Text>
-          <TextInput style={styles.textInput}
+          <TextInput
+            style={styles.textInput}
             multiline={true}
             placeholder="여기에 설명을 입력하세요"
             onChangeText={setText}
@@ -334,22 +427,27 @@ const CreateGroupPurchase = ({ navigation }) => {
           </MapView>
           <View style={{ marginTop: 10, color: '#777777', fontSize: 13, fontWeight: 300 }}>
             {selectedPlace === '기타' ? (
-                  <TextInput 
-                    style={[styles.input1, { marginTop: 10 }]} 
-                    placeholder="장소에 대한 설명을 적어주세요." 
-                    value={otherLocation} // 장소 설명 보내기
-                    onChangeText={setOtherLocation}
-                  />
-                ) : (
-                  <Text>{`${selectedPlace} 일대`}</Text>
-                )}          
-                </View>
+              <TextInput
+                style={[styles.input1, { marginTop: 10 }]}
+                placeholder="장소에 대한 설명을 적어주세요."
+                value={otherLocation} // 장소 설명 보내기
+                onChangeText={setOtherLocation}
+              />
+            ) : (
+              <Text>{`${selectedPlace} 일대`}</Text>
+            )}
+          </View>
         </View>
         <View style={styles.section}>
           <Text style={styles.label}>카카오톡 오픈채팅 링크</Text>
-          <TextInput style={styles.input} placeholder="http://카카오톡.openchat" />
+          <TextInput
+            style={styles.input}
+            placeholder="http://카카오톡.openchat"
+            value={chatUrl}
+            onChangeText={setChatUrl}
+          />
         </View>
-        <TouchableOpacity onPress={() => navigation.navigate('TabNavigation')} style={styles.submitButton}>
+        <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
           <Text style={styles.submitButtonText}>작성 완료</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -383,7 +481,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   scrollViewContent: {
-    paddingTop: 100, 
+    paddingTop: 100,
     padding: 20,
   },
   section: {
@@ -411,9 +509,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 10,
-    height:20,
-    fontSize:12,
-    width:200,
+    height: 20,
+    fontSize: 12,
+    width: 200,
     borderRadius: 5,
     backgroundColor: '#fff',
   },
@@ -479,14 +577,14 @@ const styles = StyleSheet.create({
   },
   dateTimeContainer: {
     flexDirection: 'row',
-    width:300
+    width: 300,
   },
   dateTimePicker: {
     flex: 1,
     marginHorizontal: 5,
-    backgroundColor: '#fff',  // DateTimePicker와 일치하는 색상으로 설정
+    backgroundColor: '#fff', // DateTimePicker와 일치하는 색상으로 설정
     borderRadius: 20,
-    justifyContent: 'center',  // 가운데 정렬
+    justifyContent: 'center', // 가운데 정렬
   },
   textInput: {
     height: 120,
