@@ -13,43 +13,70 @@ const FindPassword = ({ navigation }) => {
     console.log('요청을 보낼 이메일:', memberEmail)
 
     try {
-      const response = await axios.post(
-        `${BASE_URL}/sendPwd`,
-        { memberEmail },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true,
+      const checkResponse = await axios.get(`${BASE_URL}/check-email`, {
+        params: { memberEmail },
+        withCredentials: true,
+      })
+
+      console.log('이메일 확인 응답:', checkResponse.data)
+
+      if (checkResponse.data.exists) {
+        console.log('이메일이 존재합니다. 메일 전송을 시작합니다.')
+
+        try {
+          const response = await axios.post(
+            `${BASE_URL}/sendPwd`,
+            { memberEmail },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              withCredentials: true,
+            }
+          )
+
+          console.log('메일 전송 서버 응답:', response.data)
+
+          if (response.data.status === 'SUCCESS') {
+            Alert.alert('성공', response.data.message)
+            navigation.navigate('VerifyNumber', { userMail: memberEmail })
+          } else {
+            Alert.alert('오류', response.data.message)
+          }
+        } catch (sendPwdError) {
+          console.error('메일 전송 실패 에러:', sendPwdError)
+          Alert.alert('오류', '메일 전송 중 오류가 발생했습니다.')
         }
-      )
-
-      console.log('서버 응답:', response.data)
-
-      if (response.data.status === 'SUCCESS') {
-        Alert.alert('성공', response.data.message)
-        navigation.navigate('VerifyNumber', { userMail: memberEmail })
       } else {
-        Alert.alert('오류', response.data.message)
+        Alert.alert('오류', '가입되지 않은 메일입니다.')
       }
     } catch (error) {
-      handleRequestError(error)
+      console.error('이메일 확인 요청 에러:', error)
+      handleRequestError(error, memberEmail)
     }
   }
 
-  const handleRequestError = (error) => {
+  const handleRequestError = (error, memberEmail) => {
     console.error('비밀번호 찾기 실패 에러:', error)
 
     if (error.response) {
       console.error('응답 데이터:', error.response.data)
       console.error('응답 상태 코드:', error.response.status)
       console.error('응답 헤더:', error.response.headers)
-      Alert.alert(
-        '오류',
-        `비밀번호 찾기 실패: ${
-          error.response.data || '상세한 오류 메시지가 없습니다.'
-        }`
-      )
+      console.error('요청한 이메일:', memberEmail)
+
+      let message = '비밀번호 찾기 실패: '
+      switch (error.response.status) {
+        case 403:
+          message += '권한이 없습니다. 올바른 이메일 주소인지 확인하세요.'
+          break
+        default:
+          message +=
+            error.response.data.message || '상세한 오류 메시지가 없습니다.'
+          break
+      }
+
+      Alert.alert('오류', message)
     } else if (error.request) {
       console.error('요청 데이터:', error.request)
       Alert.alert('오류', '서버로부터 응답을 받지 못했습니다.')
