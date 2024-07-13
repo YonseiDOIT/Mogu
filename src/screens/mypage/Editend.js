@@ -9,7 +9,7 @@ import {
 import { NavigationContainer } from '@react-navigation/native'
 
 const Editend = ({ navigation, route }) => {
-  const { updatedNickname } = route.params || {}
+  const { updatedNickname, updatedPhone } = route.params || {}
 
   return (
     <View style={styles.container}>
@@ -27,7 +27,10 @@ const Editend = ({ navigation, route }) => {
         <TouchableOpacity
           style={styles.back}
           onPress={() =>
-            navigation.navigate('MyInfoCheck', { updatedNickname })
+            navigation.navigate('MyInfoCheck', {
+              updatedNickname,
+              updatedPhone,
+            })
           }
         >
           <Text style={styles.buttonText}>되돌아가기</Text>
