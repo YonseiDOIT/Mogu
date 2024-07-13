@@ -58,7 +58,7 @@ const Login = ({ navigation }) => {
     const isValidEmail = await checkEmail()
     const fullEmail = `${emailPrefix}@yonsei.ac.kr`
 
-    if (isValidEmail && isPasswordValid) {
+    if (isPasswordValid) {
       try {
         const response = await axios.post(`${BASE_URL}/sign-in`, {
           email: fullEmail,
@@ -82,7 +82,6 @@ const Login = ({ navigation }) => {
             setLoginError('이메일 또는 비밀번호가 일치하지 않습니다.')
           } else {
             console.error('서버에서 알 수 없는 오류가 발생했습니다.')
-            setLoginError('서버에서 알 수 없는 오류가 발생했습니다.')
           }
         } else {
           console.error('네트워크 오류:', error.message)
