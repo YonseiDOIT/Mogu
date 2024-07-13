@@ -39,23 +39,26 @@ const Login = ({ navigation }) => {
         })
 
         console.log('이메일 서버 응답:', response.data)
-        setIsPasswordValid(response.data.isValid)
+        setIsEmailValid(response.data)
+        return response.data
       } catch (error) {
         console.error('이메일 유효성 검사 중 오류가 발생했습니다:', error)
-        setIsPasswordValid(false)
+        setIsEmailValid(false)
         setLoginError('서버에서 알 수 없는 오류가 발생했습니다.')
+        return false
       }
     } else {
-      setIsPasswordValid(false)
+      setIsEmailValid(false)
       setLoginError('올바른 이메일 형식이 아닙니다.')
+      return false
     }
   }
 
   const handleLogin = async () => {
+    const isValidEmail = await checkEmail()
     const fullEmail = `${emailPrefix}@yonsei.ac.kr`
-    checkEmail()
 
-    if (isPasswordValid) {
+    if (isValidEmail && isPasswordValid) {
       try {
         const response = await axios.post(`${BASE_URL}/sign-in`, {
           email: fullEmail,
@@ -79,11 +82,18 @@ const Login = ({ navigation }) => {
             setLoginError('이메일 또는 비밀번호가 일치하지 않습니다.')
           } else {
             console.error('서버에서 알 수 없는 오류가 발생했습니다.')
+            setLoginError('서버에서 알 수 없는 오류가 발생했습니다.')
           }
         } else {
           console.error('네트워크 오류:', error.message)
           setLoginError('네트워크 오류가 발생했습니다. 다시 시도해주세요.')
         }
+      }
+    } else {
+      if (!isValidEmail) {
+        setLoginError('유효한 이메일 주소를 입력하세요.')
+      } else {
+        setLoginError('비밀번호는 최소 7자 이상이어야 합니다.')
       }
     }
   }
