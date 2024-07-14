@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
+import { AuthContext } from '../App'
 import TabNavigation from './TabNavigation'
 import Maintest from '../screens/main/Maintest'
 import MyInfoCheck from '../screens/mypage/MyInfoCheck'
@@ -25,14 +26,16 @@ import EditGroupPurchase from '../screens/main/participate/EditGroupPurchase'
 const Stack = createStackNavigator()
 
 const StackAfterLogin = () => {
+  const { userInfo } = useContext(AuthContext)
+
   return (
     <Stack.Navigator initialRouteName="TabNavigation">
       <Stack.Screen
         name="TabNavigation"
         component={TabNavigation}
         options={{ headerShown: false }}
+        initialParams={{ userInfo }}
       />
-
       <Stack.Screen
         name="MyInfoCheck"
         component={MyInfoCheck}
