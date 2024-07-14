@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   View,
   TextInput,
@@ -11,45 +11,67 @@ import {
 import { useNavigation } from '@react-navigation/native'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import LikeHeader from '../../components/LikeHeader'
+import axios from 'axios'
+import { BASE_URL } from '../../services/api'
 
-function Maintest() {
+const Like = ({ route }) => {
   const navigation = useNavigation()
   const [selectedSort, setSelectedSort] = useState('기한임박순')
   const [dropdownVisible, setDropdownVisible] = useState(false)
   const [items, setItems] = useState([
     {
       id: 1,
-      quantity: '5개',
-      time: '23',
+      remainingQuantity: '5',
+      totalQuantity: '10',
+      time: '13800', // 23시간
       title: '상품 1',
       price: '3,000',
       favorite: true,
     },
     {
       id: 2,
-      quantity: '3개',
-      time: '1430',
+      remainingQuantity: '3',
+      totalQuantity: '5',
+      time: '0',
       title: '상품 2',
       price: '500',
       favorite: false,
     },
     {
       id: 3,
-      quantity: '7개',
-      time: '1440',
+      remainingQuantity: '7',
+      totalQuantity: '10',
+      time: '360000',
       title: '상품 3',
       price: '15,000',
       favorite: true,
     },
     {
       id: 4,
-      quantity: '1개',
+      remainingQuantity: '1',
+      totalQuantity: '1',
       time: '3000',
       title: '상품 4',
       price: '4,200',
       favorite: false,
     },
   ])
+
+  useEffect(() => {
+    const fetchFavoriteItems = async () => {
+      try {
+        const response = await axios.get(
+          `${BASE_URL}/favorite/user/${userNickname}`
+        )
+        const data = response.data.items
+        setItems(data)
+      } catch (error) {
+        console.error('Error fetching favorite items:', error)
+      }
+    }
+
+    fetchFavoriteItems()
+  }, [])
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible)
@@ -61,24 +83,27 @@ function Maintest() {
   }
 
   const formatTime = (time) => {
-    const totalMinutes = parseInt(time, 10)
-    if (totalMinutes >= 1440) {
-      const days = Math.floor(totalMinutes / 1440)
-      const hours = Math.floor((totalMinutes % 1440) / 60)
-      const minutes = totalMinutes % 60
+    const totalSeconds = parseInt(time, 10)
+
+    const days = Math.floor(totalSeconds / (60 * 60 * 24))
+    const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60))
+    const minutes = Math.floor((totalSeconds % (60 * 60)) / 60)
+    const seconds = totalSeconds % 60
+
+    if (days > 0) {
       return `${days}일 ${hours}시간 ${minutes}분`
-    } else if (totalMinutes >= 60) {
-      const hours = Math.floor(totalMinutes / 60)
-      const minutes = totalMinutes % 60
-      return `${hours}시간 ${minutes}분`
+    } else if (hours > 0) {
+      return `${hours}시간 ${minutes}분 ${seconds}초`
+    } else if (minutes > 0) {
+      return `${minutes}분 ${seconds}초`
     } else {
-      const seconds = (totalMinutes * 60) % 60
-      return `${totalMinutes}분 ${seconds}초`
+      return `${seconds}초`
     }
   }
 
   const isDeadlineSoon = (time) => {
-    const totalMinutes = parseInt(time, 10)
+    const totalSeconds = parseInt(time, 10)
+    const totalMinutes = totalSeconds / 60
     return totalMinutes < 1440 // 24시간 미만
   }
 
@@ -91,7 +116,7 @@ function Maintest() {
 
   return (
     <View style={styles.screenContainer}>
-      <LikeHeader/>
+      <LikeHeader />
       <View style={styles.separator} />
       <View style={styles.sortWrapper}>
         <TouchableOpacity onPress={toggleDropdown} style={styles.sortButton}>
@@ -134,9 +159,9 @@ function Maintest() {
         <View style={styles.itemsGrid}>
           {items.map((item) => (
             <View key={item.id} style={styles.itemWrapper}>
-              {isDeadlineSoon(item.time) && (
+              {item.product && isDeadlineSoon(item.time) && (
                 <Image
-                  source={require('../../assets/deadline.png')}
+                  source={{ uri: item.product.productImage }}
                   style={styles.deadlineImage}
                 />
               )}
@@ -169,7 +194,9 @@ function Maintest() {
               </View>
               <Text style={styles.itemTitle}>{item.title}</Text>
               <View style={styles.row}>
-                <Text style={styles.itemText}>{`수량 ${item.quantity}`}</Text>
+                <Text
+                  style={styles.itemText}
+                >{`수량 ${item.remainingQuantity}/${item.totalQuantity}`}</Text>
                 <Text style={styles.itemPrice}>{`${item.price} 원`}</Text>
               </View>
             </View>
@@ -196,7 +223,7 @@ const styles = StyleSheet.create({
   },
 
   separator: {
-    marginTop:20,
+    marginTop: 20,
     height: 2,
     backgroundColor: '#fff',
   },
@@ -408,4 +435,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default Maintest
+export default Like
