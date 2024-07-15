@@ -7,71 +7,65 @@ import {
   TouchableOpacity,
   ScrollView,
   Text,
+  Alert,
 } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useRoute } from '@react-navigation/native'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import LikeHeader from '../../components/LikeHeader'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
 import { BASE_URL } from '../../services/api'
 
-const Like = ({ route }) => {
+const Like = () => {
+  const route = useRoute()
+  const { userNickname } = route.params ?? { userNickname: '' }
   const navigation = useNavigation()
   const [selectedSort, setSelectedSort] = useState('기한임박순')
   const [dropdownVisible, setDropdownVisible] = useState(false)
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      remainingQuantity: '5',
-      totalQuantity: '10',
-      time: '13800', // 23시간
-      title: '상품 1',
-      price: '3,000',
-      favorite: true,
-    },
-    {
-      id: 2,
-      remainingQuantity: '3',
-      totalQuantity: '5',
-      time: '0',
-      title: '상품 2',
-      price: '500',
-      favorite: false,
-    },
-    {
-      id: 3,
-      remainingQuantity: '7',
-      totalQuantity: '10',
-      time: '360000',
-      title: '상품 3',
-      price: '15,000',
-      favorite: true,
-    },
-    {
-      id: 4,
-      remainingQuantity: '1',
-      totalQuantity: '1',
-      time: '3000',
-      title: '상품 4',
-      price: '4,200',
-      favorite: false,
-    },
-  ])
+  const [items, setItems] = useState([])
 
   useEffect(() => {
     const fetchFavoriteItems = async () => {
       try {
+        const storedToken = await AsyncStorage.getItem('token')
+        if (!storedToken) {
+          throw new Error('토큰이 없습니다.')
+        }
+
         const response = await axios.get(
-          `${BASE_URL}/favorite/user/${userNickname}`
+          `${BASE_URL}/favorite/user/${userNickname}`,
+          {
+            headers: {
+              Authorization: `Bearer ${storedToken}`,
+            },
+          }
         )
-        const data = response.data.items
+        const data = response.data.map((favorite) => {
+          const { product } = favorite
+          const remainingTime = Math.max(
+            Math.floor((new Date(product.endDate) - new Date()) / 1000),
+            0
+          )
+          return {
+            id: favorite.id,
+            remainingQuantity: product.remainingQty,
+            totalQuantity: product.qty,
+            time: remainingTime.toString(),
+            title: product.name,
+            price: product.price.toString(),
+            favorite: true,
+            fileName: product.fileName,
+          }
+        })
         setItems(data)
       } catch (error) {
-        console.error('Error fetching favorite items:', error)
+        console.error('아이템 불러오기 에러:', error.message)
+        Alert.alert('오류 발생', '아이템을 불러오는 중 오류가 발생했습니다.')
       }
     }
 
     fetchFavoriteItems()
-  }, [])
+  }, [userNickname])
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible)
@@ -159,10 +153,13 @@ const Like = ({ route }) => {
         <View style={styles.itemsGrid}>
           {items.map((item) => (
             <View key={item.id} style={styles.itemWrapper}>
-              {item.product && isDeadlineSoon(item.time) && (
+              {isDeadlineSoon(item.time) && (
                 <Image
-                  source={{ uri: item.product.productImage }}
-                  style={styles.deadlineImage}
+                  source={{ uri: `${BASE_URL}/images/${item.fileName}` }}
+                  style={[
+                    styles.deadlineImage,
+                    { width: '100%', height: '45%' },
+                  ]}
                 />
               )}
               <TouchableOpacity
