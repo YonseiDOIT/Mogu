@@ -1,4 +1,4 @@
-# ❇️ 매지리 민들을 위한 공구 매칭 서비스, 모구 ❇️
+# ❇️ 매지리민들을 위한 공구 매칭 서비스, 모구 ❇️
 ** 로고넣기
 
 ## 모든 연세인을 위한 공구, 모구
@@ -14,6 +14,12 @@
 
 💫 Team Goals
 정해진 기간 내 MVP 구현하기
+
+## 소통 채널
+![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)
+![KakaoTalk](https://img.shields.io/badge/kakaotalk-ffcd00.svg?style=for-the-badge&logo=kakaotalk&logoColor=000000)
+![Notion](https://img.shields.io/badge/Notion-%23000000.svg?style=for-the-badge&logo=notion&logoColor=white)
+![Figma](https://img.shields.io/badge/figma-%23F24E1E.svg?style=for-the-badge&logo=figma&logoColor=white)
 
 ## 배경
 - 학교 주변에 거주하는 자취생과 기숙사생은 주변에 오프라인 매장이 없어 물품을 구매하는 데 불편함을 겪음. 배송시킬 때도 더 이득이 되는 방향으로 구매하려면 대량으로 구매해야 하며 결국 비용적인 측면에서 부담감을 느낌
@@ -32,8 +38,18 @@
   (4) 요리 재료를 대량으로 구매했다가 음식물쓰레기 양만 많아져 '불필요한 처리'라는 문제점 유발하기도 함
 
   (4) 갑작스럼게 생핆품을 구매하려면 자취방으로부터 꽤 떨어진 편의점에 가야했기에 불편했음
+### 분석 및 리서치
+  (1)
+  
+  (2)
+  (3)
+  
+  (4)
+  
+  (5)
+→ 핵심 가치
 
-#### 2. 메인 기능
+#### 3. 메인 기능
   - 검색 : 관심있는 진행중인 공구 찾아보기
   - 참여 : 공구 참여하기
   - 모집 : 공구 글 직접 등록하여 함께 공구할 참여자 모집하기
@@ -50,6 +66,10 @@
 ** 사진 넣기
 
 ## 🛠 기술 스택
+![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
+![MySQL](https://img.shields.io/badge/mysql-4479A1.svg?style=for-the-badge&logo=mysql&logoColor=white)
+![React Native](https://img.shields.io/badge/react_native-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white)
 
 FE
 
@@ -58,12 +78,18 @@ BE
 ## 프로젝트를 진행하면서 생긴 문제점 및 해결방안
 
 ## 프로젝트 후기
-- 목표 달성 여부 : 
+<details>
+<summary>
+  목표 달성 여부 : 
+</summary>
+   이유
+</details>
+
 - 좋았던 점/아쉬웠던 점
 - 소감
   
 ## 프로젝트 성공과 실패 혹은 아쉬운 부분 / 개선사항
 
-## 문의
-- Email : hyerim712@yonsei.ac.kr
+## 📞Contact
+Email : hyerim712@yonsei.ac.kr
   
