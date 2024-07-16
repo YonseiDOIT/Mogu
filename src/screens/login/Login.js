@@ -68,6 +68,10 @@ const Login = ({ navigation }) => {
         console.log('로그인 응답:', response.data)
         if (response.data.status === 'SUCCESS') {
           await AsyncStorage.setItem('token', response.data.data.token)
+          await AsyncStorage.setItem(
+            'userNickName',
+            response.data.data.nickname
+          )
           setIsLoggedIn(true)
           navigation.navigate('TabNavigation')
         } else {
