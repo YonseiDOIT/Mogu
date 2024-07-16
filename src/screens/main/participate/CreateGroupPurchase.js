@@ -14,7 +14,6 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import CreateGroupPurchaseHeader from '../../../components/CreateGroupPurchaseHeader';
 import { WebView } from 'react-native-webview';
 import MapView, { Marker } from 'react-native-maps';
-import axios from 'axios';
 import { BASE_URL } from '../../../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -24,7 +23,7 @@ const CreateGroupPurchase = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [totalQuantity, setTotalQuantity] = useState('');
   const [totalPrice, setTotalPrice] = useState('');
-  const [myQuantity, setmyQuantity] = useState('');
+  const [myQuantity, setMyQuantity] = useState('');
   const [unitQuantity, setUnitQuantity] = useState('');
   const [endDate, setEndDate] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
@@ -46,11 +45,12 @@ const CreateGroupPurchase = ({ navigation }) => {
   const [chatUrl, setChatUrl] = useState('');
   const [name, setName] = useState('');
   const [mqq, setMqq] = useState('');
-  const [token, setToken] = useState(null); // State variable to store the token
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
     const fetchToken = async () => {
       const storedToken = await getToken();
+      console.log('Fetched Token:', storedToken);
       setToken(storedToken);
     };
     fetchToken();
@@ -171,54 +171,96 @@ const CreateGroupPurchase = ({ navigation }) => {
     setEndTime(currentTime);
   };
 
-  const handleSubmit = async () => {
+const handleSubmit = async () => {
     try {
-      const endDateTime = new Date(
-        endDate.getFullYear(),
-        endDate.getMonth(),
-        endDate.getDate(),
-        endTime.getHours(),
-        endTime.getMinutes()
-      );
+    const endDateTime = new Date(
+            endDate.getFullYear(),
+            endDate.getMonth(),
+            endDate.getDate(),
+            23, 
+            59,
+            59  
+        );
 
-      const payload = {
-        name,
-        url: link,
-        image: {
-          uploadFileName: image.split('/').pop(),
-          storeFileName: image,
-        },
-        category: category === '기타' ? otherCategory : category,
-        price: totalPrice,
-        qty: totalQuantity,
-        remainingQty: totalQuantity - myQuantity,
-        endDate: endDateTime.toISOString(),
-        mqq,
-        content: text,
-        location: selectedPlace === '기타' ? otherLocation : selectedPlace,
-        latitude: selectedPlace === '기타' ? markerLocation.latitude : location.latitude,
-        longitude: selectedPlace === '기타' ? markerLocation.longitude : location.longitude,
-        locationName: selectedPlace === '기타' ? otherLocation : selectedPlace,
-        status: '모집중',
-        chatUrl,
-      };
+        const formattedEndDate = endDateTime.toISOString().slice(0, -1); 
 
-      const response = await axios.post(`${BASE_URL}/products/register`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`, // Use the token from state
-        },
-      });
+        const formData = new FormData();
+        formData.append('endDate', formattedEndDate);
+        formData.append('name', name);
+        formData.append('url', link);
+        formData.append('image', {
+            uri: image,
+            type: 'image/jpeg', // Assuming jpeg, change if necessary
+            name: image.split('/').pop(), // Extracting image name from the URL
+        });
+        formData.append('category', category === '기타' ? otherCategory : category);
+        formData.append('price', parseInt(totalPrice)); // Ensure it's an integer
+        formData.append('qty', parseInt(totalQuantity)); // Ensure it's an integer
+        formData.append('participate_qty', parseInt(myQuantity)); // Assuming this is the correct field
+        formData.append('endDate', endDateTime.toISOString());
+        formData.append('mqq', parseInt(mqq)); // Ensure it's an integer
+        formData.append('content', text);
+        formData.append('location', selectedPlace === '기타' ? otherLocation : selectedPlace);
+        formData.append('latitude', selectedPlace === '기타' ? markerLocation.latitude : location.latitude);
+        formData.append('longitude', selectedPlace === '기타' ? markerLocation.longitude : location.longitude);
+        formData.append('locationName', selectedPlace === '기타' ? otherLocation : selectedPlace);
+        formData.append('chatUrl', chatUrl);
 
-      if (response.status === 200 || response.status === 201) {
-        Alert.alert('Success', '공동 구매가 성공적으로 등록되었습니다.');
-        navigation.navigate('TabNavigation');
-      } else {
-        throw new Error('Failed to register group purchase');
-      }
+        console.log('Submitting data:', {
+            name,
+            url: link,
+            image: {
+                uri: image,
+                type: 'image/jpeg',
+                name: image.split('/').pop(),
+            },
+            category: category === '기타' ? otherCategory : category,
+            price: parseInt(totalPrice),
+            qty: parseInt(totalQuantity),
+            participate_qty: parseInt(myQuantity),
+            endDate: endDateTime.toISOString(),
+            mqq: parseInt(mqq),
+            content: text,
+            location: selectedPlace === '기타' ? otherLocation : selectedPlace,
+            latitude: selectedPlace === '기타' ? markerLocation.latitude : location.latitude,
+            longitude: selectedPlace === '기타' ? markerLocation.longitude : location.longitude,
+            locationName: selectedPlace === '기타' ? otherLocation : selectedPlace,
+            chatUrl,
+        });
+
+        const response = await fetch(`${BASE_URL}/products/register`, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'multipart/form-data',
+                Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+        });
+
+        console.log('Response status:', response.status);
+
+        // 서버 응답이 JSON일 경우만 파싱 시도
+        if (response.headers.get('content-type')?.includes('application/json')) {
+            const responseData = await response.json();
+            console.log('Response data:', responseData);
+        } else {
+            console.log('Response is not JSON');
+        }
+
+        if (response.status === 200 || response.status === 201) {
+            Alert.alert('Success', '공동 구매가 성공적으로 등록되었습니다.');
+            navigation.navigate('TabNavigation');
+        } else {
+            console.error('Failed to register group purchase:', response.status);
+            throw new Error('Failed to register group purchase');
+        }
     } catch (error) {
-      Alert.alert('Error', error.message || '공동 구매 등록에 실패했습니다.');
+        console.error('Error during submission:', error);
+        Alert.alert('Error', error.message || '공동 구매 등록에 실패했습니다.');
     }
-  };
+};
+
 
   return (
     <View style={styles.container}>
@@ -330,7 +372,7 @@ const CreateGroupPurchase = ({ navigation }) => {
               style={[styles.input, { width: 60, height: 35 }]}
               placeholder="0"
               value={myQuantity}
-              onChangeText={setmyQuantity}
+              onChangeText={setMyQuantity}
               keyboardType="numeric"
             />
             <Text style={[styles.rowText, { marginTop: 0 }]}>개 가져갈게요!</Text>
@@ -350,13 +392,6 @@ const CreateGroupPurchase = ({ navigation }) => {
               maximumDate={new Date(minimumDate.getTime() + 7 * 24 * 60 * 60 * 1000)}
               onChange={handleConfirmDate}
               style={[styles.dateTimePicker]}
-            />
-            <DateTimePicker
-              value={endTime}
-              mode="time"
-              display="default"
-              onChange={handleConfirmTime}
-              style={styles.dateTimePicker}
             />
           </View>
           <Text style={{ color: '#777777', fontSize: 13, fontWeight: 300, marginTop: 5, marginBottom: 7 }}>등록일을 포함하여 최소 2일부터 최대 7일 동안 신청 받을 수 있습니다.</Text>
@@ -430,7 +465,7 @@ const CreateGroupPurchase = ({ navigation }) => {
               <TextInput
                 style={[styles.input1, { marginTop: 10 }]}
                 placeholder="장소에 대한 설명을 적어주세요."
-                value={otherLocation} // 장소 설명 보내기
+                value={otherLocation}
                 onChangeText={setOtherLocation}
               />
             ) : (
@@ -576,15 +611,16 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   dateTimeContainer: {
-    flexDirection: 'row',
-    width: 300,
+    marginVertical:5,
+    width: '100%',
+    alignItems:'center'
   },
   dateTimePicker: {
     flex: 1,
     marginHorizontal: 5,
-    backgroundColor: '#fff', // DateTimePicker와 일치하는 색상으로 설정
+    backgroundColor: '#fff',
     borderRadius: 20,
-    justifyContent: 'center', // 가운데 정렬
+    justifyContent: 'center',
   },
   textInput: {
     height: 120,
@@ -593,7 +629,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     backgroundColor: '#fff',
-    textAlignVertical: 'top', // 커서를 왼쪽 위에 고정
+    textAlignVertical: 'top',
   },
 });
 

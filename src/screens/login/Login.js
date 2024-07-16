@@ -69,7 +69,7 @@ const Login = ({ navigation }) => {
         if (response.data.status === 'SUCCESS') {
           await AsyncStorage.setItem('token', response.data.data.token)
           setIsLoggedIn(true)
-          navigation.navigate('Maintest')
+          navigation.navigate('TabNavigation')
         } else {
           setLoginError('이메일 또는 비밀번호가 일치하지 않습니다.')
         }
