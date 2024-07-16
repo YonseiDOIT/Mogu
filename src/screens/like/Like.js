@@ -18,7 +18,6 @@ import { BASE_URL } from '../../services/api'
 
 const Like = () => {
   const route = useRoute()
-  const { userNickname } = route.params ?? { userNickname: '' }
   const navigation = useNavigation()
   const [selectedSort, setSelectedSort] = useState('기한임박순')
   const [dropdownVisible, setDropdownVisible] = useState(false)
@@ -28,44 +27,35 @@ const Like = () => {
     const fetchFavoriteItems = async () => {
       try {
         const storedToken = await AsyncStorage.getItem('token')
+        const userNickName = await AsyncStorage.getItem('userNickName')
+        console.log(storedToken)
         if (!storedToken) {
-          throw new Error('토큰이 없습니다.')
+          console.log('토큰이 없습니다.')
         }
 
         const response = await axios.get(
-          `${BASE_URL}/favorite/user/${userNickname}`,
+          `${BASE_URL}/favorite/user/${userNickName}`,
           {
             headers: {
               Authorization: `Bearer ${storedToken}`,
             },
           }
         )
-        const data = response.data.map((favorite) => {
-          const { product } = favorite
-          const remainingTime = Math.max(
-            Math.floor((new Date(product.endDate) - new Date()) / 1000),
-            0
-          )
-          return {
-            id: favorite.id,
-            remainingQuantity: product.remainingQty,
-            totalQuantity: product.qty,
-            time: remainingTime.toString(),
-            title: product.name,
-            price: product.price.toString(),
-            favorite: true,
-            fileName: product.fileName,
-          }
-        })
+        const data = response.data.map((favorite) => ({
+          product: { favid: favorite.id, ...favorite.product, fav: true },
+        }))
         setItems(data)
+        console.log('찜 확인', items)
       } catch (error) {
         console.error('아이템 불러오기 에러:', error.message)
         Alert.alert('오류 발생', '아이템을 불러오는 중 오류가 발생했습니다.')
       }
     }
-
-    fetchFavoriteItems()
-  }, [userNickname])
+    const unsubscribe = navigation.addListener('focus', () => {
+      // 화면이 focus될 때마다 데이터를 다시 가져옴
+      fetchFavoriteItems()
+    })
+  }, [])
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible)
@@ -152,13 +142,15 @@ const Like = () => {
       <ScrollView style={styles.itemsContainer}>
         <View style={styles.itemsGrid}>
           {items.map((item) => (
-            <View key={item.id} style={styles.itemWrapper}>
-              {isDeadlineSoon(item.time) && (
+            <View key={item.product.favid} style={styles.itemWrapper}>
+              {isDeadlineSoon(item.product.endDate) && (
                 <Image
-                  source={{ uri: `${BASE_URL}/images/${item.fileName}` }}
+                  source={{
+                    uri: `${BASE_URL}/images/${item.product.productImage}`,
+                  }}
                   style={[
                     styles.deadlineImage,
-                    { width: '100%', height: '45%' },
+                    // { width: '100%', height: '71%' },
                   ]}
                 />
               )}
@@ -167,7 +159,7 @@ const Like = () => {
                 onPress={() => navigation.navigate('CreateGroupPurchase')}
               >
                 <TouchableOpacity
-                  onPress={() => handleFavoriteToggle(item.id)}
+                  onPress={() => handleFavoriteToggle(item.product.favid)}
                   style={styles.heartIconContainer}
                 >
                   <Image
@@ -181,7 +173,9 @@ const Like = () => {
                 </TouchableOpacity>
               </TouchableOpacity>
               <View style={styles.timeContainer}>
-                <Text style={styles.itemText}>{formatTime(item.time)}</Text>
+                <Text style={styles.itemText}>
+                  {formatTime(item.product.endDate)}
+                </Text>
                 <MaterialIcons
                   name="access-time"
                   size={16}
@@ -193,8 +187,10 @@ const Like = () => {
               <View style={styles.row}>
                 <Text
                   style={styles.itemText}
-                >{`수량 ${item.remainingQuantity}/${item.totalQuantity}`}</Text>
-                <Text style={styles.itemPrice}>{`${item.price} 원`}</Text>
+                >{`수량 ${item.product.remainingQty}/${item.product.qty}`}</Text>
+                <Text
+                  style={styles.itemPrice}
+                >{`${item.product.price} 원`}</Text>
               </View>
             </View>
           ))}
@@ -426,8 +422,8 @@ const styles = StyleSheet.create({
 
   deadlineImage: {
     position: 'absolute',
-    width: 42,
-    height: 42,
+    width: '100%',
+    height: '70%',
     zIndex: 1,
   },
 })
