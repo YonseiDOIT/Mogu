@@ -7,53 +7,24 @@ import {
   TouchableOpacity,
   ScrollView,
   Text,
+  RefreshControl,
 } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useIsFocused } from '@react-navigation/native'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import axios from 'axios'
+import { BASE_URL } from '../../services/api'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 function Maintest() {
   const navigation = useNavigation()
+  const isFocused = useIsFocused()
   const [searchText, setSearchText] = useState('')
   const [selectedSort, setSelectedSort] = useState('기한임박순')
   const [dropdownVisible, setDropdownVisible] = useState(false)
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      remainingQuantity: '5',
-      totalQuantity: '10',
-      time: '13800', // 23시간
-      title: '상품 1',
-      price: '3,000',
-      favorite: true,
-    },
-    {
-      id: 2,
-      remainingQuantity: '3',
-      totalQuantity: '5',
-      time: '0',
-      title: '상품 2',
-      price: '500',
-      favorite: false,
-    },
-    {
-      id: 3,
-      remainingQuantity: '7',
-      totalQuantity: '10',
-      time: '360000',
-      title: '상품 3',
-      price: '15,000',
-      favorite: true,
-    },
-    {
-      id: 4,
-      remainingQuantity: '1',
-      totalQuantity: '1',
-      time: '3000',
-      title: '상품 4',
-      price: '4,200',
-      favorite: false,
-    },
-  ])
+  const [page, setPage] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [items, setItems] = useState([])
+  const [hasMoreData, setHasMoreData] = useState(true)
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -67,6 +38,51 @@ function Maintest() {
 
     return () => clearInterval(intervalId)
   }, [])
+
+  useEffect(() => {
+    if (isFocused) {
+      // 화면이 포커스될 때 첫 페이지 데이터를 다시 로드
+      resetAndFetchProducts()
+    }
+  }, [isFocused])
+
+  const resetAndFetchProducts = () => {
+    setPage(0)
+    setItems([])
+    setHasMoreData(true)
+    getProducts(0)
+  }
+
+  const getProducts = async (page) => {
+    const storedToken = await AsyncStorage.getItem('token')
+    setLoading(true)
+    try {
+      const response = await axios.get(`${BASE_URL}/products`, {
+        params: {
+          page: page,
+          size: 2,
+        },
+        headers: {
+          Authorization: `Bearer ${storedToken}`,
+        },
+      })
+
+      if (page === 0) {
+        setItems(response.data.content)
+      } else {
+        setItems((prevItems) => [...prevItems, ...response.data.content])
+      }
+
+      if (response.data.content.length < 8) {
+        setHasMoreData(false)
+      }
+    } catch (error) {
+      console.error('Error getProducts:', error)
+    } finally {
+      setLoading(false)
+    }
+    console.log('목록확인', items)
+  }
 
   const handleSearchPress = () => {
     navigation.navigate('Search')
@@ -84,7 +100,6 @@ function Maintest() {
   const formatTime = (time) => {
     const totalSeconds = parseInt(time, 10)
 
-    // 남은 시간을 초, 분, 시간, 일로 변환하는 로직
     const days = Math.floor(totalSeconds / (60 * 60 * 24))
     const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60))
     const minutes = Math.floor((totalSeconds % (60 * 60)) / 60)
@@ -114,6 +129,17 @@ function Maintest() {
     setItems(updatedItems)
   }
 
+  const handleScrollEnd = (event) => {
+    const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent
+    const isBottom =
+      contentOffset.y + layoutMeasurement.height >= contentSize.height - 20
+
+    if (isBottom && !loading && hasMoreData) {
+      const nextPage = page + 1 // 다음 페이지 번호
+      setPage(nextPage) // 페이지 상태 업데이트
+      getProducts(nextPage) // 다음 페이지 데이터 요청
+    }
+  }
   return (
     <View style={styles.screenContainer}>
       <View style={styles.container}>
@@ -211,13 +237,19 @@ function Maintest() {
         </View>
       )}
 
-      <ScrollView style={styles.itemsContainer}>
+      <ScrollView
+        style={styles.itemsContainer}
+        onScroll={handleScrollEnd}
+        scrollEventThrottle={400}
+      >
         <View style={styles.itemsGrid}>
           {items.map((item) => (
             <View key={item.id} style={styles.itemWrapper}>
-              {isDeadlineSoon(item.time) && (
+              {isDeadlineSoon(item.endDate) && (
                 <Image
-                  source={require('../../assets/deadline.png')}
+                  source={{
+                    uri: `${BASE_URL}/images/${item.productImage}`,
+                  }}
                   style={styles.deadlineImage}
                 />
               )}
@@ -246,23 +278,23 @@ function Maintest() {
                   color="#333"
                   style={[
                     styles.timeIcon,
-                    isDeadlineSoon(item.time) && styles.deadlineSoonText,
+                    isDeadlineSoon(item.endDate) && styles.deadlineSoonText,
                   ]}
                 />
                 <Text
                   style={[
                     styles.itemText,
-                    isDeadlineSoon(item.time) && styles.deadlineSoonText,
+                    isDeadlineSoon(item.endDate) && styles.deadlineSoonText,
                   ]}
                 >
-                  {formatTime(item.time)}
+                  {formatTime(item.endDate)}
                 </Text>
               </View>
-              <Text style={styles.itemTitle}>{item.title}</Text>
+              <Text style={styles.itemTitle}>{item.name}</Text>
               <View style={styles.row}>
                 <Text
                   style={styles.itemText}
-                >{`수량 ${item.remainingQuantity}/${item.totalQuantity}`}</Text>
+                >{`수량 ${item.remainingQty}/${item.qty}`}</Text>
                 <Text style={styles.itemPriceWrapper}>
                   <Text style={styles.itemPrice}>{item.price}</Text>
                   <Text style={styles.priceWon}> 원</Text>
@@ -543,8 +575,8 @@ const styles = StyleSheet.create({
 
   deadlineImage: {
     position: 'absolute',
-    width: 42,
-    height: 42,
+    width: '100%',
+    height: '71%',
     zIndex: 1,
   },
 })
