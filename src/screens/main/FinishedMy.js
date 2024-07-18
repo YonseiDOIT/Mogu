@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
 import FinishedMyHeader from '../../components/FinishedMyHeader';
+import axios from 'axios'
+import { BASE_URL } from '../../services/api'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const FinishedMy = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('ongoing'); // 'ongoing' or 'participated'
@@ -75,6 +78,11 @@ const FinishedMy = ({ navigation }) => {
       console.error('Error getProducts:', err)
     }
   };
+
+  useEffect(() => {
+    fetchOngoingGroupBuys();
+    fetchMyParticipatedGroupBuys();
+  }, []);
 
   const renderGroupBuys = (groupBuys) => {
     return groupBuys.map((item) => (
@@ -199,3 +207,4 @@ const styles = StyleSheet.create({
 });
 
 export default FinishedMy;
+
