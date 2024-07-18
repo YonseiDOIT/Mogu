@@ -50,6 +50,7 @@
   - 모집 : 공구 글 직접 등록하여 함께 공구할 참여자 모집하기
   - 참여자 관리 : 주최자가 단계별로 공구를 진행하는 과정이 용이하도록 참여자들의 참여수량 및 참여자 정보 리스트업하여 보여주기
   - 찜 : 현재 진행중인 공동구매 중 관심있는 상품을 관심공구로 등록
+![image](https://github.com/user-attachments/assets/a540e2d0-b426-44a4-8eac-1853fc4b5b3f)
 
 #### 4. 플로우 차트
 ![image](https://github.com/user-attachments/assets/b9c4b410-f947-4731-805b-262310533d74)
