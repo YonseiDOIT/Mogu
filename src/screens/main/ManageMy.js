@@ -1,61 +1,45 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
 import ManageMyHeader from '../../components/ManageMyHeader';
+import axios from 'axios'
+import { BASE_URL } from '../../services/api'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const ManageMy = ({ navigation }) => {
-  const [myOngoingGroupBuys, setMyOngoingGroupBuys] = useState([
-    {
-      id: 1,
-      image: '/mnt/data/image.png', // 제품 이미지
-      status: '모집 중',
-      title: 'RAURI 오렌지주스 1500ml 팩',
-      minQuantity: 15,
-      currentQuantity: 12,
-      maxQuantity: 20,
-      location: '매지놀이터',
-    },
-    {
-      id: 2,
-      image: '/mnt/data/image.png',
-      status: '구매 진행 중',
-      title: '비건 대체육 부산물고기까스',
-      minQuantity: 6,
-      currentQuantity: 10,
-      maxQuantity: 10,
-      location: '연세플라자',
-    },
-    {
-      id: 3,
-      image: '/mnt/data/image.png',
-      status: '구매 진행 중',
-      title: '알러지 고급 휴지 곽티슈 200매',
-      minQuantity: 8,
-      currentQuantity: 9,
-      maxQuantity: 10,
-      location: '매지놀이터',
-    },
-  ]);
+  const [myOngoingGroupBuys, setMyOngoingGroupBuys] = useState([]);
+  const fetchOngoingGroupBuys = async () => {
+    const storedToken = await AsyncStorage.getItem('token');
+    try {
+      const response = await axios.get(`${BASE_URL}/products/seller/ongoing`, {
+        headers: {
+          Authorization: `Bearer ${storedToken}`,
+        },
+      });
+      setMyOngoingGroupBuys(response.data); // 데이터를 상태에 저장
+    } catch (err) {
+      console.error('Error getProducts:', err)
+    }
+  };
 
-  const [myParticipatedGroupBuys, setMyParticipatedGroupBuys] = useState([
-    {
-      id: 1,
-      image: '/mnt/data/image.png',
-      status: '모집 중',
-      title: '비건 대체육 부산물고기까스',
-      quantity: 1,
-      totalPrice: 12900,
-      location: '연세플라자',
-    },
-    {
-      id: 2,
-      image: '/mnt/data/image.png',
-      status: '구매 진행 중',
-      title: '알러지 고급 휴지 곽티슈 200매',
-      quantity: 1,
-      totalPrice: 8700,
-      location: '기타',
-    },
-  ]);
+  useEffect(() => {
+    fetchOngoingGroupBuys();
+    fetchMyParticipatedGroupBuys();
+  }, []);
+
+  const [myParticipatedGroupBuys, setMyParticipatedGroupBuys] = useState([]);
+  const fetchMyParticipatedGroupBuys = async () => {
+    const storedToken = await AsyncStorage.getItem('token');
+    try {
+      const response = await axios.get(`${BASE_URL}/participation/ongoing`, {
+        headers: {
+          Authorization: `Bearer ${storedToken}`,
+        },
+      });
+      setMyParticipatedGroupBuys(response.data); // 데이터를 상태에 저장
+    } catch (err) {
+      console.error('Error getProducts:', err)
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -67,12 +51,14 @@ const ManageMy = ({ navigation }) => {
           </Text>
           {myOngoingGroupBuys.map((item) => (
             <View key={item.id} style={styles.productCard}>
-              <Image source={{ uri: item.image }} style={styles.productImage} />
+              <Image source={{
+                    uri: `${BASE_URL}/images/${item.productImage}`,
+                  }} style={styles.productImage} />
               <View style={styles.productDetails}>
                 <Text style={styles.status}>{item.status}</Text>
-                <Text style={styles.title}>{item.title}</Text>
-                <Text style={styles.minQuantity}>최소 수량 {item.minQuantity}개</Text>
-                <Text style={styles.currentQuantity}>{item.currentQuantity}/{item.maxQuantity}</Text>
+                <Text style={styles.title}>{item.name}</Text>
+                <Text style={styles.minQuantity}>최소 수량 {item.mqq}개</Text>
+                <Text style={styles.currentQuantity}>{item.remainingQty}/{item.mqq}</Text>
                 <Text style={styles.location}>{item.location}</Text>
               </View>
             </View>
@@ -83,11 +69,13 @@ const ManageMy = ({ navigation }) => {
           <Text style={styles.sectionTitle}>내가 참여 중인 공구</Text>
           {myParticipatedGroupBuys.map((item) => (
             <View key={item.id} style={styles.productCard}>
-              <Image source={{ uri: item.image }} style={styles.productImage} />
+              <Image source={{
+                    uri: `${BASE_URL}/images/${item.productImage}`,
+                  }} style={styles.productImage} />
               <View style={styles.productDetails}>
                 <Text style={styles.status}>{item.status}</Text>
-                <Text style={styles.title}>{item.title}</Text>
-                <Text style={styles.quantity}>1개 ・ 총 {item.totalPrice}원</Text>
+                <Text style={styles.title}>{item.name}</Text>
+                <Text style={styles.quantity}>{item.participate_qty}1개 ・ 총 {item.participate_price}원</Text>
                 <Text style={styles.location}>{item.location}</Text>
               </View>
             </View>

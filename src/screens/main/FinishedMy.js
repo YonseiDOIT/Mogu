@@ -4,62 +4,91 @@ import FinishedMyHeader from '../../components/FinishedMyHeader';
 
 const FinishedMy = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('ongoing'); // 'ongoing' or 'participated'
+  const [myOngoingGroupBuys, setMyOngoingGroupBuys] = useState([]);
+  // const ongoingGroupBuys = [
+  //   {
+  //     id: 1,
+  //     image: '/mnt/data/image.png',
+  //     status: '종료',
+  //     title: '(진행한) 비건 대체육 부산물고기까스',
+  //     minQuantity: 8,
+  //     currentQuantity: 3,
+  //     maxQuantity: 10,
+  //     location: '연세플라자',
+  //   },
+  //   {
+  //     id: 2,
+  //     image: '/mnt/data/image.png',
+  //     status: '취소',
+  //     title: '(진행한) 비건 대체육 부산물고기까스',
+  //     minQuantity: 8,
+  //     currentQuantity: 3,
+  //     maxQuantity: 10,
+  //     location: '연세플라자',
+  //   },
+  // ];
+  const fetchOngoingGroupBuys = async () => {
+    const storedToken = await AsyncStorage.getItem('token');
+    try {
+      const response = await axios.get(`${BASE_URL}/products/seller/completed`, {
+        headers: {
+          Authorization: `Bearer ${storedToken}`,
+        },
+      });
+      setMyOngoingGroupBuys(response.data); // 데이터를 상태에 저장
+    } catch (err) {
+      console.error('Error getProducts:', err)
+    }
+  };
 
-  const ongoingGroupBuys = [
-    {
-      id: 1,
-      image: '/mnt/data/image.png',
-      status: '종료',
-      title: '(진행한) 비건 대체육 부산물고기까스',
-      minQuantity: 8,
-      currentQuantity: 3,
-      maxQuantity: 10,
-      location: '연세플라자',
-    },
-    {
-      id: 2,
-      image: '/mnt/data/image.png',
-      status: '취소',
-      title: '(진행한) 비건 대체육 부산물고기까스',
-      minQuantity: 8,
-      currentQuantity: 3,
-      maxQuantity: 10,
-      location: '연세플라자',
-    },
-  ];
-
-  const participatedGroupBuys = [
-    {
-      id: 1,
-      image: '/mnt/data/image.png',
-      status: '종료',
-      title: '(참여한) 비건 대체육 부산물고기까스',
-      quantity: 1,
-      totalPrice: 12900,
-      location: '연세플라자',
-    },
-    {
-      id: 2,
-      image: '/mnt/data/image.png',
-      status: '취소',
-      title: '(참여한) 비건 대체육 부산물고기까스',
-      quantity: 1,
-      totalPrice: 12900,
-      location: '연세플라자',
-    },
-  ];
+  const [myParticipatedGroupBuys, setMyParticipatedGroupBuys] = useState([]);
+  // const participatedGroupBuys = [
+  //   {
+  //     id: 1,
+  //     image: '/mnt/data/image.png',
+  //     status: '종료',
+  //     title: '(참여한) 비건 대체육 부산물고기까스',
+  //     quantity: 1,
+  //     totalPrice: 12900,
+  //     location: '연세플라자',
+  //   },
+  //   {
+  //     id: 2,
+  //     image: '/mnt/data/image.png',
+  //     status: '취소',
+  //     title: '(참여한) 비건 대체육 부산물고기까스',
+  //     quantity: 1,
+  //     totalPrice: 12900,
+  //     location: '연세플라자',
+  //   },
+  // ];
+  const fetchMyParticipatedGroupBuys = async () => {
+    const storedToken = await AsyncStorage.getItem('token');
+    try {
+      const response = await axios.get(`${BASE_URL}/participation/completed`, {
+        headers: {
+          Authorization: `Bearer ${storedToken}`,
+        },
+      });
+      setMyParticipatedGroupBuys(response.data); // 데이터를 상태에 저장
+    } catch (err) {
+      console.error('Error getProducts:', err)
+    }
+  };
 
   const renderGroupBuys = (groupBuys) => {
     return groupBuys.map((item) => (
       <View key={item.id} style={styles.productCard}>
-        <Image source={{ uri: item.image }} style={styles.productImage} />
+        <Image  source={{
+                    uri: `${BASE_URL}/images/${item.productImage}`,
+                  }} style={styles.productImage} />
         <View style={styles.productDetails}>
           <Text style={item.status === '종료' ? styles.statusCompleted : styles.statusCancelled}>{item.status}</Text>
-          <Text style={styles.title}>{item.title}</Text>
-          {item.minQuantity ? (
-            <Text style={styles.minQuantity}>최소 수량 {item.minQuantity}개</Text>
+          <Text style={styles.title}>{item.name}</Text>
+          {item.mqq ? (
+            <Text style={styles.minQuantity}>최소 수량 {item.mqq}개</Text>
           ) : (
-            <Text style={styles.quantity}>{item.quantity}개 ・ 총 {item.totalPrice}원</Text>
+            <Text style={styles.quantity}>{item.participate_qty}개 ・ 총 {item.participate_price}원</Text>
           )}
           <Text style={styles.location}>{item.location}</Text>
         </View>
@@ -86,7 +115,7 @@ const FinishedMy = ({ navigation }) => {
       </View>
       <ScrollView style={styles.scrollView}>
         <View style={styles.section}>
-          {selectedTab === 'ongoing' ? renderGroupBuys(ongoingGroupBuys) : renderGroupBuys(participatedGroupBuys)}
+          {selectedTab === 'ongoing' ? renderGroupBuys(myOngoingGroupBuys) : renderGroupBuys(myParticipatedGroupBuys)}
         </View>
       </ScrollView>
     </View>
