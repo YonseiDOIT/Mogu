@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   View,
   Image,
@@ -9,23 +9,58 @@ import {
   ScrollView,
   FlatList,
 } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const Search = ({ navigation }) => {
-  const [searchText, setSearchText] = useState('') // 검색어 입력 상태를 관리하는 상태 변수
-  const [recentSearches, setRecentSearches] = useState([]) // 최근 검색어 목록을 관리하는 상태 변수
+  const [searchText, setSearchText] = useState('') // 검색어 입력
+  const [recentSearches, setRecentSearches] = useState([]) // 최근 검색어 목록
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem('token')
+        if (storedToken) {
+          navigation.navigate('SearchResult', { token: storedToken })
+        }
+      } catch (error) {
+        console.error('토큰을 가져오는 중 오류 발생:', error)
+      }
+    }
+
+    fetchToken()
+  }, [])
 
   const handleBackPress = () => {
-    navigation.goBack() // 뒤로 가기 버튼 처리 함수
+    navigation.goBack()
   }
 
-  const handleSearchPress = () => {
-    console.log('search') // 검색 버튼 클릭 시 로그 출력
+  const handleSearchPress = async () => {
+    console.log('search') // 검색 버튼 클릭 확인 로그
     // 검색어 추가 및 중복 검사
     if (
       searchText.trim() !== '' &&
       !recentSearches.includes(searchText.trim())
     ) {
-      setRecentSearches((prevSearches) => [searchText.trim(), ...prevSearches]) // 새로운 검색어를 목록 맨 앞에 추가
+      try {
+        const storedToken = await AsyncStorage.getItem('token')
+        if (storedToken) {
+          setRecentSearches((prevSearches) => [
+            searchText.trim(),
+            ...prevSearches,
+          ]) // 새로운 목록을 검색어 맨 앞에 추가
+          navigation.navigate('SearchResult', {
+            token: storedToken,
+            keyword: searchText.trim(),
+            page: 0,
+            size: 10,
+          })
+          setSearchText('')
+        } else {
+          console.error('토큰이 없습니다.')
+        }
+      } catch (error) {
+        console.error('토큰을 가져오는 중 오류 발생:', error)
+      }
       setSearchText('') // 검색 후 검색어 초기화
     }
   }
