@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native'
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  TextInput,
+} from 'react-native'
 import { useIsFocused } from '@react-navigation/native'
 import axios from 'axios'
 import { BASE_URL } from '../../services/api'
@@ -13,6 +20,36 @@ const SearchResult = ({ route, navigation }) => {
   const [error, setError] = useState(null)
   const isFocused = useIsFocused()
   const [storedToken, setStoredToken] = useState(token || '')
+  const [searchText, setSearchText] = useState('')
+
+  const handleSearchPress = () => {
+    // navigation.navigate('Search', { token: storedToken })
+    console.log('search')
+  }
+
+  // 검색창
+  const renderSearchBar = () => {
+    return (
+      <View style={styles.header}>
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="관심 있는 상품을 검색해보세요."
+            placeholderTextColor="#B3B3B3"
+            value={searchText}
+            onChangeText={(text) => setSearchText(text)}
+            onSubmitEditing={handleSearchPress} // 엔터 키로 검색 가능
+          />
+          <TouchableOpacity onPress={handleSearchPress}>
+            <Image
+              source={require('../../assets/search.png')}
+              style={styles.searchButton}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+    )
+  }
 
   const formatTime = (time) => {
     const totalSeconds = parseInt(time, 10)
@@ -100,74 +137,117 @@ const SearchResult = ({ route, navigation }) => {
   }
 
   return (
-    <View style={styles.itemsGrid}>
-      {results.map((item) => (
-        <View key={item.id} style={styles.itemWrapper}>
-          {isDeadlineSoon(item.endDate) && (
-            <Image
-              source={{
-                uri: `${BASE_URL}/images/${item.productImage}`,
-              }}
-              style={styles.deadlineImage}
-            />
-          )}
-          <TouchableOpacity
-            style={styles.itemBox}
-            onPress={() => navigation.navigate('CreateGroupPurchase')}
-          >
-            <TouchableOpacity
-              onPress={() => handleFavoriteToggle(item.id)}
-              style={styles.heartIconContainer}
-            >
+    <View style={styles.screenContainer}>
+      {renderSearchBar()}
+      <View style={styles.itemsGrid}>
+        {results.map((item) => (
+          <View key={item.id} style={styles.itemWrapper}>
+            {isDeadlineSoon(item.endDate) && (
               <Image
-                source={
-                  item.favorite
-                    ? require('../../assets/heart.png')
-                    : require('../../assets/emptyheart.png')
-                }
-                style={styles.heartIcon}
+                source={{
+                  uri: `${BASE_URL}/images/${item.productImage}`,
+                }}
+                style={styles.deadlineImage}
               />
-            </TouchableOpacity>
-          </TouchableOpacity>
-          <View style={styles.timeContainer}>
-            <MaterialIcons
-              name="access-time"
-              size={16}
-              color="#333"
-              style={[
-                styles.timeIcon,
-                isDeadlineSoon(item.endDate) && styles.deadlineSoonText,
-              ]}
-            />
-            <Text
-              style={[
-                styles.itemText,
-                isDeadlineSoon(item.endDate) && styles.deadlineSoonText,
-              ]}
+            )}
+            <TouchableOpacity
+              style={styles.itemBox}
+              onPress={() => navigation.navigate('CreateGroupPurchase')}
             >
-              {formatTime(item.endDate)}
-            </Text>
+              <TouchableOpacity
+                onPress={() => handleFavoriteToggle(item.id)}
+                style={styles.heartIconContainer}
+              >
+                <Image
+                  source={
+                    item.favorite
+                      ? require('../../assets/heart.png')
+                      : require('../../assets/emptyheart.png')
+                  }
+                  style={styles.heartIcon}
+                />
+              </TouchableOpacity>
+            </TouchableOpacity>
+            <View style={styles.timeContainer}>
+              <MaterialIcons
+                name="access-time"
+                size={16}
+                color="#333"
+                style={[
+                  styles.timeIcon,
+                  isDeadlineSoon(item.endDate) && styles.deadlineSoonText,
+                ]}
+              />
+              <Text
+                style={[
+                  styles.itemText,
+                  isDeadlineSoon(item.endDate) && styles.deadlineSoonText,
+                ]}
+              >
+                {formatTime(item.endDate)}
+              </Text>
+            </View>
+            <Text style={styles.itemTitle}>{item.name}</Text>
+            <View style={styles.row}>
+              <Text
+                style={styles.itemText}
+              >{`수량 ${item.remainingQty}/${item.qty}`}</Text>
+              <Text style={styles.itemPriceWrapper}>
+                <Text style={styles.itemPrice}>{item.price}</Text>
+                <Text style={styles.priceWon}> 원</Text>
+              </Text>
+            </View>
           </View>
-          <Text style={styles.itemTitle}>{item.name}</Text>
-          <View style={styles.row}>
-            <Text
-              style={styles.itemText}
-            >{`수량 ${item.remainingQty}/${item.qty}`}</Text>
-            <Text style={styles.itemPriceWrapper}>
-              <Text style={styles.itemPrice}>{item.price}</Text>
-              <Text style={styles.priceWon}> 원</Text>
-            </Text>
-          </View>
-        </View>
-      ))}
+        ))}
+      </View>
     </View>
   )
 }
 const styles = StyleSheet.create({
+  screenContainer: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  backButton: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
+    marginRight: 10,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#CCCCCC',
+    marginTop: 50,
+    height: 60,
+  },
+  searchContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F3F3',
+    borderRadius: 10,
+    paddingLeft: 15,
+    paddingRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: 37,
+    fontSize: 16,
+  },
+  searchButton: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
+    marginLeft: 10,
   },
   item: {
     flexDirection: 'row',
