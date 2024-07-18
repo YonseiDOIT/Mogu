@@ -36,6 +36,7 @@ const ManageMy = ({ navigation }) => {
         },
       });
       setMyParticipatedGroupBuys(response.data); // 데이터를 상태에 저장
+      console.log("참여한거")
     } catch (err) {
       console.error('Error getProducts:', err)
     }
@@ -58,7 +59,7 @@ const ManageMy = ({ navigation }) => {
                 <Text style={styles.status}>{item.status}</Text>
                 <Text style={styles.title}>{item.name}</Text>
                 <Text style={styles.minQuantity}>최소 수량 {item.mqq}개</Text>
-                <Text style={styles.currentQuantity}>{item.remainingQty}/{item.mqq}</Text>
+                <Text style={styles.currentQuantity}>{item.remainingQty}/{item.qty}</Text>
                 <Text style={styles.location}>{item.location}</Text>
               </View>
             </View>
@@ -75,7 +76,7 @@ const ManageMy = ({ navigation }) => {
               <View style={styles.productDetails}>
                 <Text style={styles.status}>{item.status}</Text>
                 <Text style={styles.title}>{item.name}</Text>
-                <Text style={styles.quantity}>{item.participate_qty}1개 ・ 총 {item.participate_price}원</Text>
+                <Text style={styles.quantity}>{item.participate_qty}개 ・ 총 {item.participate_price}원</Text>
                 <Text style={styles.location}>{item.location}</Text>
               </View>
             </View>
@@ -139,3 +140,4 @@ const styles = StyleSheet.create({
 });
 
 export default ManageMy;
+
