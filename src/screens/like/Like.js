@@ -24,6 +24,29 @@ const Like = () => {
   const [items, setItems] = useState([])
 
   useEffect(() => {
+    // const intervalId = setInterval(() => {
+    //   setItems((prevItems) => {
+    //     return prevItems.map((item) => {
+    //       const newTime = Math.max(parseInt(item.time, 10) - 1, 0).toString()
+    //       return { ...item, time: newTime }
+    //     })
+    //   })
+    // }, 1000) // 1초마다 업데이트
+
+    // return () => clearInterval(intervalId)
+    const intervalId = setInterval(() => {
+      setItems((prevItems) => {
+        return prevItems.map((item) => {
+          const newTime = calculateTimeRemaining(item.endDate)
+          return { ...item, time: newTime }
+        })
+      })
+    }, 1000) // 1초마다 업데이트
+
+    return () => clearInterval(intervalId)
+  }, [])
+
+  useEffect(() => {
     const fetchFavoriteItems = async () => {
       try {
         const storedToken = await AsyncStorage.getItem('token')
@@ -76,6 +99,27 @@ const Like = () => {
 
     if (days > 0) {
       return `${days}일 ${hours}시간 ${minutes}분`
+    } else if (hours > 0) {
+      return `${hours}시간 ${minutes}분 ${seconds}초`
+    } else if (minutes > 0) {
+      return `${minutes}분 ${seconds}초`
+    } else {
+      return `${seconds}초`
+    }
+  }
+
+  const calculateTimeRemaining = (endDate) => {
+    const end = new Date(endDate).getTime()
+    const now = new Date().getTime()
+    const totalSeconds = Math.max((end - now) / 1000, 0)
+
+    const days = Math.floor(totalSeconds / (60 * 60 * 24))
+    const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60))
+    const minutes = Math.floor((totalSeconds % (60 * 60)) / 60)
+    const seconds = Math.floor(totalSeconds % 60)
+
+    if (days > 0) {
+      return `${days}일 ${hours}시간 ${minutes}분 ${seconds}초`
     } else if (hours > 0) {
       return `${hours}시간 ${minutes}분 ${seconds}초`
     } else if (minutes > 0) {
@@ -164,7 +208,7 @@ const Like = () => {
                 >
                   <Image
                     source={
-                      item.favorite
+                      item.product.fav
                         ? require('../../assets/heart.png')
                         : require('../../assets/emptyheart.png')
                     }
@@ -174,7 +218,7 @@ const Like = () => {
               </TouchableOpacity>
               <View style={styles.timeContainer}>
                 <Text style={styles.itemText}>
-                  {formatTime(item.product.endDate)}
+                  {calculateTimeRemaining(item.product.endDate)}
                 </Text>
                 <MaterialIcons
                   name="access-time"

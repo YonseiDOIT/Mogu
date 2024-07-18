@@ -22,15 +22,20 @@ const SearchResult = ({ route, navigation }) => {
   const [storedToken, setStoredToken] = useState(token || '')
   const [searchText, setSearchText] = useState('')
 
-  const handleSearchPress = () => {
-    // navigation.navigate('Search', { token: storedToken })
-    console.log('search')
+  const handleBackPress = () => {
+    navigation.goBack()
   }
 
   // 검색창
   const renderSearchBar = () => {
     return (
       <View style={styles.header}>
+        <TouchableOpacity onPress={handleBackPress}>
+          <Image
+            source={require('../../assets/back.png')}
+            style={styles.backButton}
+          />
+        </TouchableOpacity>
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
@@ -49,6 +54,37 @@ const SearchResult = ({ route, navigation }) => {
         </View>
       </View>
     )
+  }
+
+  const handleSearchPress = async () => {
+    console.log('search') // 검색 버튼 클릭 확인 로그
+    // 검색어 추가 및 중복 검사
+    if (
+      searchText.trim() !== '' &&
+      !recentSearches.includes(searchText.trim())
+    ) {
+      try {
+        const storedToken = await AsyncStorage.getItem('token')
+        if (storedToken) {
+          setRecentSearches((prevSearches) => [
+            searchText.trim(),
+            ...prevSearches,
+          ]) // 새로운 목록을 검색어 맨 앞에 추가
+          navigation.navigate('SearchResult', {
+            token: storedToken,
+            keyword: searchText.trim(),
+            page: 0,
+            size: 10,
+          })
+          setSearchText('')
+        } else {
+          console.error('토큰이 없습니다.')
+        }
+      } catch (error) {
+        console.error('토큰을 가져오는 중 오류 발생:', error)
+      }
+      setSearchText('') // 검색 후 검색어 초기화
+    }
   }
 
   const formatTime = (time) => {

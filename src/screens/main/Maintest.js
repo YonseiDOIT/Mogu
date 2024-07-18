@@ -28,10 +28,20 @@ function Maintest() {
   const [storedToken, setStoredToken] = useState('')
 
   useEffect(() => {
+    // const intervalId = setInterval(() => {
+    //   setItems((prevItems) => {
+    //     return prevItems.map((item) => {
+    //       const newTime = Math.max(parseInt(item.time, 10) - 1, 0).toString()
+    //       return { ...item, time: newTime }
+    //     })
+    //   })
+    // }, 1000) // 1초마다 업데이트
+
+    // return () => clearInterval(intervalId)
     const intervalId = setInterval(() => {
       setItems((prevItems) => {
         return prevItems.map((item) => {
-          const newTime = Math.max(parseInt(item.time, 10) - 1, 0).toString()
+          const newTime = calculateTimeRemaining(item.endDate)
           return { ...item, time: newTime }
         })
       })
@@ -108,6 +118,26 @@ function Maintest() {
 
     if (days > 0) {
       return `${days}일 ${hours}시간 ${minutes}분`
+    } else if (hours > 0) {
+      return `${hours}시간 ${minutes}분 ${seconds}초`
+    } else if (minutes > 0) {
+      return `${minutes}분 ${seconds}초`
+    } else {
+      return `${seconds}초`
+    }
+  }
+  const calculateTimeRemaining = (endDate) => {
+    const end = new Date(endDate).getTime()
+    const now = new Date().getTime()
+    const totalSeconds = Math.max((end - now) / 1000, 0)
+
+    const days = Math.floor(totalSeconds / (60 * 60 * 24))
+    const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60))
+    const minutes = Math.floor((totalSeconds % (60 * 60)) / 60)
+    const seconds = Math.floor(totalSeconds % 60)
+
+    if (days > 0) {
+      return `${days}일 ${hours}시간 ${minutes}분 ${seconds}초`
     } else if (hours > 0) {
       return `${hours}시간 ${minutes}분 ${seconds}초`
     } else if (minutes > 0) {
@@ -289,7 +319,7 @@ function Maintest() {
                     isDeadlineSoon(item.endDate) && styles.deadlineSoonText,
                   ]}
                 >
-                  {formatTime(item.endDate)}
+                  {calculateTimeRemaining(item.endDate)}
                 </Text>
               </View>
               <Text style={styles.itemTitle}>{item.name}</Text>
