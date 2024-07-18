@@ -61,7 +61,7 @@ function Maintest() {
       const response = await axios.get(`${BASE_URL}/products`, {
         params: {
           page: page,
-          size: 2,
+          size: 10,
         },
         headers: {
           Authorization: `Bearer ${storedToken}`,
