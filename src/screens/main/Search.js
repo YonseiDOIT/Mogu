@@ -7,28 +7,29 @@ import {
   TouchableOpacity,
   Text,
   ScrollView,
-  FlatList,
 } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-const Search = ({ navigation }) => {
+const Search = ({ navigation, route }) => {
+  const { token } = route.params
   const [searchText, setSearchText] = useState('') // 검색어 입력
   const [recentSearches, setRecentSearches] = useState([]) // 최근 검색어 목록
+  const [storedToken, setStoredToken] = useState(token || '')
 
   useEffect(() => {
     const fetchToken = async () => {
       try {
         const storedToken = await AsyncStorage.getItem('token')
         if (storedToken) {
-          navigation.navigate('SearchResult', { token: storedToken })
+          console.log('토큰:', storedToken)
+          setStoredToken(storedToken)
         }
       } catch (error) {
         console.error('토큰을 가져오는 중 오류 발생:', error)
       }
     }
-
     fetchToken()
-  }, [])
+  }, [token])
 
   const handleBackPress = () => {
     navigation.goBack()
@@ -76,14 +77,26 @@ const Search = ({ navigation }) => {
     )
   }
 
-  const handleSearchItemPress = (searchTerm) => {
-    navigation.navigate('SearchResult', { searchTerm }) // 검색어를 파라미터로 해서 SearchResult 화면으로 이동
+  const handleSearchItemPress = async (searchTerm) => {
+    try {
+      const token = await AsyncStorage.getItem('token')
+      if (token) {
+        navigation.navigate('SearchResult', {
+          // 검색어를 파라미터로 해서 SearchResult 화면으로 이동
+          keyword: searchTerm,
+          token: token,
+        })
+      } else {
+        console.error('토큰이 없습니다.')
+      }
+    } catch (error) {
+      console.error('토큰을 가져오는 중 오류 발생:', error)
+    }
   }
 
   const renderRecentSearches = () =>
     recentSearches.map((item, index) => {
       const itemWidth = item.length * 12 + 50 // 검색어 길이에 따라 아이템의 가로 길이 계산
-
       return (
         <View key={index} style={[styles.searchItem, { width: itemWidth }]}>
           <TouchableOpacity
