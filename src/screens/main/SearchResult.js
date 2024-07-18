@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, StyleSheet, FlatList, Image } from 'react-native'
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native'
 import { useIsFocused } from '@react-navigation/native'
 import axios from 'axios'
 import { BASE_URL } from '../../services/api'
@@ -7,11 +7,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
 const SearchResult = ({ route, navigation }) => {
-  const { token, keyword, page = 0, size = 10 } = route.params
+  const { keyword, page = 0, size = 10, token } = route.params
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const isFocused = useIsFocused()
+  const [storedToken, setStoredToken] = useState(token || '')
 
   const formatTime = (time) => {
     const totalSeconds = parseInt(time, 10)
@@ -41,16 +42,22 @@ const SearchResult = ({ route, navigation }) => {
   useEffect(() => {
     const fetchSearchResults = async () => {
       setLoading(true)
-      let storedToken
       try {
-        if (storedToken) {
-          const storedToken = await AsyncStorage.getItem('token')
-          console.log('Fetched token:', token)
-          console.log('Request parameters:', { keyword, page, size })
+        const storedToken = token || (await AsyncStorage.getItem('token'))
+        if (!storedToken) {
+          console.log('토큰이 없습니다.')
+          return
+        }
+        setStoredToken(storedToken)
+
+        console.log('token:', storedToken)
+        console.log('parameters:', { keyword, page, size })
+        if (token) {
+          const storedToken = token || (await AsyncStorage.getItem('token'))
 
           const response = await axios.get(`${BASE_URL}/products/search`, {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${storedToken}`,
             },
             params: {
               keyword: keyword,
@@ -61,15 +68,19 @@ const SearchResult = ({ route, navigation }) => {
 
           console.log('Response data:', response.data)
           setResults(response.data.content)
+
+          if (response.data.content.length === 0) {
+            console.log('검색 결과가 없습니다.')
+          }
         }
       } catch (err) {
         if (err.response) {
           console.error('Error response:', err.response)
           if (err.response.status === 403) {
-            console.error('403 Forbidden Error:', err.message)
+            console.error('에러:', err.message)
           }
         } else {
-          console.error('Error:', err.message)
+          console.error('에러:', err.message)
         }
         setError(err)
       } finally {
@@ -79,7 +90,14 @@ const SearchResult = ({ route, navigation }) => {
     if (isFocused) {
       fetchSearchResults()
     }
-  }, [isFocused, keyword, page, size])
+  }, [isFocused, keyword, page, size, token])
+
+  const handleFavoriteToggle = async (itemId) => {
+    const updatedResults = results.map((item) =>
+      item.id === itemId ? { ...item, favorite: !item.favorite } : item
+    )
+    setResults(updatedResults)
+  }
 
   return (
     <View style={styles.itemsGrid}>
