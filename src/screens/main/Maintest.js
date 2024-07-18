@@ -25,6 +25,7 @@ function Maintest() {
   const [loading, setLoading] = useState(false)
   const [items, setItems] = useState([])
   const [hasMoreData, setHasMoreData] = useState(true)
+  const [storedToken, setStoredToken] = useState('')
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -85,7 +86,7 @@ function Maintest() {
   }
 
   const handleSearchPress = () => {
-    navigation.navigate('Search')
+    navigation.navigate('Search', { token: storedToken })
   }
 
   const toggleDropdown = () => {
@@ -140,6 +141,7 @@ function Maintest() {
       getProducts(nextPage) // 다음 페이지 데이터 요청
     }
   }
+
   return (
     <View style={styles.screenContainer}>
       <View style={styles.container}>

@@ -83,6 +83,11 @@ const StackAfterLogin = () => {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="SearchResult"
+        component={SearchResult}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="Useredit"
         component={Useredit}
         options={{ headerShown: false }}
