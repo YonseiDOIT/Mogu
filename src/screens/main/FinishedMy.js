@@ -1,13 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
-import FinishedMyHeader from '../../components/FinishedMyHeader';
-import axios from 'axios'
-import { BASE_URL } from '../../services/api'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import React, { useState } from 'react'
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Image,
+} from 'react-native'
+import FinishedMyHeader from '../../components/FinishedMyHeader'
 
 const FinishedMy = ({ navigation }) => {
-  const [selectedTab, setSelectedTab] = useState('ongoing'); // 'ongoing' or 'participated'
-  const [myOngoingGroupBuys, setMyOngoingGroupBuys] = useState([]);
+  const [selectedTab, setSelectedTab] = useState('ongoing') // 'ongoing' or 'participated'
+  const [myOngoingGroupBuys, setMyOngoingGroupBuys] = useState([])
   // const ongoingGroupBuys = [
   //   {
   //     id: 1,
@@ -31,20 +35,23 @@ const FinishedMy = ({ navigation }) => {
   //   },
   // ];
   const fetchOngoingGroupBuys = async () => {
-    const storedToken = await AsyncStorage.getItem('token');
+    const storedToken = await AsyncStorage.getItem('token')
     try {
-      const response = await axios.get(`${BASE_URL}/products/seller/completed`, {
-        headers: {
-          Authorization: `Bearer ${storedToken}`,
-        },
-      });
-      setMyOngoingGroupBuys(response.data); // 데이터를 상태에 저장
+      const response = await axios.get(
+        `${BASE_URL}/products/seller/completed`,
+        {
+          headers: {
+            Authorization: `Bearer ${storedToken}`,
+          },
+        }
+      )
+      setMyOngoingGroupBuys(response.data) // 데이터를 상태에 저장
     } catch (err) {
       console.error('Error getProducts:', err)
     }
-  };
+  }
 
-  const [myParticipatedGroupBuys, setMyParticipatedGroupBuys] = useState([]);
+  const [myParticipatedGroupBuys, setMyParticipatedGroupBuys] = useState([])
   // const participatedGroupBuys = [
   //   {
   //     id: 1,
@@ -66,69 +73,104 @@ const FinishedMy = ({ navigation }) => {
   //   },
   // ];
   const fetchMyParticipatedGroupBuys = async () => {
-    const storedToken = await AsyncStorage.getItem('token');
+    const storedToken = await AsyncStorage.getItem('token')
     try {
       const response = await axios.get(`${BASE_URL}/participation/completed`, {
         headers: {
           Authorization: `Bearer ${storedToken}`,
         },
-      });
-      setMyParticipatedGroupBuys(response.data); // 데이터를 상태에 저장
+      })
+      setMyParticipatedGroupBuys(response.data) // 데이터를 상태에 저장
     } catch (err) {
       console.error('Error getProducts:', err)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchOngoingGroupBuys();
-    fetchMyParticipatedGroupBuys();
-  }, []);
+    fetchOngoingGroupBuys()
+    fetchMyParticipatedGroupBuys()
+  }, [])
 
   const renderGroupBuys = (groupBuys) => {
     return groupBuys.map((item) => (
       <View key={item.id} style={styles.productCard}>
-        <Image  source={{
-                    uri: `${BASE_URL}/images/${item.productImage}`,
-                  }} style={styles.productImage} />
+        <Image
+          source={{
+            uri: `${BASE_URL}/images/${item.productImage}`,
+          }}
+          style={styles.productImage}
+        />
         <View style={styles.productDetails}>
-          <Text style={item.status === '종료' ? styles.statusCompleted : styles.statusCancelled}>{item.status}</Text>
+          <Text
+            style={
+              item.status === '종료'
+                ? styles.statusCompleted
+                : styles.statusCancelled
+            }
+          >
+            {item.status}
+          </Text>
           <Text style={styles.title}>{item.name}</Text>
           {item.mqq ? (
             <Text style={styles.minQuantity}>최소 수량 {item.mqq}개</Text>
           ) : (
-            <Text style={styles.quantity}>{item.participate_qty}개 ・ 총 {item.participate_price}원</Text>
+            <Text style={styles.quantity}>
+              {item.participate_qty}개 ・ 총 {item.participate_price}원
+            </Text>
           )}
           <Text style={styles.location}>{item.location}</Text>
         </View>
       </View>
-    ));
-  };
+    ))
+  }
 
   return (
     <View style={styles.container}>
       <FinishedMyHeader />
       <View style={styles.buttonContainer}>
         <TouchableOpacity
-          style={[styles.tabButton, selectedTab === 'ongoing' && styles.activeTab]}
+          style={[
+            styles.tabButton,
+            selectedTab === 'ongoing' && styles.activeTab,
+          ]}
           onPress={() => setSelectedTab('ongoing')}
         >
-          <Text style={[styles.tabText, selectedTab === 'ongoing' && styles.activeTabText]}>내가 진행한 공구</Text>
+          <Text
+            style={[
+              styles.tabText,
+              selectedTab === 'ongoing' && styles.activeTabText,
+            ]}
+          >
+            내가 진행한 공구
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tabButton, selectedTab === 'participated' && styles.activeTab]}
+          style={[
+            styles.tabButton,
+            selectedTab === 'participated' && styles.activeTab,
+          ]}
           onPress={() => setSelectedTab('participated')}
         >
-          <Text style={[styles.tabText, selectedTab === 'participated' && styles.activeTabText]}>내가 참여한 공구</Text>
+          <Text
+            style={[
+              styles.tabText,
+              selectedTab === 'participated' && styles.activeTabText,
+            ]}
+          >
+            내가 참여한 공구
+          </Text>
         </TouchableOpacity>
       </View>
       <ScrollView style={styles.scrollView}>
         <View style={styles.section}>
-          {selectedTab === 'ongoing' ? renderGroupBuys(myOngoingGroupBuys) : renderGroupBuys(myParticipatedGroupBuys)}
+          {selectedTab === 'ongoing'
+            ? renderGroupBuys(myOngoingGroupBuys)
+            : renderGroupBuys(myParticipatedGroupBuys)}
         </View>
       </ScrollView>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -139,7 +181,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'left',
     marginTop: 15,
-    marginLeft:10
+    marginLeft: 10,
   },
   tabButton: {
     paddingVertical: 5,
@@ -204,7 +246,6 @@ const styles = StyleSheet.create({
   location: {
     color: '#555',
   },
-});
+})
 
-export default FinishedMy;
-
+export default FinishedMy

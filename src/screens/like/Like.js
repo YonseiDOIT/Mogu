@@ -47,7 +47,6 @@ const Like = () => {
   }, [])
 
   useEffect(() => {
-    
     const fetchFavoriteItems = async () => {
       try {
         const storedToken = await AsyncStorage.getItem('token')
