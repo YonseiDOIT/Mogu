@@ -86,6 +86,11 @@ const FinishedMy = ({ navigation }) => {
     }
   }
 
+  useEffect(() => {
+    fetchOngoingGroupBuys()
+    fetchMyParticipatedGroupBuys()
+  }, [])
+
   const renderGroupBuys = (groupBuys) => {
     return groupBuys.map((item) => (
       <View key={item.id} style={styles.productCard}>
