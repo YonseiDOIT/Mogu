@@ -110,7 +110,7 @@ const MyInfoCheck = ({ navigation, route }) => {
         <View style={styles.id}>
           <Image
             source={require('../../assets/myinfoMail.png')}
-            style={[styles.idmail, { height: 16, top: 15 }]}
+            style={[styles.idmail, { height: 21, top: 12 }]}
           />
           <View style={[styles.idinfo, { left: 15 }]}>
             <Text style={[styles.usernametext, { color: '#777777' }]}>
