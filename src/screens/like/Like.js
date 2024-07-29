@@ -142,6 +142,10 @@ const Like = () => {
     setItems(updatedItems)
   }
 
+  const formatPrice = (price) => {
+    return price.toLocaleString()
+  }
+
   return (
     <View style={styles.screenContainer}>
       <LikeHeader />
@@ -232,9 +236,9 @@ const Like = () => {
                 <Text
                   style={styles.itemText}
                 >{`수량 ${item.product.remainingQty}/${item.product.qty}`}</Text>
-                <Text
-                  style={styles.itemPrice}
-                >{`${item.product.price} 원`}</Text>
+                <Text style={styles.itemPrice}>{`${formatPrice(
+                  item.product.price
+                )} 원`}</Text>
               </View>
             </View>
           ))}
