@@ -191,7 +191,7 @@ const Like = () => {
         <View style={styles.itemsGrid}>
           {items.map((item) => (
             <View key={item.product.favid} style={styles.itemWrapper}>
-              {isDeadlineSoon(item.product.endDate) && (
+              {/* {isDeadlineSoon(item.product.endDate) && (
                 <Image
                   source={{
                     uri: `${BASE_URL}/images/${item.product.productImage}`,
@@ -201,11 +201,17 @@ const Like = () => {
                     // { width: '100%', height: '71%' },
                   ]}
                 />
-              )}
+              )} */}
               <TouchableOpacity
                 style={styles.itemBox}
                 onPress={() => navigation.navigate('CreateGroupPurchase')}
               >
+                <Image
+                  source={{
+                    uri: `${BASE_URL}/images/${item.productImage}`,
+                  }}
+                  style={styles.deadlineImage}
+                />
                 <TouchableOpacity
                   onPress={() => handleFavoriteToggle(item.product.favid)}
                   style={styles.heartIconContainer}
@@ -471,8 +477,9 @@ const styles = StyleSheet.create({
   deadlineImage: {
     position: 'absolute',
     width: '100%',
-    height: '70%',
+    height: '100%',
     zIndex: 1,
+    borderRadius: 10,
   },
 })
 
