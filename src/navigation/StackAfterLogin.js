@@ -51,7 +51,12 @@ const StackAfterLogin = () => {
         component={SignOutFinish}
         options={{ headerShown: false }}
       />
-      <Stack.Screen name="RecruitDetails" options={{ headerShown: false }}>
+      <Stack.Screen
+        name="RecruitDetails"
+        component={RecruitDetails}
+        options={{ headerShown: false }}
+      />
+      {/* <Stack.Screen name="RecruitDetails" options={{ headerShown: false }}>
         {(props) => (
           <RecruitDetails
             {...props}
@@ -71,7 +76,7 @@ const StackAfterLogin = () => {
             isHost={false}
           />
         )}
-      </Stack.Screen>
+      </Stack.Screen> */}
       <Stack.Screen
         name="Participate"
         component={Participate}
