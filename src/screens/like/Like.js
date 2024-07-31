@@ -204,7 +204,7 @@ const Like = () => {
               )} */}
               <TouchableOpacity
                 style={styles.itemBox}
-                onPress={() => navigation.navigate('CreateGroupPurchase')}
+                onPress={() => navigation.navigate('Participate')}
               >
                 <Image
                   source={{
