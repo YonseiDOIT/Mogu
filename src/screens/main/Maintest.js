@@ -277,18 +277,24 @@ function Maintest() {
         <View style={styles.itemsGrid}>
           {items.map((item) => (
             <View key={item.id} style={styles.itemWrapper}>
-              {isDeadlineSoon(item.endDate) && (
+              {/* {isDeadlineSoon(item.endDate) && (
                 <Image
                   source={{
                     uri: `${BASE_URL}/images/${item.productImage}`,
                   }}
                   style={styles.deadlineImage}
                 />
-              )}
+              )} */}
               <TouchableOpacity
                 style={styles.itemBox}
                 onPress={() => navigation.navigate('CreateGroupPurchase')}
               >
+                <Image
+                  source={{
+                    uri: `${BASE_URL}/images/${item.productImage}`,
+                  }}
+                  style={styles.deadlineImage}
+                />
                 <TouchableOpacity
                   onPress={() => handleFavoriteToggle(item.id)}
                   style={styles.heartIconContainer}
@@ -608,8 +614,9 @@ const styles = StyleSheet.create({
   deadlineImage: {
     position: 'absolute',
     width: '100%',
-    height: '71%',
+    height: '100%',
     zIndex: 1,
+    borderRadius: 10,
   },
 })
 
