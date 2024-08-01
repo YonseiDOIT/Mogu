@@ -26,18 +26,9 @@ function Maintest() {
   const [items, setItems] = useState([])
   const [hasMoreData, setHasMoreData] = useState(true)
   const [storedToken, setStoredToken] = useState('')
+  const [favoriteItems, setFavoriteItems] = useState([])
 
   useEffect(() => {
-    // const intervalId = setInterval(() => {
-    //   setItems((prevItems) => {
-    //     return prevItems.map((item) => {
-    //       const newTime = Math.max(parseInt(item.time, 10) - 1, 0).toString()
-    //       return { ...item, time: newTime }
-    //     })
-    //   })
-    // }, 1000) // 1초마다 업데이트
-
-    // return () => clearInterval(intervalId)
     const intervalId = setInterval(() => {
       setItems((prevItems) => {
         return prevItems.map((item) => {
@@ -53,15 +44,43 @@ function Maintest() {
   useEffect(() => {
     if (isFocused) {
       // 화면이 포커스될 때 첫 페이지 데이터를 다시 로드
-      resetAndFetchProducts()
+      loadFavoriteItems()
     }
   }, [isFocused])
 
-  const resetAndFetchProducts = () => {
+  const loadFavoriteItems = async () => {
+    try {
+      const favoriteItemsString = await AsyncStorage.getItem('favoriteItems')
+      const favoriteItems = favoriteItemsString
+        ? JSON.parse(favoriteItemsString)
+        : []
+      setFavoriteItems(favoriteItems)
+      updateItemsWithFavorites(favoriteItems)
+    } catch (error) {
+      console.error('Error loading favorite items:', error)
+    } finally {
+      resetAndFetchProducts()
+    }
+  }
+
+  const resetAndFetchProducts = async () => {
     setPage(0)
     setItems([])
     setHasMoreData(true)
     getProducts(0)
+  }
+
+  const updateItemsWithFavorites = (favoriteItems) => {
+    setItems((prevItems) => {
+      return prevItems.map((item) => {
+        const favoriteItem = favoriteItems.find(
+          (favItem) => favItem.id === item.id
+        )
+        return favoriteItem
+          ? { ...item, favorite: true }
+          : { ...item, favorite: false }
+      })
+    })
   }
 
   const getProducts = async (page) => {
@@ -78,10 +97,20 @@ function Maintest() {
         },
       })
 
+      const newItems = response.data.content.map((item) => {
+        const favoriteItem = favoriteItems.find(
+          (favItem) => favItem.id === item.id
+        )
+        return favoriteItem
+          ? // ? { ...item, favorite: favoriteItem.favorite }
+            { ...item, favorite: true }
+          : { ...item, favorite: false }
+      })
+
       if (page === 0) {
-        setItems(response.data.content)
+        setItems(newItems)
       } else {
-        setItems((prevItems) => [...prevItems, ...response.data.content])
+        setItems((prevItems) => [...prevItems, ...newItems])
       }
 
       if (response.data.content.length < 8) {
@@ -153,11 +182,23 @@ function Maintest() {
     return totalMinutes < 1440 // 24시간 미만 (1440분)
   }
 
-  const handleFavoriteToggle = (itemId) => {
+  const handleFavoriteToggle = async (itemId) => {
     const updatedItems = items.map((item) =>
       item.id === itemId ? { ...item, favorite: !item.favorite } : item
     )
     setItems(updatedItems)
+
+    const updatedFavoriteItems = updatedItems.filter((item) => item.favorite)
+    setFavoriteItems(updatedFavoriteItems)
+
+    try {
+      await AsyncStorage.setItem(
+        'favoriteItems',
+        JSON.stringify(updatedFavoriteItems)
+      )
+    } catch (error) {
+      console.error('Error saving favorite items:', error)
+    }
   }
 
   const handleScrollEnd = (event) => {
