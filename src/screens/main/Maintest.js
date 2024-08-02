@@ -29,6 +29,23 @@ function Maintest() {
   const [favoriteItems, setFavoriteItems] = useState([])
 
   useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token')
+        if (token) {
+          setStoredToken(token || '')
+          console.log('Token fetched:', token)
+        } else {
+          console.error('토큰이 없습니다.')
+        }
+      } catch (error) {
+        console.error('토큰을 가져오는 중 오류 발생:', error)
+      }
+    }
+    fetchToken()
+  }, [])
+
+  useEffect(() => {
     const intervalId = setInterval(() => {
       setItems((prevItems) => {
         return prevItems.map((item) => {
@@ -50,6 +67,15 @@ function Maintest() {
 
   const loadFavoriteItems = async () => {
     try {
+      await fetchToken()
+      const token = storedToken
+      // const token = await AsyncStorage.getItem('token')
+      if (!token) {
+        console.error('토큰이 없습니다.')
+        return
+      }
+      setStoredToken(token)
+
       const favoriteItemsString = await AsyncStorage.getItem('favoriteItems')
       const favoriteItems = favoriteItemsString
         ? JSON.parse(favoriteItemsString)
@@ -64,10 +90,20 @@ function Maintest() {
   }
 
   const resetAndFetchProducts = async () => {
-    setPage(0)
-    setItems([])
-    setHasMoreData(true)
-    getProducts(0)
+    try {
+      await fetchToken()
+      const token = storedToken
+      if (!token) {
+        console.error('토큰이 없습니다.')
+        return
+      }
+      setPage(0)
+      setItems([])
+      setHasMoreData(true)
+      getProducts(0)
+    } catch (error) {
+      console.error('Error resetting and fetching products:', error)
+    }
   }
 
   const updateItemsWithFavorites = (favoriteItems) => {
@@ -84,7 +120,11 @@ function Maintest() {
   }
 
   const getProducts = async (page) => {
-    const storedToken = await AsyncStorage.getItem('token')
+    const token = await AsyncStorage.getItem('token')
+    if (!token) {
+      console.error('토큰이 없습니다.')
+      return
+    }
     setLoading(true)
     try {
       const response = await axios.get(`${BASE_URL}/products`, {
@@ -93,7 +133,7 @@ function Maintest() {
           size: 10,
         },
         headers: {
-          Authorization: `Bearer ${storedToken}`,
+          Authorization: `Bearer ${token}`,
         },
       })
 
@@ -196,8 +236,49 @@ function Maintest() {
         'favoriteItems',
         JSON.stringify(updatedFavoriteItems)
       )
+      await addFavorite(itemId)
     } catch (error) {
       console.error('Error saving favorite items:', error)
+    }
+  }
+
+  const addFavorite = async (itemId) => {
+    if (!storedToken) {
+      console.error('토큰이 없습니다.')
+      return
+    }
+    setLoading(true)
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/favorite/add`,
+        { productId: itemId },
+        {
+          headers: {
+            Authorization: `Bearer ${storedToken}`,
+          },
+        }
+      )
+      console.log('찜 추가 성공:', response.data)
+    } catch (error) {
+      if (error.response) {
+        // 서버에서 반환한 응답 검사
+        console.error('Error adding favorite:', error.response.data)
+        console.error('Error status:', error.response.status)
+        console.error('Error headers:', error.response.headers)
+
+        // 403 오류의 상세 원인 파악
+        if (error.response.status === 403) {
+          console.error('403 Forbidden: 권한이 없습니다.')
+        }
+      } else if (error.request) {
+        // 요청이 전송되었지만 응답이 없는 경우
+        console.error('No response received:', error.request)
+      } else {
+        // 요청 설정 중 오류 발생
+        console.error('Error setting up request:', error.message)
+      }
+    } finally {
+      setLoading(false)
     }
   }
 
