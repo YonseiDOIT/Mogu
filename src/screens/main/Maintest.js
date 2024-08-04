@@ -67,7 +67,7 @@ function Maintest() {
     setPage(0)
     setItems([])
     setHasMoreData(true)
-    getProducts(0)
+    await getProducts(0)
   }
 
   const updateItemsWithFavorites = (favoriteItems) => {
@@ -85,6 +85,11 @@ function Maintest() {
 
   const getProducts = async (page) => {
     const storedToken = await AsyncStorage.getItem('token')
+    if (!storedToken) {
+      console.error('Token is missing')
+      return
+    }
+
     setLoading(true)
     try {
       const response = await axios.get(`${BASE_URL}/products`, {
@@ -197,13 +202,11 @@ function Maintest() {
     setFavoriteItems(updatedFavoriteItems)
 
     try {
-      let token = await AsyncStorage.getItem('token')
-      if (!token || isTokenExpired(token)) {
+      const token = await AsyncStorage.getItem('token')
+      if (!token) {
         console.error('토큰이 없습니다.')
         return
       }
-
-      console.log('토큰 확인:', token)
 
       const config = {
         headers: {
@@ -211,18 +214,16 @@ function Maintest() {
         },
       }
 
-      if (isCurrentlyFavorite) {
-        // 현재 찜 상태인 경우, 찜 삭제 요청
-        await axios.delete(`${BASE_URL}/favorite/${itemId}`, config)
-        console.log('찜 삭제 성공')
-      } else {
-        // 현재 찜 상태가 아닌 경우, 찜 추가 요청
+      if (!isCurrentlyFavorite) {
         await axios.post(
           `${BASE_URL}/favorite/add`,
           { productId: itemId },
           config
         )
         console.log('찜 추가 성공')
+      } else {
+        await axios.delete(`${BASE_URL}/favorite/${itemId}`, config)
+        console.log('찜 삭제 성공')
       }
 
       await AsyncStorage.setItem(
@@ -233,9 +234,30 @@ function Maintest() {
       console.error('Error saving favorite items:', error)
       if (error.response && error.response.status === 403) {
         console.error('토큰이 없습니다.')
+        await AsyncStorage.removeItem('token')
       }
     }
   }
+
+  useEffect(() => {
+    const initializeFavoriteItems = async () => {
+      try {
+        const favoriteItemsString = await AsyncStorage.getItem('favoriteItems')
+        const favoriteItems = favoriteItemsString
+          ? JSON.parse(favoriteItemsString)
+          : []
+        setFavoriteItems(favoriteItems)
+        updateItemsWithFavorites(favoriteItems)
+      } catch (error) {
+        console.error('Error loading favorite items:', error)
+      } finally {
+        // 데이터 로딩 후 페이지 새로고침
+        resetAndFetchProducts()
+      }
+    }
+
+    initializeFavoriteItems()
+  }, [isFocused])
 
   const handleScrollEnd = (event) => {
     const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent
@@ -251,17 +273,6 @@ function Maintest() {
 
   const formatPrice = (price) => {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  }
-
-  const isTokenExpired = (token) => {
-    try {
-      const decodedToken = JSON.parse(atob(token.split('.')[1]))
-      const currentTime = Date.now() / 1000
-      return decodedToken.exp < currentTime
-    } catch (e) {
-      console.error('Error decoding token:', e)
-      return true
-    }
   }
 
   return (
