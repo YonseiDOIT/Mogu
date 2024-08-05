@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import {
   View,
   TextInput,
@@ -28,6 +28,26 @@ function Maintest() {
   const [storedToken, setStoredToken] = useState('')
   const [favoriteItems, setFavoriteItems] = useState([])
 
+  const loadToken = useCallback(async () => {
+    try {
+      const token = await AsyncStorage.getItem('token')
+      console.log('Loaded token:', token)
+      setStoredToken(token || '')
+    } catch (error) {
+      console.error('Error loading token:', error)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadToken()
+  }, [loadToken])
+
+  useEffect(() => {
+    if (isFocused && storedToken) {
+      loadFavoriteItems()
+    }
+  }, [isFocused, storedToken])
+
   useEffect(() => {
     const intervalId = setInterval(() => {
       setItems((prevItems) => {
@@ -41,14 +61,7 @@ function Maintest() {
     return () => clearInterval(intervalId)
   }, [])
 
-  useEffect(() => {
-    if (isFocused) {
-      // 화면이 포커스될 때 첫 페이지 데이터를 다시 로드
-      loadFavoriteItems()
-    }
-  }, [isFocused])
-
-  const loadFavoriteItems = async () => {
+  const loadFavoriteItems = async (token) => {
     try {
       const favoriteItemsString = await AsyncStorage.getItem('favoriteItems')
       const favoriteItems = favoriteItemsString
@@ -59,7 +72,7 @@ function Maintest() {
     } catch (error) {
       console.error('Error loading favorite items:', error)
     } finally {
-      resetAndFetchProducts()
+      resetAndFetchProducts(token)
     }
   }
 
@@ -67,7 +80,10 @@ function Maintest() {
     setPage(0)
     setItems([])
     setHasMoreData(true)
-    await getProducts(0)
+    // await getProducts(0, token)
+    if (storedToken) {
+      await getProducts(0)
+    }
   }
 
   const updateItemsWithFavorites = (favoriteItems) => {
@@ -83,51 +99,101 @@ function Maintest() {
     })
   }
 
+  // const getProducts = async (page, token) => {
+  //   if (!token) {
+  //     console.error('토큰이 없습니다.')
+  //     return
+  //   }
+
+  //   console.log('token:', token)
+  //   console.log('Request URL:', `${BASE_URL}/products?page=${page}&size=10`)
+
+  //   setLoading(true)
+  //   try {
+  //     const response = await axios.get(`${BASE_URL}/products`, {
+  //       params: {
+  //         page: page,
+  //         size: 10,
+  //       },
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     })
+
+  //     console.log('API Response:', response.data)
+
+  //     const newItems = response.data.content.map((item) => {
+  //       const favoriteItem = favoriteItems.find(
+  //         (favItem) => favItem.id === item.id
+  //       )
+  //       return favoriteItem
+  //         ? { ...item, favorite: true }
+  //         : { ...item, favorite: false }
+  //     })
+
+  //     console.log('New Items:', newItems)
+
+  //     if (page === 0) {
+  //       setItems(newItems)
+  //     } else {
+  //       setItems((prevItems) => [...prevItems, ...newItems])
+  //     }
+
+  //     if (response.data.content.length < 8) {
+  //       setHasMoreData(false)
+  //     }
+  //   } catch (error) {
+  //     console.error(
+  //       'Error in getProducts:',
+  //       error.response ? error.response.data : error.message
+  //     )
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  //   console.log('목록확인', items)
+  // }
+
   const getProducts = async (page) => {
-    const storedToken = await AsyncStorage.getItem('token')
     if (!storedToken) {
-      console.error('Token is missing')
+      console.error('토큰이 없습니다.')
       return
     }
 
     setLoading(true)
     try {
       const response = await axios.get(`${BASE_URL}/products`, {
-        params: {
-          page: page,
-          size: 10,
-        },
-        headers: {
-          Authorization: `Bearer ${storedToken}`,
-        },
+        params: { page, size: 10 },
+        headers: { Authorization: `Bearer ${storedToken}` },
       })
 
-      const newItems = response.data.content.map((item) => {
-        const favoriteItem = favoriteItems.find(
-          (favItem) => favItem.id === item.id
-        )
-        return favoriteItem
-          ? // ? { ...item, favorite: favoriteItem.favorite }
-            { ...item, favorite: true }
-          : { ...item, favorite: false }
-      })
+      const newItems = response.data.content.map((item) => ({
+        ...item,
+        favorite: !!favoriteItems.find((favItem) => favItem.id === item.id),
+      }))
 
-      if (page === 0) {
-        setItems(newItems)
-      } else {
-        setItems((prevItems) => [...prevItems, ...newItems])
-      }
-
-      if (response.data.content.length < 8) {
-        setHasMoreData(false)
-      }
+      setItems((prevItems) =>
+        page === 0 ? newItems : [...prevItems, ...newItems]
+      )
+      setHasMoreData(response.data.content.length >= 10)
     } catch (error) {
-      console.error('Error getProducts:', error)
+      console.error(
+        'Error in getProducts:',
+        error.response ? error.response.data : error.message
+      )
     } finally {
       setLoading(false)
     }
-    console.log('목록확인', items)
   }
+
+  // const checkToken = async () => {
+  //   try {
+  //     const token = await AsyncStorage.getItem('token')
+  //     // console.log('Token from AsyncStorage:', token)
+  //   } catch (error) {
+  //     console.error('Error checking token:', error)
+  //   }
+  // }
+  // checkToken()
 
   const handleSearchPress = () => {
     navigation.navigate('Search', { token: storedToken })
@@ -160,6 +226,7 @@ function Maintest() {
       return `${seconds}초`
     }
   }
+
   const calculateTimeRemaining = (endDate) => {
     const end = new Date(endDate).getTime()
     const now = new Date().getTime()
@@ -202,17 +269,19 @@ function Maintest() {
     setFavoriteItems(updatedFavoriteItems)
 
     try {
-      const token = await AsyncStorage.getItem('token')
-      if (!token) {
+      if (!storedToken) {
         console.error('토큰이 없습니다.')
         return
       }
 
       const config = {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${storedToken}`,
         },
       }
+
+      console.log('Favorite toggle initiated for item:', itemId)
+      console.log('Token:', storedToken)
 
       if (!isCurrentlyFavorite) {
         await axios.post(
@@ -232,10 +301,18 @@ function Maintest() {
       )
     } catch (error) {
       console.error('Error saving favorite items:', error)
-      if (error.response && error.response.status === 403) {
-        console.error('토큰이 없습니다.')
-        await AsyncStorage.removeItem('token')
-      }
+      console.error(
+        'Response data:',
+        error.response ? error.response.data : null
+      )
+      console.error(
+        'Response status:',
+        error.response ? error.response.status : null
+      )
+      // const revertedItems = updatedItems.map((item) =>
+      //   item.id === itemId ? { ...item, favorite: isCurrentlyFavorite } : item
+      // )
+      // setItems(revertedItems)
     }
   }
 
@@ -248,6 +325,7 @@ function Maintest() {
           : []
         setFavoriteItems(favoriteItems)
         updateItemsWithFavorites(favoriteItems)
+        resetAndFetchProducts(storedToken)
       } catch (error) {
         console.error('Error loading favorite items:', error)
       } finally {
@@ -257,7 +335,7 @@ function Maintest() {
     }
 
     initializeFavoriteItems()
-  }, [isFocused])
+  }, [isFocused, storedToken])
 
   const handleScrollEnd = (event) => {
     const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent
@@ -273,6 +351,42 @@ function Maintest() {
 
   const formatPrice = (price) => {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  }
+
+  const renderItem = (item) => {
+    return (
+      <View key={item.id} style={styles.itemContainer}>
+        <TouchableOpacity onPress={() => navigateToDetail(item)}>
+          <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
+        </TouchableOpacity>
+        <Text style={styles.itemName}>{item.name}</Text>
+        <Text style={styles.itemPrice}>
+          {item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '원'}
+        </Text>
+        <Text
+          style={[
+            styles.itemTime,
+            isDeadlineSoon(item.time) ? styles.deadlineSoon : null,
+          ]}
+        >
+          {calculateTimeRemaining(item.endDate)}
+        </Text>
+        <TouchableOpacity
+          onPress={() => handleFavoriteToggle(item.id)}
+          style={styles.favoriteButton}
+        >
+          <MaterialIcons
+            name={item.favorite ? 'favorite' : 'favorite-border'}
+            size={24}
+            color={item.favorite ? 'red' : 'black'}
+          />
+        </TouchableOpacity>
+      </View>
+    )
+  }
+
+  const navigateToDetail = (item) => {
+    navigation.navigate('RecruitDetails', { item, token: storedToken })
   }
 
   return (
