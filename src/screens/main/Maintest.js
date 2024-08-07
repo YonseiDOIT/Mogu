@@ -14,6 +14,27 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import axios from 'axios'
 import { BASE_URL } from '../../services/api'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import jwtDecode from 'jwt-decode'
+
+const isTokenValid = (token) => {
+  try {
+    const payload = jwtDecode(token)
+    const currentTime = Math.floor(Date.now() / 1000)
+    return payload.exp > currentTime
+  } catch (error) {
+    console.error('Invalid token:', error)
+    return false
+  }
+}
+
+const getStoredToken = async () => {
+  try {
+    return await AsyncStorage.getItem('token')
+  } catch (error) {
+    console.error('Error getting token:', error)
+    return null
+  }
+}
 
 function Maintest() {
   const navigation = useNavigation()
@@ -30,12 +51,12 @@ function Maintest() {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      setItems((prevItems) => {
-        return prevItems.map((item) => {
-          const newTime = calculateTimeRemaining(item.endDate)
-          return { ...item, time: newTime }
-        })
-      })
+      setItems((prevItems) =>
+        prevItems.map((item) => ({
+          ...item,
+          time: calculateTimeRemaining(item.endDate),
+        }))
+      )
     }, 1000) // 1초마다 업데이트
 
     return () => clearInterval(intervalId)
@@ -43,7 +64,6 @@ function Maintest() {
 
   useEffect(() => {
     if (isFocused) {
-      // 화면이 포커스될 때 첫 페이지 데이터를 다시 로드
       loadFavoriteItems()
     }
   }, [isFocused])
@@ -67,7 +87,7 @@ function Maintest() {
     setPage(0)
     setItems([])
     setHasMoreData(true)
-    getProducts(0)
+    await getProducts(0)
   }
 
   const updateItemsWithFavorites = (favoriteItems) => {
@@ -84,44 +104,52 @@ function Maintest() {
   }
 
   const getProducts = async (page) => {
-    const storedToken = await AsyncStorage.getItem('token')
+    const token = await getStoredToken()
+    if (!token || !isTokenValid(token)) {
+      console.error('Invalid or no token')
+      Alert.alert('Session expired', 'Please log in again.')
+      navigation.navigate('Login')
+      return
+    }
+
     setLoading(true)
+
     try {
+      console.log(`Fetching products for page ${page}`)
       const response = await axios.get(`${BASE_URL}/products`, {
         params: {
           page: page,
           size: 10,
         },
         headers: {
-          Authorization: `Bearer ${storedToken}`,
+          Authorization: `Bearer ${token}`,
         },
       })
 
-      const newItems = response.data.content.map((item) => {
-        const favoriteItem = favoriteItems.find(
-          (favItem) => favItem.id === item.id
-        )
-        return favoriteItem
-          ? // ? { ...item, favorite: favoriteItem.favorite }
-            { ...item, favorite: true }
-          : { ...item, favorite: false }
-      })
+      console.log('Response data:', response.data)
 
-      if (page === 0) {
-        setItems(newItems)
-      } else {
-        setItems((prevItems) => [...prevItems, ...newItems])
-      }
+      const newItems = response.data.content.map((item) => ({
+        ...item,
+        favorite: favoriteItems.some((fav) => fav.id === item.id),
+      }))
 
-      if (response.data.content.length < 8) {
-        setHasMoreData(false)
-      }
+      setItems((prevItems) =>
+        page === 0 ? newItems : [...prevItems, ...newItems]
+      )
+      setHasMoreData(response.data.content.length >= 10)
     } catch (error) {
-      console.error('Error getProducts:', error)
+      console.error('Error fetching products:', error)
+      if (error.response) {
+        console.error('Error Response Data:', error.response.data)
+        console.error('Error Response Status:', error.response.status)
+        console.error('Error Response Headers:', error.response.headers)
+        if (error.response.status === 403) {
+          console.error('Permission error')
+        }
+      }
     } finally {
       setLoading(false)
     }
-    console.log('목록확인', items)
   }
 
   const handleSearchPress = () => {
@@ -155,6 +183,7 @@ function Maintest() {
       return `${seconds}초`
     }
   }
+
   const calculateTimeRemaining = (endDate) => {
     const end = new Date(endDate).getTime()
     const now = new Date().getTime()
@@ -183,22 +212,63 @@ function Maintest() {
   }
 
   const handleFavoriteToggle = async (itemId) => {
-    const updatedItems = items.map((item) =>
-      item.id === itemId ? { ...item, favorite: !item.favorite } : item
-    )
-    setItems(updatedItems)
-
-    const updatedFavoriteItems = updatedItems.filter((item) => item.favorite)
-    setFavoriteItems(updatedFavoriteItems)
-
     try {
+      const token = await getStoredToken()
+      if (!token || !isTokenValid(token)) {
+        console.error('유효하지 않은 토큰입니다.')
+        return
+      }
+
+      const updatedItems = items.map((item) =>
+        item.id === itemId ? { ...item, favorite: !item.favorite } : item
+      )
+      setItems(updatedItems)
+
+      const updatedFavoriteItems = updatedItems.filter((item) => item.favorite)
+      setFavoriteItems(updatedFavoriteItems)
+
+      if (updatedItems.find((item) => item.id === itemId).favorite) {
+        // 찜 추가 요청
+        console.log(`Adding item to favorites: ${itemId}`)
+        await axios.post(
+          `${BASE_URL}/favorite/add`,
+          { productId: itemId },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+      } else {
+        // 찜 삭제 요청
+        console.log(`Removing item from favorites: ${itemId}`)
+        await axios.delete(`${BASE_URL}/favorite/${itemId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+      }
+
+      // 찜 아이템 저장
       await AsyncStorage.setItem(
         'favoriteItems',
         JSON.stringify(updatedFavoriteItems)
       )
     } catch (error) {
       console.error('Error saving favorite items:', error)
+      if (error.response) {
+        console.error('Error Response Data:', error.response.data)
+        console.error('Error Response Status:', error.response.status)
+        console.error('Error Response Headers:', error.response.headers)
+        if (error.response.status === 403) {
+          console.error('권한 에러')
+        }
+      }
     }
+  }
+
+  const handleItemPress = (itemId) => {
+    navigation.navigate('Detail', { itemId: itemId, token: storedToken })
   }
 
   const handleScrollEnd = (event) => {
