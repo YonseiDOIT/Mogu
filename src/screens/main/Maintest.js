@@ -137,24 +137,6 @@ function Maintest() {
     setDropdownVisible(false)
   }
 
-  const formatTime = (time) => {
-    const totalSeconds = parseInt(time, 10)
-
-    const days = Math.floor(totalSeconds / (60 * 60 * 24))
-    const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60))
-    const minutes = Math.floor((totalSeconds % (60 * 60)) / 60)
-    const seconds = totalSeconds % 60
-
-    if (days > 0) {
-      return `${days}일 ${hours}시간 ${minutes}분`
-    } else if (hours > 0) {
-      return `${hours}시간 ${minutes}분 ${seconds}초`
-    } else if (minutes > 0) {
-      return `${minutes}분 ${seconds}초`
-    } else {
-      return `${seconds}초`
-    }
-  }
   const calculateTimeRemaining = (endDate) => {
     const end = new Date(endDate).getTime()
     const now = new Date().getTime()

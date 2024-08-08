@@ -21,6 +21,24 @@ const SearchResult = ({ route, navigation }) => {
   const isFocused = useIsFocused()
   const [storedToken, setStoredToken] = useState(token || '')
   const [searchText, setSearchText] = useState('')
+  const [selectedSort, setSelectedSort] = useState('기한임박순')
+  const [dropdownVisible, setDropdownVisible] = useState(false)
+  const [items, setItems] = useState([])
+  const [hasMoreData, setHasMoreData] = useState(true)
+  const [favoriteItems, setFavoriteItems] = useState([])
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setItems((prevItems) => {
+        return prevItems.map((item) => {
+          const newTime = calculateTimeRemaining(item.endDate)
+          return { ...item, time: newTime }
+        })
+      })
+    }, 1000) // 1초마다 업데이트
+
+    return () => clearInterval(intervalId)
+  }, [])
 
   const handleBackPress = () => {
     navigation.goBack()
@@ -89,16 +107,18 @@ const SearchResult = ({ route, navigation }) => {
     }
   }
 
-  const formatTime = (time) => {
-    const totalSeconds = parseInt(time, 10)
+  const calculateTimeRemaining = (endDate) => {
+    const end = new Date(endDate).getTime()
+    const now = new Date().getTime()
+    const totalSeconds = Math.max((end - now) / 1000, 0)
 
     const days = Math.floor(totalSeconds / (60 * 60 * 24))
     const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60))
     const minutes = Math.floor((totalSeconds % (60 * 60)) / 60)
-    const seconds = totalSeconds % 60
+    const seconds = Math.floor(totalSeconds % 60)
 
     if (days > 0) {
-      return `${days}일 ${hours}시간 ${minutes}분`
+      return `${days}일 ${hours}시간 ${minutes}분 ${seconds}초`
     } else if (hours > 0) {
       return `${hours}시간 ${minutes}분 ${seconds}초`
     } else if (minutes > 0) {
@@ -174,6 +194,10 @@ const SearchResult = ({ route, navigation }) => {
     setResults(updatedResults)
   }
 
+  const formatPrice = (price) => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  }
+
   return (
     <View style={styles.screenContainer}>
       {renderSearchBar()}
@@ -222,7 +246,7 @@ const SearchResult = ({ route, navigation }) => {
                   isDeadlineSoon(item.endDate) && styles.deadlineSoonText,
                 ]}
               >
-                {formatTime(item.endDate)}
+                {calculateTimeRemaining(item.endDate)}
               </Text>
             </View>
             <Text style={styles.itemTitle}>{item.name}</Text>
@@ -231,7 +255,7 @@ const SearchResult = ({ route, navigation }) => {
                 style={styles.itemText}
               >{`수량 ${item.remainingQty}/${item.qty}`}</Text>
               <Text style={styles.itemPriceWrapper}>
-                <Text style={styles.itemPrice}>{item.price}</Text>
+                <Text style={styles.itemPrice}> {formatPrice(item.price)}</Text>
                 <Text style={styles.priceWon}> 원</Text>
               </Text>
             </View>
