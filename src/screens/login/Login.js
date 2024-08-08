@@ -58,7 +58,7 @@ const Login = ({ navigation }) => {
     const isValidEmail = await checkEmail()
     const fullEmail = `${emailPrefix}@yonsei.ac.kr`
 
-    if (isPasswordValid && isValidEmail) {
+    if (isPasswordValid) {
       try {
         const response = await axios.post(`${BASE_URL}/sign-in`, {
           email: fullEmail,
