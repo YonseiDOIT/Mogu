@@ -10,6 +10,8 @@ import {
 } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
+const SEARCH_HISTORY_KEY = 'recentSearches'
+
 const Search = ({ navigation, route }) => {
   const { token } = route.params
   const [searchText, setSearchText] = useState('') // 검색어 입력
@@ -31,6 +33,28 @@ const Search = ({ navigation, route }) => {
     fetchToken()
   }, [token])
 
+  useEffect(() => {
+    const loadRecentSearches = async () => {
+      try {
+        const storedSearches = await AsyncStorage.getItem(SEARCH_HISTORY_KEY)
+        if (storedSearches) {
+          setRecentSearches(JSON.parse(storedSearches))
+        }
+      } catch (error) {
+        console.error('검색어를 가져오는 중 오류 발생:', error)
+      }
+    }
+    loadRecentSearches()
+  }, [])
+
+  const saveRecentSearches = async (searches) => {
+    try {
+      await AsyncStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(searches))
+    } catch (error) {
+      console.error('검색어를 저장하는 중 오류 발생:', error)
+    }
+  }
+
   const handleBackPress = () => {
     navigation.goBack()
   }
@@ -45,10 +69,10 @@ const Search = ({ navigation, route }) => {
       try {
         const storedToken = await AsyncStorage.getItem('token')
         if (storedToken) {
-          setRecentSearches((prevSearches) => [
-            searchText.trim(),
-            ...prevSearches,
-          ]) // 새로운 목록을 검색어 맨 앞에 추가
+          const updatedSearches = [searchText.trim(), ...recentSearches] // 새로운 목록을 검색어 맨 앞에 추가
+          setRecentSearches(updatedSearches)
+          await saveRecentSearches(updatedSearches) // AsyncStorage에 저장
+
           navigation.navigate('SearchResult', {
             token: storedToken,
             keyword: searchText.trim(),
@@ -66,15 +90,17 @@ const Search = ({ navigation, route }) => {
     }
   }
 
-  const handleDeleteAll = () => {
+  const handleDeleteAll = async () => {
     setRecentSearches([]) // 모든 검색어 삭제
+    await saveRecentSearches([])
   }
 
-  const handleDeleteSearch = (index) => {
+  const handleDeleteSearch = async (index) => {
+    const updatedSearches = recentSearches.filter((_, idx) => idx !== index)
+
     // 특정 인덱스의 검색어 삭제 처리 함수
-    setRecentSearches((prevSearches) =>
-      prevSearches.filter((_, idx) => idx !== index)
-    )
+    setRecentSearches(updatedSearches)
+    await saveRecentSearches(updatedSearches)
   }
 
   const handleSearchItemPress = async (searchTerm) => {
