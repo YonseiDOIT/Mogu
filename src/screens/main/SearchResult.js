@@ -59,31 +59,33 @@ const SearchResult = ({ route, navigation }) => {
   const handleSearchPress = async () => {
     console.log('search') // 검색 버튼 클릭 확인 로그
     // 검색어 추가 및 중복 검사
-    if (
-      searchText.trim() !== '' &&
-      !recentSearches.includes(searchText.trim())
-    ) {
+    if (searchText.trim() !== '') {
       try {
         const storedToken = await AsyncStorage.getItem('token')
         if (storedToken) {
-          setRecentSearches((prevSearches) => [
-            searchText.trim(),
-            ...prevSearches,
-          ]) // 새로운 목록을 검색어 맨 앞에 추가
-          navigation.navigate('SearchResult', {
-            token: storedToken,
-            keyword: searchText.trim(),
-            page: 0,
-            size: 10,
+          setLoading(true)
+          const response = await axios.get(`${BASE_URL}/products/search`, {
+            headers: {
+              Authorization: `Bearer ${storedToken}`,
+            },
+            params: {
+              keyword: searchText.trim(),
+              page: 0,
+              size: 10,
+            },
           })
+
+          setResults(response.data.content)
           setSearchText('')
         } else {
           console.error('토큰이 없습니다.')
         }
       } catch (error) {
-        console.error('토큰을 가져오는 중 오류 발생:', error)
+        console.error('검색 중 오류 발생:', error)
+        setError(error)
+      } finally {
+        setLoading(false)
       }
-      setSearchText('') // 검색 후 검색어 초기화
     }
   }
 
@@ -150,7 +152,7 @@ const SearchResult = ({ route, navigation }) => {
         if (err.response) {
           console.error('Error response:', err.response)
           if (err.response.status === 403) {
-            console.error('에러:', err.message)
+            console.error('에러 403 - 접근 거부:', err.response.data.message)
           }
         } else {
           console.error('에러:', err.message)
@@ -183,12 +185,12 @@ const SearchResult = ({ route, navigation }) => {
                 source={{
                   uri: `${BASE_URL}/images/${item.productImage}`,
                 }}
-                style={styles.deadlineImage}
+                style={[styles.deadlineImage]}
               />
             )}
             <TouchableOpacity
               style={styles.itemBox}
-              onPress={() => navigation.navigate('CreateGroupPurchase')}
+              onPress={() => navigation.navigate('RecruitDetails')}
             >
               <TouchableOpacity
                 onPress={() => handleFavoriteToggle(item.id)}
@@ -307,16 +309,18 @@ const styles = StyleSheet.create({
     width: '48%',
     marginBottom: 20,
   },
+
   deadlineImage: {
     position: 'absolute',
     width: '100%',
     height: '71%',
     zIndex: 1,
+    borderRadius: 10,
   },
+
   itemBox: {
     width: '100%',
     height: 170,
-    backgroundColor: '#F3F3F3',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
