@@ -174,6 +174,10 @@ const SearchResult = ({ route, navigation }) => {
     setResults(updatedResults)
   }
 
+  const formatPrice = (price) => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  }
+
   return (
     <View style={styles.screenContainer}>
       {renderSearchBar()}
@@ -231,7 +235,7 @@ const SearchResult = ({ route, navigation }) => {
                 style={styles.itemText}
               >{`수량 ${item.remainingQty}/${item.qty}`}</Text>
               <Text style={styles.itemPriceWrapper}>
-                <Text style={styles.itemPrice}>{item.price}</Text>
+                <Text style={styles.itemPrice}> {formatPrice(item.price)}</Text>
                 <Text style={styles.priceWon}> 원</Text>
               </Text>
             </View>
