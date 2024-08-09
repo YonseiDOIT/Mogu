@@ -20,6 +20,8 @@ function Maintest() {
   const isFocused = useIsFocused()
   const [searchText, setSearchText] = useState('')
   const [selectedSort, setSelectedSort] = useState('기한임박순')
+  const [selectedCategory, setSelectedCategory] = useState('')
+  const [selectedLocation, setSelectedLocation] = useState('')
   const [dropdownVisible, setDropdownVisible] = useState(false)
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -27,6 +29,7 @@ function Maintest() {
   const [hasMoreData, setHasMoreData] = useState(true)
   const [storedToken, setStoredToken] = useState('')
   const [favoriteItems, setFavoriteItems] = useState([])
+  const [noResults, setNoResults] = useState(false)
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -67,7 +70,8 @@ function Maintest() {
     setPage(0)
     setItems([])
     setHasMoreData(true)
-    getProducts(0)
+    setNoResults(false)
+    getProducts(0, selectedCategory, selectedLocation)
   }
 
   const updateItemsWithFavorites = (favoriteItems) => {
@@ -83,27 +87,47 @@ function Maintest() {
     })
   }
 
-  const getProducts = async (page) => {
+  const getProducts = async (page, category = '', location = '') => {
+    console.log(
+      `Fetching products with page=${page}, category=${category}, location=${location}`
+    )
+
     const storedToken = await AsyncStorage.getItem('token')
     setLoading(true)
     try {
-      const response = await axios.get(`${BASE_URL}/products`, {
-        params: {
-          page: page,
-          size: 10,
-        },
+      let url = `${BASE_URL}/products`
+      let params = {
+        page: page,
+        size: 10,
+      }
+
+      if (category || location) {
+        url = `${BASE_URL}/products/filter`
+        params = {
+          ...params,
+          category: category,
+          location: location,
+        }
+      }
+
+      console.log('Request URL:', url)
+      console.log('Request Params:', params)
+
+      const response = await axios.get(url, {
+        params: params,
         headers: {
           Authorization: `Bearer ${storedToken}`,
         },
       })
+
+      console.log('Response Data:', response.data)
 
       const newItems = response.data.content.map((item) => {
         const favoriteItem = favoriteItems.find(
           (favItem) => favItem.id === item.id
         )
         return favoriteItem
-          ? // ? { ...item, favorite: favoriteItem.favorite }
-            { ...item, favorite: true }
+          ? { ...item, favorite: true }
           : { ...item, favorite: false }
       })
 
@@ -113,16 +137,62 @@ function Maintest() {
         setItems((prevItems) => [...prevItems, ...newItems])
       }
 
-      if (response.data.content.length < 8) {
+      if (response.data.content.length < 10) {
         setHasMoreData(false)
+      }
+
+      // 결과가 없을 때
+      if (newItems.length === 0) {
+        setNoResults(true)
+      } else {
+        setNoResults(false)
       }
     } catch (error) {
       console.error('Error getProducts:', error)
     } finally {
       setLoading(false)
     }
-    console.log('목록확인', items)
   }
+
+  const selectCategory = (category) => {
+    setSelectedCategory(category)
+    setPage(0)
+    setItems([])
+    setHasMoreData(true)
+    setNoResults(false)
+    console.log('카테고리:', category)
+    setTimeout(() => {
+      getProducts(0, category, selectedLocation)
+    }, 0)
+  }
+
+  const selectLocation = (location) => {
+    setSelectedLocation(location)
+    setPage(0)
+    setItems([])
+    setHasMoreData(true)
+    setNoResults(false)
+    console.log('장소:', location)
+    setTimeout(() => {
+      getProducts(0, selectedCategory, location)
+    }, 0)
+  }
+
+  const resetFilters = () => {
+    setSelectedCategory('')
+    setSelectedLocation('')
+    setPage(0)
+    setItems([])
+    setHasMoreData(true)
+    setNoResults(false)
+    getProducts(0)
+  }
+
+  useEffect(() => {
+    if (selectedCategory || selectedLocation) {
+      getProducts(page, selectedCategory, selectedLocation)
+    }
+  }, [selectedCategory, selectedLocation, page])
 
   const handleSearchPress = () => {
     navigation.navigate('Search', { token: storedToken })
@@ -136,6 +206,10 @@ function Maintest() {
     setSelectedSort(option)
     setDropdownVisible(false)
   }
+
+  useEffect(() => {
+    resetAndFetchProducts()
+  }, [])
 
   const calculateTimeRemaining = (endDate) => {
     const end = new Date(endDate).getTime()
@@ -223,7 +297,10 @@ function Maintest() {
       <View style={styles.separator} />
       <View style={styles.categoriesWrapper}>
         <View style={styles.fixedButtonContainer}>
-          <TouchableOpacity style={styles.categoryButton}>
+          <TouchableOpacity
+            style={styles.categoryButton}
+            onPress={resetFilters}
+          >
             <Text style={styles.categoryButtonText}>전체</Text>
           </TouchableOpacity>
           <ScrollView
@@ -233,7 +310,10 @@ function Maintest() {
           >
             {['물 · 음료', '과일', '유제품', '건강식', '위생용품', '기타'].map(
               (category, index) => (
-                <TouchableOpacity key={index}>
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => selectCategory(category)}
+                >
                   <Text style={styles.categoryText}>{category}</Text>
                 </TouchableOpacity>
               )
@@ -241,7 +321,10 @@ function Maintest() {
           </ScrollView>
         </View>
         <View style={styles.fixedButtonContainer}>
-          <TouchableOpacity style={styles.categoryButton}>
+          <TouchableOpacity
+            style={styles.categoryButton}
+            onPress={resetFilters}
+          >
             <Text style={styles.categoryButtonText}>전체</Text>
           </TouchableOpacity>
           <ScrollView
@@ -250,9 +333,12 @@ function Maintest() {
             showsHorizontalScrollIndicator={false}
           >
             {['연세플라자', '연탄불고기', '매지놀이터', '기타'].map(
-              (category, index) => (
-                <TouchableOpacity key={index}>
-                  <Text style={styles.categoryText}>{category}</Text>
+              (location, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => selectLocation(location)}
+                >
+                  <Text style={styles.categoryText}>{location}</Text>
                 </TouchableOpacity>
               )
             )}
