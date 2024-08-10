@@ -99,10 +99,17 @@ function Maintest() {
       let params = {
         page: page,
         size: 10,
+        keyword: searchText,
+      }
+
+      if (selectedSort === '기한임박순') {
+        url = `${BASE_URL}/products/search/end-date`
+      } else if (selectedSort === '추천순') {
+        url = `${BASE_URL}/products/search/recommend`
       }
 
       if (category || location) {
-        url = `${BASE_URL}/products/filter`
+        // url = `${BASE_URL}/products/filter`
         params = {
           ...params,
           category: category,
@@ -205,6 +212,9 @@ function Maintest() {
   const selectSortOption = (option) => {
     setSelectedSort(option)
     setDropdownVisible(false)
+
+    // 선택된 정렬 옵션에 따라 데이터를 다시 가져옴
+    resetAndFetchProducts()
   }
 
   useEffect(() => {
