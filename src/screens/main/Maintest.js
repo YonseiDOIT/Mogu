@@ -21,8 +21,6 @@ function Maintest() {
   const [selectedSort, setSelectedSort] = useState('기한임박순')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [selectedLocation, setSelectedLocation] = useState('')
-  const [category, setCategory] = useState('전체')
-  const [location, setLocation] = useState('전체')
   const [dropdownVisible, setDropdownVisible] = useState(false)
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -67,16 +65,12 @@ function Maintest() {
     }
   }
 
-  const resetAndFetchProducts = async (newCategory = '', newLocation = '') => {
+  const resetAndFetchProducts = async () => {
     setPage(0)
     setItems([])
     setHasMoreData(true)
     setNoResults(false)
-    await getProducts(
-      0,
-      newCategory || selectedCategory,
-      newLocation || selectedLocation
-    )
+    getProducts(0, selectedCategory, selectedLocation)
   }
 
   const updateItemsWithFavorites = (favoriteItems) => {
@@ -90,11 +84,6 @@ function Maintest() {
           : { ...item, favorite: false }
       })
     })
-  }
-
-  const handleCategoryChange = (newCategory) => {
-    setCategory(newCategory) // 버튼 클릭 시 카테고리 변경
-    fetchProducts(newCategory) // 새로운 카테고리로 API 요청
   }
 
   const getProducts = async (page, category = '', location = '') => {
@@ -119,14 +108,14 @@ function Maintest() {
       }
 
       if (category || location) {
-        url = `${BASE_URL}/products/filter`
         params = {
           ...params,
-          category: category || selectedCategory,
-          location: location || selectedLocation,
+          category: category,
+          location: location,
         }
       }
 
+      console.log('Request URL:', url)
       console.log('Request Params:', params)
 
       const response = await axios.get(url, {
@@ -147,80 +136,68 @@ function Maintest() {
           : { ...item, favorite: false }
       })
 
-      // if (category) {
-      //   newItems = newItems.filter((item) => item.category === category)
-      // }
-
-      // if (location) {
-      //   newItems = newItems.filter((item) => item.location === location)
-      // }
-
-      setItems((prevItems) =>
-        page === 0 ? newItems : [...prevItems, ...newItems]
-      )
+      if (page === 0) {
+        setItems(newItems)
+      } else {
+        setItems((prevItems) => [...prevItems, ...newItems])
+      }
 
       if (response.data.content.length < 10) {
         setHasMoreData(false)
       }
 
-      // 결과 없음
-      setNoResults(newItems.length === 0)
+      // 결과가 없을 때
+      if (newItems.length === 0) {
+        setNoResults(true)
+      } else {
+        setNoResults(false)
+      }
     } catch (error) {
-      console.error(
-        'Error getProducts:',
-        error.response ? error.response.data : error.message
-      )
+      console.error('Error getProducts:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const selectCategory = (newCategory) => {
-    setSelectedCategory(newCategory)
-    resetAndFetchProducts(newCategory, selectedLocation)
-    // setPage(0)
-    // setItems([])
-    // setHasMoreData(true)
-    // setNoResults(false)
-    // console.log('카테고리:', category)
-    // setTimeout(() => {
-    //   getProducts(0, category, selectedLocation)
-    // }, 0)
+  const selectCategory = (category) => {
+    setSelectedCategory(category)
+    setPage(0)
+    setItems([])
+    setHasMoreData(true)
+    setNoResults(false)
+    console.log('카테고리:', category)
+    setTimeout(() => {
+      getProducts(0, category, selectedLocation)
+    }, 0)
   }
 
-  const selectLocation = (newLocation) => {
-    setSelectedLocation(newLocation)
-    resetAndFetchProducts(selectedCategory, newLocation)
-    // setPage(0)
-    // setItems([])
-    // setHasMoreData(true)
-    // setNoResults(false)
-    // console.log('장소:', location)
-    // setTimeout(() => {
-    //   getProducts(0, selectedCategory, location)
-    // }, 0)
+  const selectLocation = (location) => {
+    setSelectedLocation(location)
+    setPage(0)
+    setItems([])
+    setHasMoreData(true)
+    setNoResults(false)
+    console.log('장소:', location)
+    setTimeout(() => {
+      getProducts(0, selectedCategory, location)
+    }, 0)
   }
 
   const resetFilters = () => {
-    setCategory('전체')
-    setLocation('전체')
-    fetchProducts('전체', '전체')
-    // setPage(0)
-    // setItems([])
-    // setHasMoreData(true)
-    // setNoResults(false)
-    // getProducts(0)
+    setSelectedCategory('')
+    setSelectedLocation('')
+    setPage(0)
+    setItems([])
+    setHasMoreData(true)
+    setNoResults(false)
+    getProducts(0)
   }
 
-  // useEffect(() => {
-  //   if (selectedCategory || selectedLocation) {
-  //     getProducts(page, selectedCategory, selectedLocation)
-  //   }
-  // }, [selectedCategory, selectedLocation, page])
-
   useEffect(() => {
-    resetAndFetchProducts()
-  }, [])
+    if (selectedCategory || selectedLocation) {
+      getProducts(page, selectedCategory, selectedLocation)
+    }
+  }, [selectedCategory, selectedLocation, page])
 
   const handleSearchPress = () => {
     navigation.navigate('Search', { token: storedToken })
@@ -237,6 +214,10 @@ function Maintest() {
     // 선택된 정렬 옵션에 따라 데이터를 다시 가져옴
     resetAndFetchProducts()
   }
+
+  useEffect(() => {
+    resetAndFetchProducts()
+  }, [])
 
   const calculateTimeRemaining = (endDate) => {
     const end = new Date(endDate).getTime()
@@ -336,12 +317,12 @@ function Maintest() {
             showsHorizontalScrollIndicator={false}
           >
             {['물 · 음료', '과일', '유제품', '건강식', '위생용품', '기타'].map(
-              (categoryItem) => (
+              (category, index) => (
                 <TouchableOpacity
-                  key={categoryItem}
-                  onPress={() => selectCategory(categoryItem)}
+                  key={index}
+                  onPress={() => selectCategory(category)}
                 >
-                  <Text style={styles.categoryText}>{categoryItem}</Text>
+                  <Text style={styles.categoryText}>{category}</Text>
                 </TouchableOpacity>
               )
             )}
@@ -360,12 +341,12 @@ function Maintest() {
             showsHorizontalScrollIndicator={false}
           >
             {['연세플라자', '연탄불고기', '매지놀이터', '기타'].map(
-              (locationItem) => (
+              (location, index) => (
                 <TouchableOpacity
-                  key={locationItem}
-                  onPress={() => selectLocation(locationItem)}
+                  key={index}
+                  onPress={() => selectLocation(location)}
                 >
-                  <Text style={styles.categoryText}>{locationItem}</Text>
+                  <Text style={styles.categoryText}>{location}</Text>
                 </TouchableOpacity>
               )
             )}
