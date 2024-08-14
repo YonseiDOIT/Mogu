@@ -93,30 +93,35 @@ function Maintest() {
 
     const storedToken = await AsyncStorage.getItem('token')
     setLoading(true)
+
     try {
-      let url = `${BASE_URL}/products`
-      let params = {
+      const url = `${BASE_URL}/products/filter`
+      const params = {
         page: page,
         size: 10,
+        category: category || undefined,
+        location: location || undefined,
         keyword: searchText,
       }
 
-      if (selectedSort === '기한임박순') {
-        url = `${BASE_URL}/products/search/end-date`
-      } else if (selectedSort === '추천순') {
-        url = `${BASE_URL}/products/search/recommend`
-      }
-
-      if (category || location) {
-        params = {
-          ...params,
-          category: category,
-          location: location,
-        }
-      }
-
-      console.log('Request URL:', url)
       console.log('Request Params:', params)
+
+      // if (selectedSort === '기한임박순') {
+      //   url = `${BASE_URL}/products/search/end-date`
+      // } else if (selectedSort === '추천순') {
+      //   url = `${BASE_URL}/products/search/recommend`
+      // }
+
+      // if (category || location) {
+      //   params = {
+      //     ...params,
+      //     category: category,
+      //     location: location,
+      //   }
+      // }
+
+      // console.log('Request URL:', url)
+      // console.log('Request Params:', params)
 
       const response = await axios.get(url, {
         params: params,
