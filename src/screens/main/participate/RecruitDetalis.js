@@ -10,6 +10,9 @@ import {
 } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import Modal from 'react-native-modal'
+import axios from 'axios'
+import { BASE_URL } from '../../../services/api'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const RecruitDetails = ({
   navigation,

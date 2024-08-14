@@ -141,6 +141,14 @@ function Maintest() {
           : { ...item, favorite: false }
       })
 
+      // 아이템의 만료 시간 계산 및 필터링
+      const filteredItems = newItems.filter((item) => {
+        const { days, hours, minutes, seconds } = calculateTimeRemaining(
+          item.endDate
+        )
+        return days > 0 || hours > 0 || minutes > 0 || seconds > 0
+      })
+
       if (page === 0) {
         setItems(newItems)
       } else {
@@ -234,14 +242,20 @@ function Maintest() {
     const minutes = Math.floor((totalSeconds % (60 * 60)) / 60)
     const seconds = Math.floor(totalSeconds % 60)
 
-    if (days > 0) {
-      return `${days}일 ${hours}시간 ${minutes}분 ${seconds}초`
-    } else if (hours > 0) {
-      return `${hours}시간 ${minutes}분 ${seconds}초`
-    } else if (minutes > 0) {
-      return `${minutes}분 ${seconds}초`
-    } else {
-      return `${seconds}초`
+    // if (days > 0) {
+    //   return `${days}일 ${hours}시간 ${minutes}분 ${seconds}초`
+    // } else if (hours > 0) {
+    //   return `${hours}시간 ${minutes}분 ${seconds}초`
+    // } else if (minutes > 0) {
+    //   return `${minutes}분 ${seconds}초`
+    // } else {
+    //   return `${seconds}초`
+    // }
+    return {
+      days,
+      hours,
+      minutes,
+      seconds,
     }
   }
 
@@ -443,10 +457,15 @@ function Maintest() {
                     isDeadlineSoon(item.endDate) && styles.deadlineSoonText,
                   ]}
                 >
-                  {calculateTimeRemaining(item.endDate)}
+                  {`${calculateTimeRemaining(item.endDate).days}일 ${
+                    calculateTimeRemaining(item.endDate).hours
+                  }시간 ${calculateTimeRemaining(item.endDate).minutes}분 ${
+                    calculateTimeRemaining(item.endDate).seconds
+                  }초`}
                 </Text>
               </View>
               <Text style={styles.itemTitle}>{item.name}</Text>
+
               <View style={styles.row}>
                 <Text
                   style={styles.itemText}
