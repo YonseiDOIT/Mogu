@@ -259,10 +259,15 @@ function Maintest() {
     }
   }
 
-  const isDeadlineSoon = (time) => {
-    const totalSeconds = parseInt(time, 10)
-    const totalMinutes = totalSeconds / 60
-    return totalMinutes < 1440 // 24시간 미만 (1440분)
+  // const isDeadlineSoon = (time) => {
+  //   const totalSeconds = parseInt(time, 10)
+  //   const totalMinutes = totalSeconds / 60
+  //   return totalMinutes < 1440 // 24시간 미만 (1440분)
+  // }
+  const isDeadlineSoon = (endDate) => {
+    const { days, hours, minutes } = calculateTimeRemaining(endDate)
+    const totalMinutes = days * 1440 + hours * 60 + minutes
+    return totalMinutes < 1440 // 24시간 미만
   }
 
   const handleFavoriteToggle = async (itemId) => {
@@ -335,7 +340,47 @@ function Maintest() {
             style={styles.categoryContainer}
             showsHorizontalScrollIndicator={false}
           >
-            {['물 · 음료', '과일', '유제품', '건강식', '위생용품', '기타'].map(
+            <TouchableOpacity
+              style={[
+                selectedCategory === '물 · 음료' && styles.selectedCategory,
+              ]}
+              onPress={() => selectCategory('물 · 음료')}
+            >
+              <Text style={[styles.categoryText]}>물 · 음료</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[selectedCategory === '과일' && styles.selectedCategory]}
+              onPress={() => selectCategory('과일')}
+            >
+              <Text style={[styles.categoryText]}>과일</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[selectedCategory === '유제품' && styles.selectedCategory]}
+              onPress={() => selectCategory('유제품')}
+            >
+              <Text style={[styles.categoryText]}>유제품</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[selectedCategory === '건강식' && styles.selectedCategory]}
+              onPress={() => selectCategory('건강식')}
+            >
+              <Text style={[styles.categoryText]}>건강식</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                selectedCategory === '위생용품' && styles.selectedCategory,
+              ]}
+              onPress={() => selectCategory('위생용품')}
+            >
+              <Text style={[styles.categoryText]}>위생용품</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[selectedCategory === '기타' && styles.selectedCategory]}
+              onPress={() => selectCategory('기타')}
+            >
+              <Text style={[styles.categoryText]}>기타</Text>
+            </TouchableOpacity>
+            {/* {['물 · 음료', '과일', '유제품', '건강식', '위생용품', '기타'].map(
               (category, index) => (
                 <TouchableOpacity
                   key={index}
@@ -344,7 +389,7 @@ function Maintest() {
                   <Text style={styles.categoryText}>{category}</Text>
                 </TouchableOpacity>
               )
-            )}
+            )} */}
           </ScrollView>
         </View>
         <View style={styles.fixedButtonContainer}>
@@ -359,7 +404,37 @@ function Maintest() {
             style={styles.categoryContainer}
             showsHorizontalScrollIndicator={false}
           >
-            {['연세플라자', '연탄불고기', '매지놀이터', '기타'].map(
+            <TouchableOpacity
+              style={[
+                selectLocation === '연세플라자' && styles.selectedCategory,
+              ]}
+              onPress={() => selectLocation('연세플라자')}
+            >
+              <Text style={[styles.categoryText]}>연세플라자</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                selectLocation === '연탄불고기' && styles.selectedCategory,
+              ]}
+              onPress={() => selectLocation('연탄불고기')}
+            >
+              <Text style={[styles.categoryText]}>연탄불고기</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                selectLocation === '매지놀이터' && styles.selectedCategory,
+              ]}
+              onPress={() => selectLocation('매지놀이터')}
+            >
+              <Text style={[styles.categoryText]}>매지놀이터</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[selectLocation === '기타' && styles.selectedCategory]}
+              onPress={() => selectLocation('기타')}
+            >
+              <Text style={[styles.categoryText]}>기타</Text>
+            </TouchableOpacity>
+            {/* {['연세플라자', '연탄불고기', '매지놀이터', '기타'].map(
               (location, index) => (
                 <TouchableOpacity
                   key={index}
@@ -368,7 +443,7 @@ function Maintest() {
                   <Text style={styles.categoryText}>{location}</Text>
                 </TouchableOpacity>
               )
-            )}
+            )} */}
           </ScrollView>
         </View>
       </View>
