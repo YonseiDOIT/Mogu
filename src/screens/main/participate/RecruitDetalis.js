@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import {
   View,
   Text,
@@ -11,71 +11,113 @@ import {
 import { ScrollView } from 'react-native-gesture-handler'
 import Modal from 'react-native-modal'
 import axios from 'axios'
-import { BASE_URL } from '../../../services/api'
+import MapView, { Marker } from 'react-native-maps'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { BASE_URL } from '../../../services/api'
 
-const RecruitDetails = ({
-  navigation,
-  isRecruiting,
-  isClosed,
-  category,
-  productName,
-  pricePerUnit,
-  remainingQuantity,
-  timeLeft,
-  purchaseLink,
-  isFavorite: initialIsFavorite,
-  isApplicant,
-  applicantQuantity,
-  hostDesiredQuantity,
-  applicationTime,
-  isHost,
-}) => {
-  const [isFavorite, setIsFavorite] = useState(initialIsFavorite)
-  const [appliedWithinHour, setAppliedWithinHour] = useState(false)
+const RecruitDetails = ({ route, navigation }) => {
+  const { itemId } = route.params
+  const [data, setData] = useState(null)
+  const [userStatus, setUserStatus] = useState('') // Combined state variable
+  const [isparticipant, setisparticipant] = useState('')
+  const [isFavorite, setIsFavorite] = useState(false)
   const [isModalVisible, setIsModalVisible] = useState(false)
-  const [currentApplicantQuantity, setCurrentApplicantQuantity] =
-    useState(applicantQuantity)
-  const [currentIsApplicant, setCurrentIsApplicant] = useState(isApplicant)
-  const [currentIsRecruiting, setCurrentIsRecruiting] = useState(isRecruiting)
+  const [currentApplicantQuantity, setCurrentApplicantQuantity] = useState(0)
+  const [currentIsRecruiting, setCurrentIsRecruiting] = useState(true)
   const [closeRecruitmentModalVisible, setCloseRecruitmentModalVisible] =
     useState(false)
   const [isOptionsVisible, setIsOptionsVisible] = useState(false)
-  const [isEndModalVisible, setIsEndModalVisible] = useState(false)
-  const [isCloseConfirmationModalVisible, setIsCloseConfirmationModalVisible] =
-    useState(false)
-  const [isCloseRecruitmentModalVisible, setIsCloseRecruitmentModalVisible] =
-    useState(false)
+  const mapRef = useRef(null)
+
+  const [location, setLocation] = useState({
+    latitude: 37.277,
+    longitude: 127.9025,
+    latitudeDelta: 0.0019,
+    longitudeDelta: 0.0019,
+  })
 
   useEffect(() => {
-    setIsFavorite(initialIsFavorite)
-  }, [initialIsFavorite])
+    fetchProductDetails()
+    fetchisseller()
+    fetchisparticipant()
+  }, [])
 
-  useEffect(() => {
-    if (isApplicant && applicationTime) {
-      const now = new Date()
-      const applicationDate = new Date(applicationTime)
-      const timeDifference = now - applicationDate
-      setAppliedWithinHour(timeDifference < 3600000)
+  const fetchProductDetails = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token')
+      if (!token) {
+        throw new Error('Token is missing')
+      }
+      const response = await axios.get(`${BASE_URL}/products/${itemId}`, {
+        params: { id: itemId },
+      })
+      setData(response.data)
+      setLocation({
+        latitude: response.data.latitude,
+        longitude: response.data.longitude,
+        latitudeDelta: 0.0019,
+        longitudeDelta: 0.0019,
+      })
+    } catch (error) {
+      console.error('Error fetching product details:', error)
     }
-  }, [isApplicant, applicationTime])
+  }
 
-  useEffect(() => {
-    if (timeLeft === '0일 0시간 0분') {
-      setCurrentIsRecruiting(false)
+  const fetchisseller = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token')
+      const userId = await AsyncStorage.getItem('userId')
+      if (!token) {
+        throw new Error('Token is missing')
+      }
+      const response = await axios.get(
+        `${BASE_URL}/products/${itemId}/checkSeller`,
+        {
+          params: { productId: itemId, sellerId: userId },
+        }
+      )
+
+      const responseText = response.data.trim()
+      console.log(responseText)
+      console.log(itemId)
+      setUserStatus(responseText)
+    } catch (error) {
+      console.error('Error fetching product details:', error)
+      setUserStatus('none') // set to 'none' in case of error
     }
-  }, [timeLeft])
+  }
+  const fetchisparticipant = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token')
+      if (!token) {
+        throw new Error('Token is missing')
+      }
+
+      const response = await axios.get(`${BASE_URL}/participation/check`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: { productId: itemId },
+      })
+
+      console.log(response)
+      setisparticipant(response.data)
+    } catch (error) {
+      console.error('Error fetching participation status:', error)
+    }
+  }
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite)
   }
 
   const openLink = () => {
-    Linking.openURL(purchaseLink)
+    if (data?.url) {
+      Linking.openURL(data.url)
+    }
   }
 
   const handleParticipate = () => {
-    setCurrentIsApplicant(true)
     setCurrentApplicantQuantity(currentApplicantQuantity + 1)
     navigation.navigate('Participate')
   }
@@ -85,7 +127,7 @@ const RecruitDetails = ({
   }
 
   const confirmCancelParticipation = () => {
-    setCurrentIsApplicant(false)
+    setUserStatus('none')
     setCurrentApplicantQuantity(currentApplicantQuantity - 1)
     setIsModalVisible(false)
   }
@@ -99,207 +141,67 @@ const RecruitDetails = ({
     setCloseRecruitmentModalVisible(false)
   }
 
-  // 신청 마감하기 버튼을 눌렀을 때
-  const handleEndRecruitment = () => {
-    // setIsEndModalVisible(true)
-    setIsCloseConfirmationModalVisible(true) // 신청 마감 확인 모달을 열기
-  }
-
-  // 신청 마감 확인 모달에서 마감하기 버튼을 눌렀을 때
-  const handleConfirmEndRecruitment = () => {
-    setIsCloseConfirmationModalVisible(false) // 신청 마감 확인 모달을 닫기
-    setIsCloseRecruitmentModalVisible(true) // 공구 종료 모달을 열기
-  }
-
-  // 공구 종료하기 버튼을 눌렀을 때 실행되는 함수
-  const handleEndRecruitmentFinal = () => {
-    // 여기에 공구 종료 처리 로직을 추가할 수 있습니다.
-    setIsCloseRecruitmentModalVisible(false) // 공구 종료 모달을 닫기
-  }
-
-  const confirmEndRecruitment = () => {
-    setCurrentIsRecruiting(false)
-    setIsEndModalVisible(false)
-    setIsCloseRecruitmentModalVisible(false)
-  }
-
   const handleManageParticipants = () => {
     navigation.navigate('ParticipantInfo')
   }
 
-  const formattedPrice = pricePerUnit ? pricePerUnit.toLocaleString() : ''
-  const formattedQuantity = remainingQuantity
-    ? remainingQuantity.toLocaleString()
+  const calculateTimeRemaining = (endDate) => {
+    const end = new Date(endDate).getTime()
+    const now = new Date().getTime()
+    const totalSeconds = Math.max((end - now) / 1000, 0)
+
+    const days = Math.floor(totalSeconds / (60 * 60 * 24))
+    const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60))
+    const minutes = Math.floor((totalSeconds % (60 * 60)) / 60)
+    const seconds = Math.floor(totalSeconds % 60)
+
+    if (days > 0) {
+      return `${days}일 ${hours}시간 ${minutes}분`
+    } else if (hours > 0) {
+      return `${hours}시간 ${minutes}분`
+    } else if (minutes > 0) {
+      return `${minutes}분`
+    } else {
+      return `${seconds}초`
+    }
+  }
+
+  const formattedPrice = data?.price ? data.price.toLocaleString() : ''
+  const formattedQuantity = data?.remainingQty
+    ? data.remainingQty.toLocaleString()
     : ''
+  const timeLeft = data ? calculateTimeRemaining(data.endDate) : ''
 
   const getStatusText = () => {
-    if (isClosed || timeLeft === '0일 0시간 0분') {
-      return (
-        <Text style={[styles.statusText, styles.closedText]}>
-          종료되었습니다.
-        </Text>
-      )
-    } else if (currentIsRecruiting) {
-      return (
-        <Text style={[styles.statusText, styles.recruitingText]}>
-          참여 모집 중
-        </Text>
-      )
+    if (!data) return ''
+    if (data.dealStatus === '모집중') {
+      return '참여 모집 중'
+    } else if (timeLeft === '0일 0시간 0분') {
+      return '종료되었습니다.'
     } else {
-      return (
-        <Text style={[styles.statusText, styles.closedTexting]}>
-          마감 후 구매 진행 중
-        </Text>
-      )
+      return '마감 후 구매 진행 중'
     }
   }
 
   const getStatusStyle = () => {
-    if (isClosed || timeLeft === '0일 0시간 0분') {
-      return [styles.statusContainer, styles.closed]
-    } else if (currentIsRecruiting) {
+    if (!data) return {}
+    if (data.dealStatus === '모집중') {
       return [styles.statusContainer, styles.recruitingBackground]
+    } else if (timeLeft === '0일 0시간 0분') {
+      return [styles.statusContainer, styles.closedBackground]
     } else {
       return [styles.statusContainer, styles.closedBackground]
     }
   }
 
-  const getFooterStyle = () => {
-    if (isHost) {
-      if (currentIsRecruiting) {
-        return [styles.footerBox, styles.manageButton]
-      } else {
-        return [styles.footerBox, styles.closedFooterText]
-      }
-    } else {
-      if (isClosed || timeLeft === '0일 0시간 0분') {
-        return [styles.footerBox, styles.footerClosed]
-      } else if (currentIsRecruiting) {
-        if (currentIsApplicant && appliedWithinHour) {
-          return [styles.footerBox, styles.cancelButton]
-        } else if (currentIsApplicant) {
-          return [styles.footerBox, styles.footerAlreadyParticipating]
-        } else {
-          return [styles.footerBox, styles.participateButton]
-        }
-      } else {
-        return [styles.footerBox, styles.footerClosed]
-      }
-    }
-  }
-
-  const getFooterTextStyle = () => {
-    if (isClosed || timeLeft === '0일 0시간 0분') {
-      return [styles.footerText, styles.closedFooterText]
-    } else if (currentIsRecruiting) {
-      if (currentIsApplicant && appliedWithinHour) {
-        return [styles.footerText]
-      } else if (currentIsApplicant) {
-        return [styles.footerText, styles.recruitingFooterText]
-      } else {
-        return [styles.footerText]
-      }
-    } else {
-      return [styles.footerText, styles.closedFooterText]
-    }
-  }
-
-  const getFooterText = () => {
-    if (isClosed || timeLeft === '0일 0시간 0분') {
-      return '종료된 공구'
-    } else if (currentIsRecruiting) {
-      if (currentIsApplicant && appliedWithinHour) {
-        return '× 참여 취소하기'
-      } else if (currentIsApplicant) {
-        return '이미 참여 중'
-      } else {
-        return `참여하기 (${currentApplicantQuantity}/${hostDesiredQuantity})`
-      }
-    } else {
-      return '신청 불가'
-    }
-  }
-
-  const renderHostButtons = () => {
-    console.log(
-      'renderHostButtons called',
-      isHost,
-      currentIsApplicant,
-      currentIsRecruiting
-    )
-
-    if (isHost) {
-      return (
-        <View style={styles.hostButtonsContainer}>
-          <TouchableOpacity
-            style={[
-              styles.manageButton,
-              currentIsRecruiting && styles.closeButton,
-            ]}
-            onPress={handleCloseRecruitment}
-          >
-            <Text style={styles.manageButtonText}>
-              {currentIsRecruiting ? '신청 마감하기' : '공구 종료하기'}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.manageButtonP}
-            onPress={handleManageParticipants}
-          >
-            <Text style={styles.manageButtonTextP}>참여자 정보 관리</Text>
-          </TouchableOpacity>
+  if (!data) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <Text>Loading...</Text>
         </View>
-      )
-    }
-    return null
-  }
-
-  const renderParticipantButtons = () => {
-    if (!isHost) {
-      if (isClosed || timeLeft === '0일 0시간 0분') {
-        return (
-          <View style={styles.footerBox}>
-            <Text style={[styles.footerText, styles.closedFooterText]}>
-              {getFooterText()}
-            </Text>
-          </View>
-        )
-      } else if (currentIsRecruiting) {
-        if (currentIsApplicant && appliedWithinHour) {
-          return (
-            <TouchableOpacity
-              style={[styles.footerBox, styles.cancelButton]}
-              onPress={handleCancelParticipation}
-            >
-              <Text style={styles.footerText}>{getFooterText()}</Text>
-            </TouchableOpacity>
-          )
-        } else if (currentIsApplicant) {
-          return (
-            <View style={[styles.footerBox, styles.footerAlreadyParticipating]}>
-              <Text style={styles.footerText}>{getFooterText()}</Text>
-            </View>
-          )
-        } else {
-          return (
-            <TouchableOpacity
-              style={[styles.footerBox, styles.participateButton]}
-              onPress={handleParticipate}
-            >
-              <Text style={styles.footerText}>{getFooterText()}</Text>
-            </TouchableOpacity>
-          )
-        }
-      } else {
-        return (
-          <View style={styles.footerBox}>
-            <Text style={[styles.footerText, styles.closedFooterText]}>
-              {getFooterText()}
-            </Text>
-          </View>
-        )
-      }
-    }
+      </SafeAreaView>
+    )
   }
 
   return (
@@ -316,42 +218,19 @@ const RecruitDetails = ({
             />
           </TouchableOpacity>
 
-          {/* 글 수정하기 */}
-          {isHost && currentIsRecruiting && (
-            <View style={styles.optionsContainer}>
-              <TouchableOpacity
-                style={styles.optionsButton}
-                onPress={() => setIsOptionsVisible(!isOptionsVisible)}
-              >
-                <Text style={styles.optionsButtonText}>⋮</Text>
-              </TouchableOpacity>
-              {isOptionsVisible && (
-                <TouchableOpacity
-                  style={styles.editButton}
-                  onPress={() => {
-                    setIsOptionsVisible(false)
-                    navigation.navigate('EditRecruit')
-                  }}
-                >
-                  <Text style={styles.editButtonText}>수정하기</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
-
-          {/* 이미지 업로드 */}
           <View style={styles.imageContainer}>
-            <View style={styles.imagePlaceholder} />
+            <Image
+              source={{ uri: `${BASE_URL}/images/${data.productImage}` }}
+              style={styles.image}
+            />
           </View>
 
-          {/* 모집 상태 */}
           <View style={getStatusStyle()}>
             <Text style={styles.statusText}>{getStatusText()}</Text>
           </View>
 
-          {/* 카테고리 */}
           <View style={styles.infoContainer}>
-            <Text style={styles.categoryText}>{category}</Text>
+            <Text style={styles.categoryText}>{data.category}</Text>
             <TouchableOpacity onPress={toggleFavorite}>
               <Image
                 source={
@@ -364,9 +243,8 @@ const RecruitDetails = ({
             </TouchableOpacity>
           </View>
 
-          {/* 상품 정보 */}
           <View style={styles.productInfoContainer}>
-            <Text style={styles.productName}>{productName}</Text>
+            <Text style={styles.productName}>{data.name}</Text>
             <TouchableOpacity onPress={openLink}>
               <Text style={styles.linkText}>구매 링크{'>'}</Text>
             </TouchableOpacity>
@@ -374,52 +252,79 @@ const RecruitDetails = ({
               <View style={styles.infoLabelContainer}>
                 <Text style={styles.staticText}>개당</Text>
               </View>
-
-              {/* 가격 */}
               <Text style={[styles.dynamicText, styles.dynamic]}>
-                {' '}
                 ₩ {formattedPrice}
               </Text>
             </View>
-
-            {/* 남은 개수 */}
             <View style={styles.infoRow}>
               <View style={styles.infoLabelContainer}>
                 <Text style={styles.staticText}>남은 개수</Text>
               </View>
               <Text style={[styles.dynamicText, styles.dynamic]}>
-                {' '}
                 {formattedQuantity}개
               </Text>
             </View>
-
-            {/* 마감까지 */}
             <View style={styles.infoRow}>
               <View style={styles.infoLabelContainer}>
                 <Text style={styles.staticText}>마감까지</Text>
               </View>
               <Text style={[styles.dynamicText, styles.dynamic]}>
-                {' '}
                 {timeLeft}
               </Text>
             </View>
           </View>
 
-          {/* 구분선 추가 */}
           <View style={styles.separator} />
 
-          {/* 공지 */}
           <View>
-            <Text style={[styles.announceTitle]}>공지</Text>
-            <Text style={[styles.announce]}>공지 예시</Text>
+            <Text style={styles.announceTitle}>공지</Text>
+            <Text style={styles.announce}>{data.content}</Text>
           </View>
+          <MapView ref={mapRef} initialRegion={location} style={styles.map}>
+            <Marker coordinate={location} />
+          </MapView>
         </ScrollView>
 
-        {renderHostButtons()}
-        {renderParticipantButtons()}
+        {userStatus === 'N' ? (
+          isparticipant === 'Y' ? (
+            <TouchableOpacity
+              style={[styles.cancelButton]}
+              onPress={handleCancelParticipation}
+            >
+              <Text style={styles.footerText}>참여 취소하기</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+              <TouchableOpacity
+                style={[styles.participateButton]}
+                onPress={handleParticipate}
+              >
+                <Text style={styles.footerText}>참여하기</Text>
+              </TouchableOpacity>
+            </View>
+          )
+        ) : (
+          currentIsRecruiting && (
+            <View style={styles.hostButtonsContainer}>
+              <TouchableOpacity
+                style={styles.manageButton}
+                onPress={handleCloseRecruitment}
+              >
+                <Text style={styles.manageButtonText}>모집 마감하기</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.manageButtonP}
+                onPress={() =>
+                  navigation.navigate('ParticipantInfo', { itemId: itemId })
+                }
+              >
+                <Text style={styles.manageButtonTextP}>참여자 정보 관리</Text>
+              </TouchableOpacity>
+            </View>
+          )
+        )}
 
-        {/* 참여 취소 */}
-        {currentIsApplicant && (
+        {userStatus === 'N' && (
           <Modal isVisible={isModalVisible}>
             <View style={styles.modalContainer}>
               <Text style={styles.modalTitle}>참여를 취소하시겠습니까?</Text>
@@ -431,20 +336,19 @@ const RecruitDetails = ({
                   style={styles.modalButtonGo}
                   onPress={confirmCancelParticipation}
                 >
-                  <Text style={[styles.modalButtonGoText]}>계속하기</Text>
+                  <Text style={styles.modalButtonGoText}>계속하기</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.modalButtonCancel}
                   onPress={() => setIsModalVisible(false)}
                 >
-                  <Text style={[styles.modalButtonCancelText]}>취소</Text>
+                  <Text style={styles.modalButtonCancelText}>취소</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </Modal>
         )}
 
-        {/* 모집 마감 */}
         <Modal
           isVisible={closeRecruitmentModalVisible}
           onBackdropPress={() => setCloseRecruitmentModalVisible(false)}
@@ -452,8 +356,7 @@ const RecruitDetails = ({
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>신청을 마감하시겠습니까?</Text>
             <Text style={styles.modalText}>
-              해당 공동구매에 더이상 다른{'\n'}
-              사용자가 참여할 수 없습니다.
+              해당 공동구매에 더이상 다른 사용자가 참여할 수 없습니다.
             </Text>
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
@@ -471,35 +374,6 @@ const RecruitDetails = ({
             </View>
           </View>
         </Modal>
-
-        {/* 공구 종료 */}
-        {isHost && !currentIsRecruiting && (
-          <Modal isVisible={closeRecruitmentModalVisible}>
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>공구를 종료하시겠습니까?</Text>
-              <Text style={styles.modalTitle}>
-                모든 구매자가 상품을 수령했거나 해당 공구를{'\n'}더이상 진행하지
-                않으려면 종료 버튼을 눌러주세요.{'\n'} 종료 시 게시글이
-                비활성화됩니다.
-              </Text>
-
-              <View style={styles.modalButtonContainer}>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={confirmCloseRecruitment}
-                >
-                  <Text style={styles.modalButtonGo}>종료하기</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={() => setCloseRecruitmentModalVisible(false)}
-                >
-                  <Text style={styles.modalButtonCancel}>취소</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
-        )}
       </View>
     </SafeAreaView>
   )
@@ -535,7 +409,6 @@ const styles = StyleSheet.create({
   optionsButtonText: {
     fontSize: 24,
   },
-
   editButton: {
     position: 'absolute',
     top: 20,
@@ -554,10 +427,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  imagePlaceholder: {
+  image: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#f0f0f0',
+    resizeMode: 'cover',
   },
   statusContainer: {
     alignItems: 'center',
@@ -568,31 +441,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: 'white',
   },
-  recruitingText: {
-    color: '#75C743',
-  },
-  closedText: {
-    color: '#777777',
-  },
-  closedTexting: {
-    color: '#75C743',
-  },
   recruitingBackground: {
     backgroundColor: '#75C743',
   },
   closedBackground: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#75C743',
-  },
-  recruitingText: {
-    color: 'white',
-  },
-  closed: {
-    color: '#777777',
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#777777',
+    backgroundColor: 'gray',
   },
   infoContainer: {
     flexDirection: 'row',
@@ -661,25 +514,11 @@ const styles = StyleSheet.create({
   },
   footerContainer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 15,
     width: '100%',
     alignItems: 'center',
-  },
-  footerBox: {
     justifyContent: 'center',
-    alignItems: 'center',
-    width: '90%',
-    left: '5%',
-    right: '5%',
-    padding: 10,
-    borderWidth: 1,
-    borderRadius: 15,
-    elevation: 5, // Android 그림자
-    shadowColor: '#000', // iOS 그림자
-    shadowOffset: { width: 0, height: 2 }, // iOS 그림자 오프셋
-    shadowOpacity: 0.25, // iOS 그림자 불투명도
-    shadowRadius: 3.84, // iOS 그림자 반경
-    backgroundColor: 'white',
+    backgroundColor: 'red',
   },
   footerText: {
     fontSize: 16,
@@ -687,48 +526,100 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
   },
-  recruitingFooterText: {
-    color: '#75C743',
-  },
-  closedFooterText: {
-    color: '#777777',
-  },
   participateButton: {
     borderRadius: 15,
     borderColor: '#75C743',
     backgroundColor: '#75C743',
+    height: 56,
+    width: '90%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   cancelButton: {
     borderRadius: 15,
     borderColor: '#C7434B',
     backgroundColor: '#C7434B',
+    padding: 10,
+    height: 56,
+    width: '90%',
   },
-  footerAlreadyParticipating: {
-    borderColor: '#75C743',
-    borderWidth: 1,
-    backgroundColor: 'white',
+  hostButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 10,
+    bottom: 15,
   },
-  footerClosed: {
-    borderColor: '#777777',
-    backgroundColor: 'white',
-  },
-  confirmButton: {
+  manageButton: {
     backgroundColor: '#C7434B',
-    marginLeft: 10,
+    borderColor: '#C7434B',
+    paddingVertical: 11,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginBottom: 10,
+    width: '45%',
+    height: 56,
+    margin: 5,
+    elevation: 5,
+    shadowColor: '#909090',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  cancelModalButton: {
-    backgroundColor: 'white',
-    borderColor: '#9C9C9C',
-    borderWidth: 1,
-    marginRight: 10,
-  },
-  modalButtonText: {
+  manageButtonText: {
+    fontSize: 16,
     color: 'white',
-    fontSize: 14,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
-  modalButtonTextCancel: {
-    color: '#9C9C9C',
+  manageButtonP: {
+    backgroundColor: 'white',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginBottom: 10,
+    width: '45%',
+    height: 56,
+    margin: 5,
+    borderWidth: 2,
+    borderColor: '#75C743',
+    elevation: 5,
+    shadowColor: '#909090',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  manageButtonTextP: {
+    fontSize: 16,
+    color: '#75C743',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  modalText: {
+    fontSize: 14,
+    color: '#CC0000',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   modalButtonGo: {
     borderRadius: 8,
@@ -760,65 +651,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
   },
-
-  hostButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 10,
-    bottom: 30,
-  },
-  manageButton: {
-    backgroundColor: '#C7434B',
-    borderColor: '#C7434B',
-    paddingVertical: 11,
-    paddingHorizontal: 20,
+  map: {
+    height: 200,
     borderRadius: 10,
-    marginBottom: 10,
-    width: '45%',
-    height: 42,
-    margin: 5,
-    bottom: '-15%',
-    elevation: 5, // Android 그림자
-    shadowColor: '#000', // iOS 그림자
-    shadowOffset: { width: 0, height: 2 }, // iOS 그림자 오프셋
-    shadowOpacity: 0.25, // iOS 그림자 불투명도
-    shadowRadius: 3.84, // iOS 그림자 반경
+    marginHorizontal: 20,
+    marginTop: 20,
   },
-  manageButtonText: {
-    fontSize: 16,
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  manageButtonP: {
-    backgroundColor: 'white',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    marginBottom: 10,
-    width: '45%',
-    height: 42,
-    margin: 5,
-    bottom: '-15%',
-    borderWidth: 2,
-    borderColor: '#75C743',
-    elevation: 5, // Android 그림자
-    shadowColor: '#000', // iOS 그림자
-    shadowOffset: { width: 0, height: 2 }, // iOS 그림자 오프셋
-    shadowOpacity: 0.25, // iOS 그림자 불투명도
-    shadowRadius: 3.84, // iOS 그림자 반경
-  },
-  manageButtonTextP: {
-    fontSize: 16,
-    color: '#75C743',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  closeButton: {
-    backgroundColor: '#75C743',
-    borderColor: '#75C743',
-  },
-
   announceTitle: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -829,44 +667,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: '4%',
     marginLeft: 20,
-  },
-  modalContainer: {
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    width: '80% ',
-    borderRadius: '12',
-    padding: 20,
-    height: '20%',
-  },
-  modalTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  modalText: {
-    fontSize: 14,
-    color: '#CC0000',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  modal: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    paddingLeft: '8%',
-    paddingRight: '8%',
-    paddingBottom: '7.5%',
-    paddingTop: '9%',
-    borderRadius: 12,
-    borderColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
   },
 })
 

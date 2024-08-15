@@ -516,7 +516,9 @@ function Maintest() {
             <View key={item.id} style={styles.itemWrapper}>
               <TouchableOpacity
                 style={styles.itemBox}
-                onPress={() => navigation.navigate('RecruitDetails')}
+                onPress={() =>
+                  navigation.navigate('RecruitDetails', { itemId: item.id })
+                }
               >
                 <Image
                   source={{

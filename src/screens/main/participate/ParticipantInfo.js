@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   View,
   Text,
@@ -9,50 +9,37 @@ import {
 } from 'react-native'
 import InfoManageHeader from '../../../components/InfoManageHeader'
 import CheckBox from 'react-native-check-box'
+import axios from 'axios'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { BASE_URL } from '../../../services/api'
 
-const ParticipantInfo = ({ navigation }) => {
-  const [participants, setParticipants] = useState([
-    {
-      id: 1,
-      name: '학생1',
-      participationCount: 1,
-      participationAmount: 1100,
-      contact: '123-456-7890',
-      checked: false,
-    },
-    {
-      id: 2,
-      name: '학생2',
-      participationCount: 3,
-      participationAmount: 3300,
-      contact: '123-456-7891',
-      checked: false,
-    },
-    {
-      id: 3,
-      name: '학생3',
-      participationCount: 2,
-      participationAmount: 2200,
-      contact: '123-456-7892',
-      checked: false,
-    },
-    {
-      id: 4,
-      name: '학생4',
-      participationCount: 4,
-      participationAmount: 4400,
-      contact: '123-456-7893',
-      checked: false,
-    },
-    {
-      id: 5,
-      name: '학생5',
-      participationCount: 5,
-      participationAmount: 5500,
-      contact: '123-456-7894',
-      checked: false,
-    },
-  ])
+const ParticipantInfo = ({ route }) => {
+  useEffect(() => {
+    fetchparticipantlist()
+  }, [])
+
+  const { itemId } = route.params
+  const [participants, setParticipants] = useState([]) // 초기 상태를 빈 배열로 설정
+
+  const fetchparticipantlist = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token')
+      if (!token) {
+        throw new Error('Token is missing')
+      }
+
+      const response = await axios.get(`${BASE_URL}/participation/${itemId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: { productId: itemId },
+      })
+      console.log(response.data)
+      setParticipants(response.data)
+    } catch (error) {
+      console.error('Error fetching participation status:', error)
+    }
+  }
 
   const [infoVisible, setInfoVisible] = useState(false)
 
@@ -66,11 +53,12 @@ const ParticipantInfo = ({ navigation }) => {
     )
   }
 
-  const totalAmount = participants.reduce(
-    (sum, participant) => sum + participant.participationAmount,
-    0
-  )
-  const totalParticipants = participants.length
+  // participants가 undefined가 아닌지 확인 후 reduce 사용
+  const totalAmount =
+    participants?.reduce((sum, participant) => sum + participant.price, 0) || 0
+
+  // participants가 undefined가 아닌지 확인 후 length 사용
+  const totalParticipants = participants?.length || 0
 
   const showInfo = () => {
     setInfoVisible(true)
@@ -88,7 +76,7 @@ const ParticipantInfo = ({ navigation }) => {
           <Text style={[styles.headerText, { marginLeft: 10 }]}>참여개수</Text>
           <Text style={[styles.headerText, { marginRight: 15 }]}>참여금액</Text>
         </View>
-        {participants.map((participant) => (
+        {participants?.map((participant) => (
           <View
             key={participant.id}
             style={[
@@ -101,14 +89,14 @@ const ParticipantInfo = ({ navigation }) => {
               onClick={() => handleCheck(participant.id)}
               checkBoxColor="#000"
             />
-            <Text style={styles.participantText}>{participant.name}</Text>
             <Text style={styles.participantText}>
-              {participant.participationCount} 개
+              {participant.memberNickname}
             </Text>
             <Text style={styles.participantText}>
-              {participant.participationAmount} 원
+              {participant.quantity} 개
             </Text>
-            <TouchableOpacity onPress={() => alert(participant.contact)}>
+            <Text style={styles.participantText}>{participant.price} 원</Text>
+            <TouchableOpacity onPress={() => alert(participant.memberphone)}>
               <Image
                 source={require('../../../assets/infophone.png')}
                 style={styles.phoneIcon}
