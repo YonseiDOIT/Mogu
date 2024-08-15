@@ -22,6 +22,7 @@ import ParticipantInfo from '../screens/main/participate/ParticipantInfo'
 import ManageMy from '../screens/main/ManageMy'
 import FinishedMy from '../screens/main/FinishedMy'
 import EditGroupPurchase from '../screens/main/participate/EditGroupPurchase'
+import ParticipateComplete from '../screens/main/participate/ParticipateComplete'
 
 const Stack = createStackNavigator()
 
@@ -151,6 +152,11 @@ const StackAfterLogin = () => {
         name="EditGroupPurchase"
         component={EditGroupPurchase}
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ParticipateComplete"
+        component={ParticipateComplete}
+        options={{ headerShown: false, gestureEnabled: false }}
       />
     </Stack.Navigator>
   )

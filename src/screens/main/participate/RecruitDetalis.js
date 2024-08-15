@@ -18,7 +18,7 @@ import { BASE_URL } from '../../../services/api'
 const RecruitDetails = ({ route, navigation }) => {
   const { itemId } = route.params
   const [data, setData] = useState(null)
-  const [userStatus, setUserStatus] = useState('') // Combined state variable
+  const [userStatus, setUserStatus] = useState('')
   const [isparticipant, setisparticipant] = useState('')
   const [isFavorite, setIsFavorite] = useState(false)
   const [isModalVisible, setIsModalVisible] = useState(false)
@@ -119,7 +119,12 @@ const RecruitDetails = ({ route, navigation }) => {
 
   const handleParticipate = () => {
     setCurrentApplicantQuantity(currentApplicantQuantity + 1)
-    navigation.navigate('Participate')
+    navigation.navigate('Participate', {
+      productName: data.name,
+      pricePerUnit: formattedPrice,
+      remainingQuantity: formattedQuantity,
+      itemId: itemId,
+    })
   }
 
   const handleCancelParticipation = () => {
