@@ -94,9 +94,10 @@ const Login = ({ navigation }) => {
     } else {
       if (!isValidEmail) {
         setLoginError('유효한 이메일 주소를 입력하세요.')
-      } else {
-        setLoginError('비밀번호는 최소 7자 이상이어야 합니다.')
       }
+      // else {
+      //   setLoginError('비밀번호는 최소 7자 이상이어야 합니다.')
+      // }
     }
   }
 
@@ -104,11 +105,11 @@ const Login = ({ navigation }) => {
     const isValid = inputPassword.length >= 7
     setIsPasswordValid(isValid)
 
-    if (!isValid) {
-      setLoginError('비밀번호는 최소 7자 이상이어야 합니다.')
-    } else {
-      setLoginError('')
-    }
+    // if (!isValid) {
+    //   setLoginError('비밀번호는 최소 7자 이상이어야 합니다.')
+    // } else {
+    //   setLoginError('')
+    // }
   }
 
   return (
