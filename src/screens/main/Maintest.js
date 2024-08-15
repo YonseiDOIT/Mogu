@@ -532,11 +532,10 @@ function Maintest() {
                     isDeadlineSoon(item.endDate) && styles.deadlineSoonText,
                   ]}
                 >
-                  {`${calculateTimeRemaining(item.endDate).days}일 ${
-                    calculateTimeRemaining(item.endDate).hours
-                  }시간 ${calculateTimeRemaining(item.endDate).minutes}분 ${
-                    calculateTimeRemaining(item.endDate).seconds
-                  }초`}
+                  {calculateTimeRemaining(item.endDate).days}일{' '}
+                  {calculateTimeRemaining(item.endDate).hours}시간{' '}
+                  {calculateTimeRemaining(item.endDate).minutes}분{' '}
+                  {calculateTimeRemaining(item.endDate).seconds}초
                 </Text>
               </View>
               <Text style={styles.itemTitle}>{item.name}</Text>
@@ -554,6 +553,15 @@ function Maintest() {
               </View>
             </View>
           ))}
+        </View>
+        <View
+          style={styles.noResultsContainer}
+          onScrollEndDrag={handleScrollEnd}
+          scrollEventThrottle={16}
+        >
+          {noResults && (
+            <Text style={styles.noResultText}>검색 결과가 없습니다.</Text>
+          )}
         </View>
       </ScrollView>
       <TouchableOpacity
@@ -831,6 +839,18 @@ const styles = StyleSheet.create({
     height: '100%',
     zIndex: 1,
     borderRadius: 10,
+  },
+
+  noResultsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noResultText: {
+    position: 'absolute',
+    fontSize: 16,
+    color: 'red',
+    textAlign: 'center',
   },
 })
 
