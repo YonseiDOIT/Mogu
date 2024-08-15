@@ -92,6 +92,8 @@ function Maintest() {
     )
 
     const storedToken = await AsyncStorage.getItem('token')
+    if (!hasMoreData) return
+
     setLoading(true)
 
     try {
@@ -132,14 +134,34 @@ function Maintest() {
 
       console.log('Response Data:', response.data)
 
-      const newItems = response.data.content.map((item) => {
-        const favoriteItem = favoriteItems.find(
-          (favItem) => favItem.id === item.id
-        )
-        return favoriteItem
-          ? { ...item, favorite: true }
-          : { ...item, favorite: false }
-      })
+      // const newItems = response.data.content.map((item) => {
+      //   const favoriteItem = favoriteItems.find(
+      //     (favItem) => favItem.id === item.id
+      //   )
+      //   return favoriteItem
+      //     ? { ...item, favorite: true }
+      //     : { ...item, favorite: false }
+      // })
+      const newItems = response.data.content
+        .map((item) => ({
+          ...item,
+          favorite: favoriteItems.some((favItem) => favItem.id === item.id),
+        }))
+        .filter((item) => {
+          const timeRemaining = calculateTimeRemaining(item.endDate)
+          return (
+            timeRemaining.days !== 0 ||
+            timeRemaining.hours !== 0 ||
+            timeRemaining.minutes !== 0 ||
+            timeRemaining.seconds !== 0
+          )
+        }) // 0일 0시간 0분 0초인 itemBox는 안 보이게 함
+
+      setItems((prevItems) =>
+        page === 0 ? newItems : [...prevItems, ...newItems]
+      )
+      setHasMoreData(newItems.length >= 10)
+      setNoResults(newItems.length === 0)
 
       // 아이템의 만료 시간 계산 및 필터링
       const filteredItems = newItems.filter((item) => {
@@ -754,6 +776,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
+    overflow: 'hidden',
   },
 
   heartIconContainer: {
