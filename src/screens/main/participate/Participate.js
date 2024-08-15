@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   View,
   Text,
@@ -9,21 +9,67 @@ import {
   SafeAreaView,
   ScrollView,
 } from 'react-native'
+import axios from 'axios'
+import { BASE_URL } from '../../../services/api'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
-const Participate = ({
-  navigation,
-  route,
-  productName = '사과',
-  pricePerUnit = 10000,
-  remainingQuantity = 10,
-}) => {
+const Participate = ({ navigation, route }) => {
+  useEffect(() => {
+    fetchProductDetails()
+  }, [])
+  const [data, setData] = useState(null)
   const [quantity, setQuantity] = useState('')
   const [confirmChecked, setConfirmChecked] = useState(false)
   const [receiveChecked, setReceiveChecked] = useState(false)
 
+  const { productName, pricePerUnit, remainingQuantity, itemId } = route.params
+
+  const fetchProductDetails = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token')
+      if (!token) {
+        throw new Error('Token is missing')
+      }
+      const response = await axios.get(`${BASE_URL}/products/${itemId}`, {
+        params: { id: itemId },
+      })
+      setData(response.data)
+      console.log(data.productImage)
+    } catch (error) {
+      console.error('Error fetching product details:', error)
+    }
+  }
+
   const handleConfirmParticipation = () => {
     if (parseInt(quantity) <= remainingQuantity) {
-      navigation.goBack()
+      postparticipant()
+      navigation.navigate('ParticipateComplete', { URL: data.chatUrl })
+    }
+  }
+
+  const postparticipant = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token')
+      if (!token) {
+        throw new Error('Token is missing')
+      }
+
+      const response = await axios.post(
+        `${BASE_URL}/participation`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            productId: parseInt(itemId),
+            quantity: parseInt(quantity),
+          },
+        }
+      )
+      console.log(response)
+    } catch (error) {
+      console.error('Error posting participation status:', error)
     }
   }
 
@@ -47,13 +93,27 @@ const Participate = ({
       parseInt(quantity) > remainingQuantity
     )
   }
+  function parsePrice(priceString) {
+    let cleanedString = priceString.replace(/[^\d]/g, '')
+    let price = parseInt(cleanedString, 10)
 
+    return price
+  }
   const calculatedAmount = () => {
     const qty = parseInt(quantity)
+    const ppu = parsePrice(pricePerUnit)
     if (isNaN(qty) || qty <= 0 || qty > remainingQuantity) return 0
-    return pricePerUnit * qty
+    return ppu * qty
   }
-
+  if (!data) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <Text>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    )
+  }
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -72,7 +132,10 @@ const Participate = ({
 
         {/* 이미지 업로드 */}
         <View style={styles.imageContainer}>
-          <View style={styles.imagePlaceholder} />
+          <Image
+            source={{ uri: `${BASE_URL}/images/${data.productImage}` }}
+            style={styles.image}
+          />
         </View>
 
         {/* 상품명 */}
@@ -82,7 +145,6 @@ const Participate = ({
         <View style={styles.infoRowNS}>
           <Text style={styles.staticText}>개당</Text>
           <Text style={[styles.dynamicText, styles.dynamic]}>
-            {' '}
             ₩ {formatNumberWithCommas(pricePerUnit)}
           </Text>
         </View>
@@ -91,7 +153,6 @@ const Participate = ({
         <View style={styles.infoRowNS}>
           <Text style={styles.staticText}>남은 개수</Text>
           <Text style={[styles.dynamicText, styles.dynamic]}>
-            {' '}
             {formatNumberWithCommas(remainingQuantity)}
           </Text>
           <Text style={styles.quantity}>개</Text>
@@ -170,8 +231,7 @@ const Participate = ({
       >
         <Text style={styles.confirmButtonText}>
           {formatNumberWithCommas(quantity)}개{' '}
-          {formatNumberWithCommas(calculatedAmount())}
-          원으로 참여할게요!
+          {formatNumberWithCommas(calculatedAmount())}원으로 참여할게요!
         </Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -337,6 +397,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: 'white',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
 })
 
