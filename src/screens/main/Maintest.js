@@ -323,7 +323,8 @@ function Maintest() {
   }
 
   const formatPrice = (price) => {
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+    const roundedPrice = Math.ceil(price)
+    return roundedPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
   }
 
   return (
@@ -569,7 +570,7 @@ function Maintest() {
                 >{`수량 ${item.remainingQty}/${item.qty}`}</Text>
                 <Text style={styles.itemPriceWrapper}>
                   <Text style={styles.itemPrice}>
-                    {formatPrice(item.price)}
+                    {formatPrice(item.price / item.qty)}
                   </Text>
                   <Text style={styles.priceWon}> 원</Text>
                 </Text>
