@@ -18,8 +18,8 @@ import { BASE_URL } from '../../../services/api'
 const RecruitDetails = ({ route, navigation }) => {
   const { itemId } = route.params
   const [data, setData] = useState(null)
-  const [userStatus, setUserStatus] = useState('')
-  const [isParticipant, setIsParticipant] = useState('')
+  const [userStatus, setUserStatus] = useState('') // Combined state variable
+  const [isparticipant, setisparticipant] = useState('')
   const [isFavorite, setIsFavorite] = useState(false)
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [currentApplicantQuantity, setCurrentApplicantQuantity] = useState(0)
@@ -86,7 +86,6 @@ const RecruitDetails = ({ route, navigation }) => {
       setUserStatus('none') // set to 'none' in case of error
     }
   }
-
   const fetchisparticipant = async () => {
     try {
       const token = await AsyncStorage.getItem('token')
@@ -142,27 +141,9 @@ const RecruitDetails = ({ route, navigation }) => {
     setCloseRecruitmentModalVisible(true)
   }
 
-  const confirmCloseRecruitment = async () => {
-    try {
-      const token = await AsyncStorage.getItem('token')
-      if (!token) {
-        throw new Error('Token is missing')
-      }
-
-      await axios.patch(
-        `${BASE_URL}/products/${itemId}/status/공구종료`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-      setCurrentIsRecruiting(false)
-      setCloseRecruitmentModalVisible(false)
-    } catch (error) {
-      console.error('Error closing recruitment:', error)
-    }
+  const confirmCloseRecruitment = () => {
+    setCurrentIsRecruiting(false)
+    setCloseRecruitmentModalVisible(false)
   }
 
   const handleManageParticipants = () => {
@@ -200,7 +181,7 @@ const RecruitDetails = ({ route, navigation }) => {
     if (!data) return ''
     if (data.dealStatus === '모집중') {
       return '참여 모집 중'
-    } else if (data.dealStatus === '공구종료') {
+    } else if (timeLeft === '0일 0시간 0분') {
       return '종료되었습니다.'
     } else {
       return '마감 후 구매 진행 중'
@@ -211,7 +192,7 @@ const RecruitDetails = ({ route, navigation }) => {
     if (!data) return {}
     if (data.dealStatus === '모집중') {
       return [styles.statusContainer, styles.recruitingBackground]
-    } else if (data.dealStatus === '공구종료') {
+    } else if (timeLeft === '0일 0시간 0분') {
       return [styles.statusContainer, styles.closedBackground]
     } else {
       return [styles.statusContainer, styles.closedBackground]
@@ -377,10 +358,10 @@ const RecruitDetails = ({ route, navigation }) => {
           isVisible={closeRecruitmentModalVisible}
           onBackdropPress={() => setCloseRecruitmentModalVisible(false)}
         >
-          <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>신청을 마감하시겠습니까?</Text>
             <Text style={styles.modalText}>
-              해당 공동구매에 더이상 다른{'\n'}사용자가 참여할 수 없습니다.
+              해당 공동구매에 더이상 다른 사용자가 참여할 수 없습니다.
             </Text>
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
@@ -629,7 +610,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
   },
-
   modalTitle: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -654,7 +634,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     marginTop: 10,
-    marginRight: 10,
   },
   modalButtonGoText: {
     color: 'white',

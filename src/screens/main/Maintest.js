@@ -58,10 +58,9 @@ function Maintest() {
         : []
       setFavoriteItems(favoriteItems)
       updateItemsWithFavorites(favoriteItems)
+      getProducts(page, selectedCategory, selectedLocation)
     } catch (error) {
       console.error('Error loading favorite items:', error)
-    } finally {
-      resetAndFetchProducts()
     }
   }
 
