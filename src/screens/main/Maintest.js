@@ -144,7 +144,7 @@ function Maintest() {
       const newItems = response.data.content
         .map((item) => ({
           ...item,
-          favorite: favoriteItems.some((favItem) => favItem.id === item.id),
+          favorite: favoriteItems.find((favItem) => favItem.id === item.id),
         }))
         .filter((item) => {
           const timeRemaining = calculateTimeRemaining(item.endDate)
@@ -292,6 +292,8 @@ function Maintest() {
   }
 
   const handleFavoriteToggle = async (itemId) => {
+    console.log('Favorite Id:', itemId)
+
     const updatedItems = items.map((item) =>
       item.id === itemId ? { ...item, favorite: !item.favorite } : item
     )
@@ -583,7 +585,7 @@ function Maintest() {
           onScrollEndDrag={handleScrollEnd}
           scrollEventThrottle={16}
         >
-          {noResults && (
+          {noResults && items.length === 0 && !loading && (
             <Text style={styles.noResultText}>검색 결과가 없습니다.</Text>
           )}
         </View>
@@ -785,11 +787,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '105%',
     right: 5,
+    zIndex: 1,
   },
   heartIcon: {
     width: 24,
     height: 24,
     resizeMode: 'contain',
+    zIndex: 1,
   },
 
   row: {
