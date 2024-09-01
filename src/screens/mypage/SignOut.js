@@ -22,7 +22,8 @@ const SignOut = ({ navigation }) => {
       const { email, nickname, phone, password } = userInfo.data.data
 
       const response = await axios.delete(`${BASE_URL}/member`, {
-        params: {
+        // params: {
+        data: {
           email: email,
           nickname: nickname,
           phone: phone,
@@ -37,14 +38,24 @@ const SignOut = ({ navigation }) => {
         await AsyncStorage.removeItem('token')
         navigation.reset({
           index: 0,
-          routes: [{ name: 'StackBeforeLogin', screen: 'Login' }],
+          // routes: [{ name: 'StackBeforeLogin', screen: 'Login' }],
+          routes: [{ name: 'Login' }],
         })
       } else {
         Alert.alert('탈퇴 실패', '다시 시도해주세요.')
       }
     } catch (error) {
       console.error('Error during sign out:', error)
-      Alert.alert('오류', '네트워크 오류가 발생했습니다.')
+      if (error.response && error.response.status === 403) {
+        await AsyncStorage.removeItem('token')
+        Alert.alert('오류', '권한이 없습니다. 다시 로그인해 주세요.')
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'StackBeforeLogin', screen: 'Login' }],
+        })
+      } else {
+        Alert.alert('오류', '네트워크 오류가 발생했습니다.')
+      }
     }
   }
 
