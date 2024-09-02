@@ -31,6 +31,13 @@ function Maintest() {
   const [noResults, setNoResults] = useState(false)
 
   useEffect(() => {
+    if (isFocused) {
+      // 화면이 포커스될 때 첫 페이지 데이터를 다시 로드
+      loadFavoriteItems()
+    }
+  }, [isFocused])
+
+  useEffect(() => {
     const intervalId = setInterval(() => {
       setItems((prevItems) => {
         return prevItems.map((item) => {
@@ -42,13 +49,6 @@ function Maintest() {
 
     return () => clearInterval(intervalId)
   }, [])
-
-  useEffect(() => {
-    if (isFocused) {
-      // 화면이 포커스될 때 첫 페이지 데이터를 다시 로드
-      loadFavoriteItems()
-    }
-  }, [isFocused])
 
   const loadFavoriteItems = async () => {
     try {
@@ -785,15 +785,18 @@ const styles = StyleSheet.create({
 
   heartIconContainer: {
     position: 'absolute',
-    top: '105%',
+    top: 150,
+    // bottom: 10,
     right: 5,
     zIndex: 1,
   },
   heartIcon: {
+    position: 'absolute',
+
     width: 24,
     height: 24,
     resizeMode: 'contain',
-    zIndex: 1,
+    zIndex: 2,
   },
 
   row: {
