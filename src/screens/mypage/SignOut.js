@@ -22,8 +22,7 @@ const SignOut = ({ navigation }) => {
       const { email, nickname, phone, password } = userInfo.data.data
 
       const response = await axios.delete(`${BASE_URL}/member`, {
-        // params: {
-        data: {
+        params: {
           email: email,
           nickname: nickname,
           phone: phone,
@@ -51,7 +50,14 @@ const SignOut = ({ navigation }) => {
         Alert.alert('오류', '권한이 없습니다. 다시 로그인해 주세요.')
         navigation.reset({
           index: 0,
-          routes: [{ name: 'StackBeforeLogin', screen: 'Login' }],
+          // routes: [{ name: 'StackBeforeLogin', screen: 'Login' }],
+          routes: [{ name: 'Login' }],
+        })
+      } else if (error.message === '토큰이 없습니다.') {
+        Alert.alert('오류', '로그인이 필요합니다.')
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Login' }],
         })
       } else {
         Alert.alert('오류', '네트워크 오류가 발생했습니다.')
