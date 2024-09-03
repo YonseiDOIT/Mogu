@@ -72,17 +72,25 @@ function Maintest() {
     getProducts(0, selectedCategory, selectedLocation)
   }
 
+  // const updateItemsWithFavorites = (favoriteItems) => {
+  //   setItems((prevItems) => {
+  //     return prevItems.map((item) => {
+  //       const favoriteItem = favoriteItems.find(
+  //         (favItem) => favItem.id === item.id
+  //       )
+  //       return favoriteItem
+  //         ? { ...item, favorite: true }
+  //         : { ...item, favorite: false }
+  //     })
+  //   })
+  // }
   const updateItemsWithFavorites = (favoriteItems) => {
-    setItems((prevItems) => {
-      return prevItems.map((item) => {
-        const favoriteItem = favoriteItems.find(
-          (favItem) => favItem.id === item.id
-        )
-        return favoriteItem
-          ? { ...item, favorite: true }
-          : { ...item, favorite: false }
-      })
-    })
+    setItems((prevItems) =>
+      prevItems.map((item) => ({
+        ...item,
+        favorite: !!favoriteItems.find((favItem) => favItem.id === item.id),
+      }))
+    )
   }
 
   const getProducts = async (page, category = '', location = '') => {
@@ -785,14 +793,12 @@ const styles = StyleSheet.create({
 
   heartIconContainer: {
     position: 'absolute',
-    top: 150,
-    // bottom: 10,
+    top: 160,
     right: 5,
     zIndex: 1,
   },
   heartIcon: {
-    position: 'absolute',
-
+    // position: 'absolute',
     width: 24,
     height: 24,
     resizeMode: 'contain',
