@@ -536,7 +536,7 @@ function Maintest() {
                   }}
                   style={styles.deadlineImage}
                 />
-                <TouchableOpacity
+                {/* <TouchableOpacity
                   onPress={() => handleFavoriteToggle(item.id)}
                   style={styles.heartIconContainer}
                 >
@@ -548,7 +548,7 @@ function Maintest() {
                     }
                     style={styles.heartIcon}
                   />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
               </TouchableOpacity>
               <View style={styles.timeContainer}>
                 <MaterialIcons
@@ -574,6 +574,19 @@ function Maintest() {
               </View>
               <Text style={styles.itemTitle}>{item.name}</Text>
 
+              <TouchableOpacity
+                onPress={() => handleFavoriteToggle(item.id)}
+                style={styles.heartIconContainer}
+              >
+                <Image
+                  source={
+                    item.favorite
+                      ? require('../../assets/heart.png')
+                      : require('../../assets/emptyheart.png')
+                  }
+                  style={styles.heartIcon}
+                />
+              </TouchableOpacity>
               <View style={styles.row}>
                 <Text
                   style={styles.itemText}
@@ -793,16 +806,17 @@ const styles = StyleSheet.create({
 
   heartIconContainer: {
     position: 'absolute',
-    top: 160,
+    top: 175,
     right: 5,
-    zIndex: 1,
+    zIndex: 10,
   },
+
   heartIcon: {
     // position: 'absolute',
     width: 24,
     height: 24,
     resizeMode: 'contain',
-    zIndex: 2,
+    // zIndex: 1,
   },
 
   row: {
