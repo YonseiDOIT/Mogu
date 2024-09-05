@@ -99,6 +99,11 @@ function Maintest() {
     )
 
     const storedToken = await AsyncStorage.getItem('token')
+    if (!storedToken) {
+      console.error('No token found')
+      return
+    }
+
     if (!hasMoreData) return
 
     setLoading(true)
@@ -299,7 +304,7 @@ function Maintest() {
     return totalMinutes < 1440 // 24시간 미만
   }
 
-  const handleFavoriteToggle = async (itemId) => {
+  const handleFavoriteToggle = async (itemId, isFavorite) => {
     console.log('Favorite Id:', itemId)
 
     const updatedItems = items.map((item) =>
@@ -311,12 +316,49 @@ function Maintest() {
     setFavoriteItems(updatedFavoriteItems)
 
     try {
+      // 토큰 가져오기
+      const storedToken = await AsyncStorage.getItem('token')
+
+      if (!storedToken) {
+        console.error('No token')
+        return
+      }
+
+      // 좋아요 추가/삭제 처리
+      const currentFavoriteStatus = updatedItems.find(
+        (item) => item.id === itemId
+      ).favorite
+      if (currentFavoriteStatus) {
+        await axios.post(
+          `${BASE_URL}/favorite/add`,
+          { productId: itemId },
+          {
+            headers: {
+              Authorization: `Bearer ${storedToken}`,
+            },
+          }
+        )
+      } else {
+        await axios.delete(`${BASE_URL}/favorite/${itemId}`, {
+          headers: {
+            Authorization: `Bearer ${storedToken}`,
+          },
+        })
+      }
+
+      // AsyncStorage에 favoriteItems 업데이트
       await AsyncStorage.setItem(
         'favoriteItems',
         JSON.stringify(updatedFavoriteItems)
       )
     } catch (error) {
-      console.error('Error saving favorite items:', error)
+      if (error.response) {
+        console.error('Response data:', error.response.data)
+        console.error('Response status:', error.response.status)
+        console.error('Response headers:', error.response.headers)
+      } else {
+        console.error('Error message:', error.message)
+      }
     }
   }
 
