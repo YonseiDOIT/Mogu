@@ -324,26 +324,36 @@ function Maintest() {
         return
       }
 
+      const headers = {
+        Authorization: `Bearer ${storedToken}`,
+        'Content-Type': 'application/json',
+      }
+
       // 좋아요 추가/삭제 처리
       const currentFavoriteStatus = updatedItems.find(
         (item) => item.id === itemId
       ).favorite
-      if (currentFavoriteStatus) {
+      if (isFavorite) {
+        const favoriteItem = favoriteItems.find((item) => item.id === itemId)
+        if (favoriteItem) {
+          await axios.delete(`${BASE_URL}/favorite/${itemId}`, {
+            headers: {
+              Authorization: `Bearer ${storedToken}`,
+            },
+          })
+        }
+      } else {
         await axios.post(
           `${BASE_URL}/favorite/add`,
-          { productId: itemId },
+          {
+            productId: itemId,
+          },
           {
             headers: {
               Authorization: `Bearer ${storedToken}`,
             },
           }
         )
-      } else {
-        await axios.delete(`${BASE_URL}/favorite/${itemId}`, {
-          headers: {
-            Authorization: `Bearer ${storedToken}`,
-          },
-        })
       }
 
       // AsyncStorage에 favoriteItems 업데이트
