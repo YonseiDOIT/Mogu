@@ -60,7 +60,13 @@ function Maintest() {
       updateItemsWithFavorites(favoriteItems)
       getProducts(page, selectedCategory, selectedLocation)
     } catch (error) {
-      console.error('Error loading favorite items:', error)
+      if (error.response) {
+        console.error('Response data:', error.response.data)
+        console.error('Response status:', error.response.status)
+        console.error('Response headers:', error.response.headers)
+      } else {
+        console.error('Error message:', error.message)
+      }
     }
   }
 
@@ -154,20 +160,15 @@ function Maintest() {
       //     ? { ...item, favorite: true }
       //     : { ...item, favorite: false }
       // })
-      const newItems = response.data.content
-        .map((item) => ({
-          ...item,
-          favorite: favoriteItems.find((favItem) => favItem.id === item.id),
-        }))
-        .filter((item) => {
-          const timeRemaining = calculateTimeRemaining(item.endDate)
-          return (
-            timeRemaining.days !== 0 ||
-            timeRemaining.hours !== 0 ||
-            timeRemaining.minutes !== 0 ||
-            timeRemaining.seconds !== 0
-          )
-        }) // 0일 0시간 0분 0초인 itemBox는 안 보이게 함
+      const newItems = response.data.content.filter((item) => {
+        const timeRemaining = calculateTimeRemaining(item.endDate)
+        return (
+          timeRemaining.days !== 0 ||
+          timeRemaining.hours !== 0 ||
+          timeRemaining.minutes !== 0 ||
+          timeRemaining.seconds !== 0
+        )
+      }) // 0일 0시간 0분 0초인 itemBox는 안 보이게 함
 
       setItems((prevItems) =>
         page === 0 ? newItems : [...prevItems, ...newItems]
@@ -318,6 +319,7 @@ function Maintest() {
     try {
       // 토큰 가져오기
       const storedToken = await AsyncStorage.getItem('token')
+      console.log('Token:', storedToken)
 
       if (!storedToken) {
         console.error('No token')
@@ -333,27 +335,23 @@ function Maintest() {
       const currentFavoriteStatus = updatedItems.find(
         (item) => item.id === itemId
       ).favorite
-      if (isFavorite) {
-        const favoriteItem = favoriteItems.find((item) => item.id === itemId)
-        if (favoriteItem) {
-          await axios.delete(`${BASE_URL}/favorite/${itemId}`, {
-            headers: {
-              Authorization: `Bearer ${storedToken}`,
-            },
-          })
-        }
-      } else {
-        await axios.post(
+
+      console.log('Favorite Status:', currentFavoriteStatus)
+
+      if (currentFavoriteStatus) {
+        // 좋아요 추가 요청
+        const response = await axios.post(
           `${BASE_URL}/favorite/add`,
-          {
-            productId: itemId,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${storedToken}`,
-            },
-          }
+          { productId: itemId },
+          { headers }
         )
+        console.log('Favorite added:', response.data)
+      } else {
+        // 좋아요 삭제 요청
+        const response = await axios.delete(`${BASE_URL}/favorite/${itemId}`, {
+          headers,
+        })
+        console.log('Favorite removed:', response.data)
       }
 
       // AsyncStorage에 favoriteItems 업데이트
@@ -363,10 +361,12 @@ function Maintest() {
       )
     } catch (error) {
       if (error.response) {
+        // 서버가 반환한 오류 응답 처리
         console.error('Response data:', error.response.data)
         console.error('Response status:', error.response.status)
         console.error('Response headers:', error.response.headers)
       } else {
+        // 네트워크 오류 또는 다른 오류 처리
         console.error('Error message:', error.message)
       }
     }
