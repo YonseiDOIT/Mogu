@@ -326,6 +326,21 @@ function Maintest() {
         return
       }
 
+      // 토큰 만료 확인
+      const decodeToken = (token) => {
+        const payload = token.split('.')[1]
+        return JSON.parse(atob(payload))
+      }
+
+      const tokenData = decodeToken(storedToken)
+      console.log('Token Data:', tokenData)
+      console.log('Token Expiry:', new Date(tokenData.exp * 1000))
+
+      if (Date.now() >= tokenData.exp * 1000) {
+        console.error('Token is expired')
+        return
+      }
+
       const headers = {
         Authorization: `Bearer ${storedToken}`,
         'Content-Type': 'application/json',
@@ -351,7 +366,7 @@ function Maintest() {
         const response = await axios.delete(`${BASE_URL}/favorite/${itemId}`, {
           headers,
         })
-        console.log('Favorite removed:', response.data)
+        console.log('Favorite removed:', response.data || 'No content')
       }
 
       // AsyncStorage에 favoriteItems 업데이트
@@ -362,9 +377,15 @@ function Maintest() {
     } catch (error) {
       if (error.response) {
         // 서버가 반환한 오류 응답 처리
-        console.error('Response data:', error.response.data)
+        console.error('Response data:', error.response.data || 'No data')
         console.error('Response status:', error.response.status)
         console.error('Response headers:', error.response.headers)
+
+        if (error.response.status === 403) {
+          console.error(
+            'Permission denied: Please check your token and API permissions.'
+          )
+        }
       } else {
         // 네트워크 오류 또는 다른 오류 처리
         console.error('Error message:', error.message)
