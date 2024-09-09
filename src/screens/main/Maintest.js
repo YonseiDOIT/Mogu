@@ -305,9 +305,8 @@ function Maintest() {
     return totalMinutes < 1440 // 24시간 미만
   }
 
-  const handleFavoriteToggle = async (itemId, isFavorite) => {
-    console.log('Favorite Id:', itemId)
-
+  const handleFavoriteToggle = async (itemId) => {
+    // 아이템 목록 업데이트
     const updatedItems = items.map((item) =>
       item.id === itemId ? { ...item, favorite: !item.favorite } : item
     )
@@ -319,7 +318,6 @@ function Maintest() {
     try {
       // 토큰 가져오기
       const storedToken = await AsyncStorage.getItem('token')
-      console.log('Token:', storedToken)
 
       if (!storedToken) {
         console.error('No token')
@@ -333,8 +331,6 @@ function Maintest() {
       }
 
       const tokenData = decodeToken(storedToken)
-      console.log('Token Data:', tokenData)
-      console.log('Token Expiry:', new Date(tokenData.exp * 1000))
 
       if (Date.now() >= tokenData.exp * 1000) {
         console.error('Token is expired')
@@ -346,28 +342,37 @@ function Maintest() {
         'Content-Type': 'application/json',
       }
 
-      // 좋아요 추가/삭제 처리
+      console.log('Request Headers:', headers)
+
+      // 현재 좋아요 상태를 가져옴
       const currentFavoriteStatus = updatedItems.find(
         (item) => item.id === itemId
       ).favorite
 
-      console.log('Favorite Status:', currentFavoriteStatus)
-
+      let response
       if (currentFavoriteStatus) {
-        // 좋아요 추가 요청
-        const response = await axios.post(
-          `${BASE_URL}/favorite/add`,
-          { productId: itemId },
+        // 찜 추가 요청
+        console.log('Sending PUT request to:', `${BASE_URL}/favorite/${itemId}`)
+
+        response = await axios.post(
+          `${BASE_URL}/favorite/${itemId}`,
+          {},
           { headers }
         )
-        console.log('Favorite added:', response.data)
       } else {
-        // 좋아요 삭제 요청
-        const response = await axios.delete(`${BASE_URL}/favorite/${itemId}`, {
+        // 찜 삭제 요청
+        console.log(
+          'Sending DELETE request to:',
+          `${BASE_URL}/favorite/${itemId}`
+        )
+
+        response = await axios.delete(`${BASE_URL}/favorite/${itemId}`, {
           headers,
         })
-        console.log('Favorite removed:', response.data || 'No content')
       }
+
+      console.log('Response Data:', response.data)
+      console.log('Response Status:', response.status)
 
       // AsyncStorage에 favoriteItems 업데이트
       await AsyncStorage.setItem(
@@ -376,18 +381,14 @@ function Maintest() {
       )
     } catch (error) {
       if (error.response) {
-        // 서버가 반환한 오류 응답 처리
         console.error('Response data:', error.response.data || 'No data')
         console.error('Response status:', error.response.status)
         console.error('Response headers:', error.response.headers)
 
         if (error.response.status === 403) {
-          console.error(
-            'Permission denied: Please check your token and API permissions.'
-          )
+          console.error('Permission denied')
         }
       } else {
-        // 네트워크 오류 또는 다른 오류 처리
         console.error('Error message:', error.message)
       }
     }
