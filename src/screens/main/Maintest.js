@@ -25,17 +25,14 @@ function Maintest() {
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(false)
   const [items, setItems] = useState([])
+  const [favoriteItems, setFavoriteItems] = useState([])
   const [hasMoreData, setHasMoreData] = useState(true)
   const [storedToken, setStoredToken] = useState('')
-  const [favoriteItems, setFavoriteItems] = useState([])
   const [noResults, setNoResults] = useState(false)
 
-  useEffect(() => {
-    if (isFocused) {
-      // 화면이 포커스될 때 첫 페이지 데이터를 다시 로드
-      loadFavoriteItems()
-    }
-  }, [isFocused])
+  // useEffect(() => {
+  //   loadFavoriteItems()
+  // }, [])
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -50,24 +47,52 @@ function Maintest() {
     return () => clearInterval(intervalId)
   }, [])
 
-  const loadFavoriteItems = async () => {
+  const initializeFavorites = async () => {
     try {
-      const favoriteItemsString = await AsyncStorage.getItem('favoriteItems')
-      const favoriteItems = favoriteItemsString
-        ? JSON.parse(favoriteItemsString)
-        : []
-      setFavoriteItems(favoriteItems)
-      updateItemsWithFavorites(favoriteItems)
-      getProducts(page, selectedCategory, selectedLocation)
+      const storedFavorites = await AsyncStorage.getItem('favoriteItems')
+      const parsedFavorites = storedFavorites ? JSON.parse(storedFavorites) : []
+      setFavoriteItems(parsedFavorites)
+      updateItemsWithFavorites(parsedFavorites)
     } catch (error) {
-      if (error.response) {
-        console.error('Response data:', error.response.data)
-        console.error('Response status:', error.response.status)
-        console.error('Response headers:', error.response.headers)
-      } else {
-        console.error('Error message:', error.message)
+      console.error('Error loading favorite items from AsyncStorage:', error)
+    }
+  }
+
+  useEffect(() => {
+    initializeFavorites() // 첫 로드 시 찜 목록 초기화
+  }, [])
+
+  useEffect(() => {
+    if (isFocused) {
+      initializeFavorites() // 화면이 포커스될 때 찜 목록 초기화
+    }
+  }, [isFocused])
+
+  useEffect(() => {
+    const loadFavoriteItems = async () => {
+      try {
+        const storedFavoriteItems = await AsyncStorage.getItem('favoriteItems')
+        if (storedFavoriteItems) {
+          const parsedFavoriteItems = JSON.parse(storedFavoriteItems)
+          setFavoriteItems(parsedFavoriteItems)
+          updateItemsWithFavorites(parsedFavoriteItems)
+        }
+      } catch (error) {
+        console.error('Error loading favorite items from AsyncStorage:', error)
       }
     }
+
+    loadFavoriteItems()
+  }, [])
+
+  // 찜 상태를 items에 반영
+  const updateItemsWithFavorites = (favoriteItems) => {
+    setItems((prevItems) =>
+      prevItems.map((item) => ({
+        ...item,
+        favorite: favoriteItems.some((favItem) => favItem.id === item.id),
+      }))
+    )
   }
 
   const resetAndFetchProducts = async () => {
@@ -76,27 +101,6 @@ function Maintest() {
     setHasMoreData(true)
     setNoResults(false)
     getProducts(0, selectedCategory, selectedLocation)
-  }
-
-  // const updateItemsWithFavorites = (favoriteItems) => {
-  //   setItems((prevItems) => {
-  //     return prevItems.map((item) => {
-  //       const favoriteItem = favoriteItems.find(
-  //         (favItem) => favItem.id === item.id
-  //       )
-  //       return favoriteItem
-  //         ? { ...item, favorite: true }
-  //         : { ...item, favorite: false }
-  //     })
-  //   })
-  // }
-  const updateItemsWithFavorites = (favoriteItems) => {
-    setItems((prevItems) =>
-      prevItems.map((item) => ({
-        ...item,
-        favorite: !!favoriteItems.find((favItem) => favItem.id === item.id),
-      }))
-    )
   }
 
   const getProducts = async (page, category = '', location = '') => {
@@ -305,74 +309,132 @@ function Maintest() {
     return totalMinutes < 1440 // 24시간 미만
   }
 
-  const handleFavoriteToggle = async (itemId) => {
-    // 아이템 목록 업데이트
-    const updatedItems = items.map((item) =>
-      item.id === itemId ? { ...item, favorite: !item.favorite } : item
-    )
-    setItems(updatedItems)
-
-    const updatedFavoriteItems = updatedItems.filter((item) => item.favorite)
-    setFavoriteItems(updatedFavoriteItems)
-
+  const isTokenValid = (token) => {
     try {
-      // 토큰 가져오기
-      const storedToken = await AsyncStorage.getItem('token')
+      const payload = token.split('.')[1]
+      const decodedPayload = JSON.parse(atob(payload))
+      return Date.now() < decodedPayload.exp * 1000
+    } catch (error) {
+      console.error('Error decoding token:', error)
+      return false
+    }
+  }
 
-      if (!storedToken) {
-        console.error('No token')
-        return
-      }
+  // const handleFavoriteToggle = async (itemId, isFavorite) => {
+  //   // 아이템 목록 업데이트
+  //   const updatedItems = items.map((item) =>
+  //     item.id === itemId ? { ...item, favorite: !item.favorite } : item
+  //   )
+  //   setItems(updatedItems)
 
-      // 토큰 만료 확인
-      const decodeToken = (token) => {
-        const payload = token.split('.')[1]
-        return JSON.parse(atob(payload))
-      }
+  //   const updatedFavoriteItems = updatedItems.filter((item) => item.favorite)
+  //   setFavoriteItems(updatedFavoriteItems)
 
-      const tokenData = decodeToken(storedToken)
+  //   try {
+  //     // 토큰 가져오기
+  //     const storedToken = await AsyncStorage.getItem('token')
 
-      if (Date.now() >= tokenData.exp * 1000) {
-        console.error('Token is expired')
-        return
-      }
+  //     if (!storedToken) {
+  //       console.error('No token')
+  //       return
+  //     }
+
+  //     // 토큰 만료 확인
+  //     const decodeToken = (token) => {
+  //       const payload = token.split('.')[1]
+  //       return JSON.parse(atob(payload))
+  //     }
+
+  //     const tokenData = decodeToken(storedToken)
+
+  //     if (Date.now() >= tokenData.exp * 1000) {
+  //       console.error('Token is expired')
+  //       return
+  //     }
+
+  //     const headers = {
+  //       Authorization: `Bearer ${storedToken}`,
+  //       'Content-Type': 'application/json',
+  //     }
+
+  //     if (isFavorite) {
+  //       // 찜 추가 요청
+  //       // console.log('Sending POST request to:', `${BASE_URL}/favorite/add`)
+
+  //       // const postData = { productId: itemId }
+
+  //       // response = await axios.post(`${BASE_URL}/favorite/add`, postData, {
+  //       //   headers,
+  //       // })
+
+  //       // console.log('Response Data:', response.data)
+  //       await axios.post(
+  //         `${BASE_URL}/favorite/add`,
+  //         { productId: itemId },
+  //         { headers }
+  //       )
+  //     } else {
+  //       // 찜 삭제 요청
+  //       // console.log(
+  //       //   'Sending DELETE request to:',
+  //       //   `${BASE_URL}/favorite/${itemId}`
+  //       // )
+
+  //       // response = await axios.delete(`${BASE_URL}/favorite/${itemId}`, {
+  //       //   headers,
+  //       // })
+
+  //       // console.log('Response Status:', response.status)
+  //       await axios.delete(`${BASE_URL}/favorite/${itemId}`, { headers })
+  //     }
+
+  //     // AsyncStorage에 favoriteItems 업데이트
+  //     await AsyncStorage.setItem(
+  //       'favoriteItems',
+  //       JSON.stringify(updatedFavoriteItems)
+  //     )
+  //   } catch (error) {
+  //     if (error.response) {
+  //       console.error('Response data:', error.response.data || 'No data')
+  //       console.error('Response status:', error.response.status)
+  //       console.error('Response headers:', error.response.headers)
+
+  //       if (error.response.status === 403) {
+  //         console.error('Permission denied')
+  //       }
+  //     } else {
+  //       console.error('Error message:', error.message)
+  //     }
+  //   }
+  // }
+  const handleFavoriteToggle = async (itemId, isFavorite) => {
+    try {
+      let storedToken = await AsyncStorage.getItem('token')
 
       const headers = {
         Authorization: `Bearer ${storedToken}`,
         'Content-Type': 'application/json',
       }
 
-      console.log('Request Headers:', headers)
+      // 아이템 목록 업데이트
+      const updatedItems = items.map((item) =>
+        item.id === itemId ? { ...item, favorite: !item.favorite } : item
+      )
+      setItems(updatedItems)
 
-      // 현재 좋아요 상태를 가져옴
-      const currentFavoriteStatus = updatedItems.find(
-        (item) => item.id === itemId
-      ).favorite
+      const updatedFavoriteItems = updatedItems.filter((item) => item.favorite)
+      setFavoriteItems(updatedFavoriteItems)
 
-      let response
-      if (currentFavoriteStatus) {
-        // 찜 추가 요청
-        console.log('Sending PUT request to:', `${BASE_URL}/favorite/${itemId}`)
-
-        response = await axios.post(
-          `${BASE_URL}/favorite/${itemId}`,
-          {},
+      // 서버에 찜 상태 업데이트
+      if (!isFavorite) {
+        await axios.post(
+          `${BASE_URL}/favorite/add`,
+          { productId: itemId },
           { headers }
         )
       } else {
-        // 찜 삭제 요청
-        console.log(
-          'Sending DELETE request to:',
-          `${BASE_URL}/favorite/${itemId}`
-        )
-
-        response = await axios.delete(`${BASE_URL}/favorite/${itemId}`, {
-          headers,
-        })
+        await axios.delete(`${BASE_URL}/favorite/${itemId}`, { headers })
       }
-
-      console.log('Response Data:', response.data)
-      console.log('Response Status:', response.status)
 
       // AsyncStorage에 favoriteItems 업데이트
       await AsyncStorage.setItem(
@@ -380,13 +442,17 @@ function Maintest() {
         JSON.stringify(updatedFavoriteItems)
       )
     } catch (error) {
+      console.error('Error handling favorite toggle:', error)
+
       if (error.response) {
         console.error('Response data:', error.response.data || 'No data')
         console.error('Response status:', error.response.status)
         console.error('Response headers:', error.response.headers)
 
         if (error.response.status === 403) {
-          console.error('Permission denied')
+          console.error('Permission denied. Token might be invalid or expired.')
+          // 토큰 만료 시 처리 로직 추가
+          await AsyncStorage.removeItem('token') // 만료된 토큰 제거
         }
       } else {
         console.error('Error message:', error.message)
@@ -410,6 +476,13 @@ function Maintest() {
     const roundedPrice = Math.ceil(price)
     return roundedPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
   }
+
+  // useEffect(() => {
+  //   if (isFocused) {
+  //     // 화면이 포커스될 때 첫 페이지 데이터를 다시 로드
+  //     loadFavoriteItems()
+  //   }
+  // }, [isFocused])
 
   return (
     <View style={styles.screenContainer}>
