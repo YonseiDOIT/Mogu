@@ -34,10 +34,7 @@ const Participate = ({ navigation, route }) => {
         params: { id: itemId },
       })
       setData(response.data)
-      console.log(data.productImage)
-    } catch (error) {
-      console.error('Error fetching product details:', error)
-    }
+    } catch (error) {}
   }
 
   const handleConfirmParticipation = () => {

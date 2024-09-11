@@ -181,7 +181,7 @@ function Maintest() {
   const selectCategory = (category) => {
     setSelectedCategory(category)
     setPage(0)
-    setItems([])
+    // setItems([])
     setHasMoreData(true)
     setNoResults(false)
     console.log('카테고리:', category)
@@ -193,7 +193,7 @@ function Maintest() {
   const selectLocation = (location) => {
     setSelectedLocation(location)
     setPage(0)
-    setItems([])
+    // setItems([])
     setHasMoreData(true)
     setNoResults(false)
     console.log('장소:', location)
@@ -206,7 +206,7 @@ function Maintest() {
     setSelectedCategory('')
     setSelectedLocation('')
     setPage(0)
-    setItems([])
+    // setItems([])
     setHasMoreData(true)
     setNoResults(false)
     getProducts(0)
@@ -273,14 +273,14 @@ function Maintest() {
     const updatedFavoriteItems = updatedItems.filter((item) => item.favorite)
     setFavoriteItems(updatedFavoriteItems)
 
-    try {
-      await AsyncStorage.setItem(
-        'favoriteItems',
-        JSON.stringify(updatedFavoriteItems)
-      )
-    } catch (error) {
-      console.error('Error saving favorite items:', error)
-    }
+    // try {
+    //   await AsyncStorage.setItem(
+    //     'favoriteItems',
+    //     JSON.stringify(updatedFavoriteItems)
+    //   )
+    // } catch (error) {
+    //   console.error('Error saving favorite items:', error)
+    // }
   }
 
   const handleScrollEnd = (event) => {
