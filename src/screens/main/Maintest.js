@@ -133,15 +133,20 @@ function Maintest() {
       //     ? { ...item, favorite: true }
       //     : { ...item, favorite: false }
       // })
-      const newItems = response.data.content.filter((item) => {
-        const timeRemaining = calculateTimeRemaining(item.endDate)
-        return (
-          timeRemaining.days !== 0 ||
-          timeRemaining.hours !== 0 ||
-          timeRemaining.minutes !== 0 ||
-          timeRemaining.seconds !== 0
-        )
-      }) // 0일 0시간 0분 0초인 itemBox는 안 보이게 함
+      const newItems = response.data.content
+        .map((item) => ({
+          ...item,
+          favorite: favoriteItems.find((favItem) => favItem.id === item.id),
+        }))
+        .filter((item) => {
+          const timeRemaining = calculateTimeRemaining(item.endDate)
+          return (
+            timeRemaining.days !== 0 ||
+            timeRemaining.hours !== 0 ||
+            timeRemaining.minutes !== 0 ||
+            timeRemaining.seconds !== 0
+          )
+        }) // 0일 0시간 0분 0초인 itemBox는 안 보이게 함
 
       setItems((prevItems) =>
         page === 0 ? newItems : [...prevItems, ...newItems]
@@ -206,7 +211,6 @@ function Maintest() {
     setSelectedCategory('')
     setSelectedLocation('')
     setPage(0)
-    // setItems([])
     setHasMoreData(true)
     setNoResults(false)
     getProducts(0)
@@ -273,14 +277,14 @@ function Maintest() {
     const updatedFavoriteItems = updatedItems.filter((item) => item.favorite)
     setFavoriteItems(updatedFavoriteItems)
 
-    // try {
-    //   await AsyncStorage.setItem(
-    //     'favoriteItems',
-    //     JSON.stringify(updatedFavoriteItems)
-    //   )
-    // } catch (error) {
-    //   console.error('Error saving favorite items:', error)
-    // }
+    try {
+      await AsyncStorage.setItem(
+        'favoriteItems',
+        JSON.stringify(updatedFavoriteItems)
+      )
+    } catch (error) {
+      console.error('Error saving favorite items:', error)
+    }
   }
 
   const handleScrollEnd = (event) => {

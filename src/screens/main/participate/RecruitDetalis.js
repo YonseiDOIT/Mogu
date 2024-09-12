@@ -16,9 +16,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { BASE_URL } from '../../../services/api'
 
 const RecruitDetails = ({ route, navigation }) => {
-  const { itemId } = route.params
+  const { itemId, itemQTY } = route.params
   const [data, setData] = useState(null)
-  const [userStatus, setUserStatus] = useState('') // Combined state variable
+  const [userStatus, setUserStatus] = useState('')
   const [isparticipant, setisparticipant] = useState('')
   const [isFavorite, setIsFavorite] = useState(false)
   const [isModalVisible, setIsModalVisible] = useState(false)
@@ -28,6 +28,26 @@ const RecruitDetails = ({ route, navigation }) => {
     useState(false)
   const [isOptionsVisible, setIsOptionsVisible] = useState(false)
   const mapRef = useRef(null)
+
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false)
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false)
+
+  const toggleDropdown = () => {
+    setIsDropdownVisible(!isDropdownVisible)
+  }
+
+  const openEditModal = () => {
+    setIsEditModalVisible(true)
+    setIsDropdownVisible(false) // Close the dropdown when opening the modal
+  }
+
+  const closeModal = () => {
+    setIsEditModalVisible(false)
+  }
+
+  const gotoEdit = () => {
+    closeModal()
+  }
 
   const [location, setLocation] = useState({
     latitude: 37.277,
@@ -40,6 +60,7 @@ const RecruitDetails = ({ route, navigation }) => {
     fetchProductDetails()
     fetchisseller()
     fetchisparticipant()
+    console.log(itemQTY)
   }, [])
 
   const fetchProductDetails = async () => {
@@ -108,6 +129,11 @@ const RecruitDetails = ({ route, navigation }) => {
   }
 
   const toggleFavorite = () => {
+    if (isFavorite) {
+      alert('찜이 해제 되었습니다.')
+    } else {
+      alert('찜 상품으로 선택되었습니다.')
+    }
     setIsFavorite(!isFavorite)
   }
 
@@ -116,12 +142,16 @@ const RecruitDetails = ({ route, navigation }) => {
       Linking.openURL(data.url)
     }
   }
+  const formatPrice = (price) => {
+    const roundedPrice = Math.ceil(price)
+    return roundedPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  }
 
   const handleParticipate = () => {
     setCurrentApplicantQuantity(currentApplicantQuantity + 1)
     navigation.navigate('Participate', {
       productName: data.name,
-      pricePerUnit: formattedPrice,
+      pricePerUnit: itemQTY,
       remainingQuantity: formattedQuantity,
       itemId: itemId,
     })
@@ -222,7 +252,95 @@ const RecruitDetails = ({ route, navigation }) => {
               style={styles.backImage}
             />
           </TouchableOpacity>
-
+          {userStatus === 'Y' && (
+            <TouchableOpacity
+              style={styles.EditButton}
+              onPress={toggleDropdown}
+            >
+              <Image
+                style={{ height: 20, width: 20, resizeMode: 'contain' }}
+                source={require('../../../assets/Editdots.png')}
+              />
+            </TouchableOpacity>
+          )}
+          {isDropdownVisible && (
+            <View style={styles.dropdown}>
+              <TouchableOpacity onPress={openEditModal}>
+                <Text style={{ color: '#75C743' }}>수정하기</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          <Modal
+            style={{ position: 'absolute', bottom: 320, right: 30, left: 30 }}
+            visible={isEditModalVisible}
+            transparent={true}
+            animationType="slide"
+            onRequestClose={closeModal}
+          >
+            <View
+              style={{
+                height: 150,
+                backgroundColor: '#F6F6F6',
+                borderRadius: 10,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <Text
+                  style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 10 }}
+                >
+                  글을 수정하시겠습니까?
+                </Text>
+                <Text
+                  style={{
+                    width: '100%',
+                    textAlign: 'center',
+                    marginBottom: 10,
+                  }}
+                >
+                  변경된 사항에 관해서는 {'\n'} 오픈채팅방에서도 공지해주세요
+                </Text>
+                <View style={{ width: '100%', flexDirection: 'row' }}>
+                  <TouchableOpacity
+                    style={{
+                      width: 100,
+                      height: 20,
+                      backgroundColor: '#75C743',
+                      justifyContent: 'center',
+                      marginRight: 5,
+                      borderRadius: 5,
+                      alignItems: 'center',
+                    }}
+                    onPress={() => {
+                      navigation.navigate('EditGroupPurchase', {
+                        itemId: itemId,
+                        itemTitle: data.name,
+                      })
+                      closeModal() // 모달 닫기
+                    }}
+                  >
+                    <Text style={{ color: 'white' }}>수정하기</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{
+                      width: 100,
+                      height: 20,
+                      backgroundColor: '#fff',
+                      borderColor: '#9C9C9C',
+                      borderWidth: 1,
+                      borderRadius: 5,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                    onPress={closeModal}
+                  >
+                    <Text style={styles.modalCloseText}>닫기</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
           <View style={styles.imageContainer}>
             <Image
               source={{ uri: `${BASE_URL}/images/${data.productImage}` }}
@@ -258,7 +376,7 @@ const RecruitDetails = ({ route, navigation }) => {
                 <Text style={styles.staticText}>개당</Text>
               </View>
               <Text style={[styles.dynamicText, styles.dynamic]}>
-                ₩ {formattedPrice}
+                ₩ {itemQTY}
               </Text>
             </View>
             <View style={styles.infoRow}>
@@ -396,6 +514,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 20,
     left: 20,
+    zIndex: 1,
+  },
+  EditButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
     zIndex: 1,
   },
   backImage: {
@@ -605,6 +729,8 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     backgroundColor: 'white',
+    width: 200,
+    height: 100,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
@@ -672,6 +798,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: '4%',
     marginLeft: 20,
+  },
+  dropdown: {
+    zIndex: 2,
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    width: 100,
+    height: 40,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
   },
 })
 
