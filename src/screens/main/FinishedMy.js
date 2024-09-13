@@ -12,28 +12,7 @@ import FinishedMyHeader from '../../components/FinishedMyHeader'
 const FinishedMy = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState('ongoing') // 'ongoing' or 'participated'
   const [myOngoingGroupBuys, setMyOngoingGroupBuys] = useState([])
-  // const ongoingGroupBuys = [
-  //   {
-  //     id: 1,
-  //     image: '/mnt/data/image.png',
-  //     status: '종료',
-  //     title: '(진행한) 비건 대체육 부산물고기까스',
-  //     minQuantity: 8,
-  //     currentQuantity: 3,
-  //     maxQuantity: 10,
-  //     location: '연세플라자',
-  //   },
-  //   {
-  //     id: 2,
-  //     image: '/mnt/data/image.png',
-  //     status: '취소',
-  //     title: '(진행한) 비건 대체육 부산물고기까스',
-  //     minQuantity: 8,
-  //     currentQuantity: 3,
-  //     maxQuantity: 10,
-  //     location: '연세플라자',
-  //   },
-  // ];
+
   const fetchOngoingGroupBuys = async () => {
     const storedToken = await AsyncStorage.getItem('token')
     try {
