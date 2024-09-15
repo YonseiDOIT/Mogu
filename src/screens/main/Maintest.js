@@ -64,6 +64,15 @@ function Maintest() {
     }
   }
 
+  const updateItemsWithFavorites = (favoriteItems) => {
+    setItems((prevItems) =>
+      prevItems.map((item) => ({
+        ...item,
+        favorite: favoriteItems.some((favItem) => favItem.id === item.id),
+      }))
+    )
+  }
+
   const resetAndFetchProducts = async () => {
     setPage(0)
     setItems([])
@@ -266,7 +275,7 @@ function Maintest() {
     return totalMinutes < 1440 // 24시간 미만
   }
 
-  const handleFavoriteToggle = async (itemId) => {
+  const handleFavoriteToggle = async (itemId, isFavorite) => {
     console.log('Favorite Id:', itemId)
 
     const updatedItems = items.map((item) =>
@@ -276,14 +285,57 @@ function Maintest() {
 
     const updatedFavoriteItems = updatedItems.filter((item) => item.favorite)
     setFavoriteItems(updatedFavoriteItems)
-
     try {
+      // 찜 -> 찜 삭제
+      const storedToken = await AsyncStorage.getItem('token')
+      console.log('Stored Token:', storedToken)
+
+      if (!storedToken || isTokenExpired(storedToken)) {
+        console.error('Token is missing or expired')
+        return
+      }
+
+      if (isFavorite) {
+        // itemId에서 찜 상태 찾기
+        const favoriteItem = favoriteItems.find(
+          (favItem) => favItem.productId === itemId
+        )
+
+        if (favoriteItem) {
+          const favoriteId = favoriteItem.id
+          console.log('Favorite Id:', favoriteId)
+
+          // 찜 삭제
+          await axios.delete(`${BASE_URL}/favorite/${favoriteId}`, {
+            headers: {
+              Authorization: `Bearer ${storedToken}`,
+            },
+          })
+          console.log(`Favorite item with ID ${favoriteId} removed`)
+        }
+      } else {
+        // 찜 추가
+        const response = await axios.post(
+          `${BASE_URL}/favorite/add`,
+          { productId: itemId },
+          {
+            headers: {
+              Authorization: `Bearer ${storedToken}`,
+            },
+          }
+        )
+        console.log(`Item with ID ${itemId} added to favorites`, response.data)
+      }
+
       await AsyncStorage.setItem(
         'favoriteItems',
         JSON.stringify(updatedFavoriteItems)
       )
     } catch (error) {
-      console.error('Error saving favorite items:', error)
+      if (error.response) {
+        console.error('Server Response:', error.response.data)
+      }
+      console.error('Error updating favorite items:', error)
     }
   }
 
@@ -483,19 +535,6 @@ function Maintest() {
                   }}
                   style={styles.deadlineImage}
                 />
-                {/* <TouchableOpacity
-                  onPress={() => handleFavoriteToggle(item.id)}
-                  style={styles.heartIconContainer}
-                >
-                  <Image
-                    source={
-                      item.favorite
-                        ? require('../../assets/heart.png')
-                        : require('../../assets/emptyheart.png')
-                    }
-                    style={styles.heartIcon}
-                  />
-                </TouchableOpacity> */}
               </TouchableOpacity>
               <View style={styles.timeContainer}>
                 <MaterialIcons
