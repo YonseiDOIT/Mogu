@@ -275,6 +275,20 @@ function Maintest() {
     return totalMinutes < 1440 // 24시간 미만
   }
 
+  const isTokenExpired = (token) => {
+    try {
+      const payloadBase64 = token.split('.')[1]
+      const decodedPayload = JSON.parse(atob(payloadBase64))
+      const expirationTime = decodedPayload.exp
+      const currentTimeInSeconds = Math.floor(Date.now() / 1000)
+
+      return currentTimeInSeconds > expirationTime
+    } catch (error) {
+      console.error('Failed to decode token:', error)
+      return true
+    }
+  }
+
   const handleFavoriteToggle = async (itemId, isFavorite) => {
     console.log('Favorite Id:', itemId)
 
