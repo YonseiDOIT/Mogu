@@ -299,8 +299,8 @@ function Maintest() {
 
     const updatedFavoriteItems = updatedItems.filter((item) => item.favorite)
     setFavoriteItems(updatedFavoriteItems)
+
     try {
-      // 찜 -> 찜 삭제
       const storedToken = await AsyncStorage.getItem('token')
       console.log('Stored Token:', storedToken)
 
@@ -310,16 +310,14 @@ function Maintest() {
       }
 
       if (isFavorite) {
-        // itemId에서 찜 상태 찾기
         const favoriteItem = favoriteItems.find(
           (favItem) => favItem.productId === itemId
         )
 
         if (favoriteItem) {
           const favoriteId = favoriteItem.id
-          console.log('Favorite Id:', favoriteId)
+          console.log('Removing favorite:', favoriteId)
 
-          // 찜 삭제
           await axios.delete(`${BASE_URL}/favorite/${favoriteId}`, {
             headers: {
               Authorization: `Bearer ${storedToken}`,
@@ -328,7 +326,8 @@ function Maintest() {
           console.log(`Favorite item with ID ${favoriteId} removed`)
         }
       } else {
-        // 찜 추가
+        console.log('Adding favorite for item:', itemId)
+
         const response = await axios.post(
           `${BASE_URL}/favorite/add`,
           { productId: itemId },
@@ -346,10 +345,10 @@ function Maintest() {
         JSON.stringify(updatedFavoriteItems)
       )
     } catch (error) {
-      if (error.response) {
-        console.error('Server Response:', error.response.data)
-      }
-      console.error('Error updating favorite items:', error)
+      console.error(
+        'Error updating favorite items:',
+        error?.response?.data || error
+      )
     }
   }
 
